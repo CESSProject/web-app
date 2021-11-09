@@ -14,18 +14,8 @@ const userInfo = {
     loading: false,
     fileId: null, // file id
     txHash: '', // transactions hash
-    contract: null,
-    contract_usdt: null,
     token: '',
-    fileSize: 0, 
-    minterAddress: null,
-    breadcrumb: [
-      {
-        folderName: 'My cloud disk',
-        parentId: -1,
-        id: 0
-      }
-    ]
+
   },
   getters: {
     // userInfo: state => {
@@ -94,7 +84,6 @@ const userInfo = {
         return Promise.reject(new Error(error))
       });
     },
-    // 退出登录
     logout({
       commit,
       state

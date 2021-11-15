@@ -29,12 +29,41 @@
               v-model="keyword"
               placeholder="Enter data name"
             ></el-input>
+            <img
+              class="search-icon"
+              src="../assets/icons/search.png"
+              width="22px"
+              @click="searchData"
+            />
           </div>
           <div class="popular-data">
-            <div class="popular-data-item" v-for="i in 4" :key="i">
-              <img src="../assets/home2.png" width="85px" />
+            <div
+              class="popular-data-item"
+              v-for="(item, index) in 4"
+              :key="index"
+            >
+              <img src="../assets/home2.png" width="85px" class="popular-img" />
               <div class="data-info">
-                <div class="data-name">g3q466eteg</div>
+                <div class="data-name">{{ popularObj.image[0].name }}</div>
+                <div class="price">
+                  <span
+                    ><img
+                      :src="require('../assets/icons/download-icon2.png')"
+                      width="32px"
+                  /></span>
+                  <span
+                    >Downloads: <br />{{
+                      popularObj.image[0].downloadTimes
+                    }}</span
+                  >
+                  <div>{{ popularObj.image[0].estimateSpent }} <br />tCESS</div>
+                </div>
+              </div>
+            </div>
+            <!-- <div class="popular-data-item">
+              <img src="../assets/home3.png" width="115px"  class="popular-img" />
+              <div class="data-info">
+                <div class="data-name">{{popularObj.text[0].downloadTimes}}</div>
                 <div class="price">
                   <div>
                     <span
@@ -42,12 +71,46 @@
                         src="../assets/icons/download-icon2.png"
                         width="32px"
                     /></span>
-                    <span>Downloads: 1234</span>
+                    <span>{{popularObj.text[0].downloadTimes}}</span>
                   </div>
-                  <div>123 tCESS</div>
+                  <div>{{popularObj.text[0].downloadTimes}} tCESS</div>
                 </div>
               </div>
             </div>
+            <div class="popular-data-item">
+              <img src="../assets/home4.png" width="95px" class="popular-img"  />
+              <div class="data-info">
+                <div class="data-name">{{popularObj.audio[0].downloadTimes}}</div>
+                <div class="price">
+                  <div>
+                    <span
+                      ><img
+                        src="../assets/icons/download-icon2.png"
+                        width="32px"
+                    /></span>
+                    <span>Downloads: {{popularObj.audio[0].downloadTimes}}</span>
+                  </div>
+                  <div>{{popularObj.audio[0].downloadTimes}} tCESS</div>
+                </div>
+              </div>
+            </div>
+            <div class="popular-data-item">
+              <img src="../assets/home5.png" width="85px" class="popular-img" />
+              <div class="data-info">
+                <div class="data-name">{{popularObj.video[0].downloadTimes}}</div>
+                <div class="price">
+                  <div>
+                    <span
+                      ><img
+                        src="../assets/icons/download-icon2.png"
+                        width="32px"
+                    /></span>
+                    <span>Downloads: {{popularObj.video[0].downloadTimes}}</span>
+                  </div>
+                  <div>{{popularObj.video[0].downloadTimes}} tCESS</div>
+                </div>
+              </div>
+            </div> -->
           </div>
         </div>
       </div>
@@ -85,13 +148,42 @@
 </template>
 
 <script>
+import { popularFiles } from "@/api/api";
+
 export default {
   data() {
     return {
       keyword: "",
+      popularObj: {},
     };
   },
-  components: {},
+  mounted() {
+    this.queryPopular();
+  },
+  methods: {
+    queryPopular() {
+      let _this = this;
+      popularFiles().then((res) => {
+        console.log("queryPopular===", res);
+        if (res.success) {
+          _this.popularObj = res.fileMap;
+        } else {
+          _this.$message({
+            type: "error",
+            message: "",
+          });
+        }
+      });
+    },
+    searchData() {
+      this.$router.push({
+        path: "market",
+        query: {
+          keyword: this.keyword,
+        },
+      });
+    },
+  },
 };
 </script>
 
@@ -153,7 +245,6 @@ export default {
       top: 143px;
       position: absolute;
       left: 170px;
-
     }
     .search-bar {
       width: 607px;
@@ -178,6 +269,12 @@ export default {
         width: 100%;
         padding: 0 32px;
       }
+      .search-icon {
+        position: absolute;
+        right: 20px;
+        top: 28%;
+        cursor: pointer;
+      }
     }
     .popular-data {
       top: 402px;
@@ -196,6 +293,9 @@ export default {
         text-align: center;
         margin: 0 23px;
         overflow: hidden;
+        .popular-img {
+          height: 95px;
+        }
         .data-info {
           background: #f6f7fb;
           margin-top: 36px;
@@ -208,13 +308,21 @@ export default {
             font-weight: 400;
             line-height: 26px;
             color: #363636;
-            padding-bottom: 18px;
             border-bottom: 1px solid #d7d7d7;
+            height: 50px;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            display: -webkit-box;
+            -webkit-line-clamp: 2;
+            -webkit-box-orient: vertical;
+            word-break: break-all;
           }
           .price {
             display: flex;
             justify-content: space-between;
             padding: 10px 0px;
+
+            color: #606060;
           }
         }
       }
@@ -240,8 +348,7 @@ export default {
     justify-content: space-around;
     width: 1564px;
     margin: 0 auto;
-  margin-top: 35px;
-
+    margin-top: 35px;
   }
   .block3-inner-item {
     p {

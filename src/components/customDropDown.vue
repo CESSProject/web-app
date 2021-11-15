@@ -1,21 +1,28 @@
 <template>
   <div class="menu" ref="menu">
     <ul class="customDropDown" ref="ul">
+      <div v-if="kind == 'accounts'" class="accounts-title">
+        <img src="../assets/icons/logo-icon.png" width="15px" />Select Account
+      </div>
       <li
         v-for="(item, index) in items"
         :key="index"
         @click="
-          item.callback();
+          item.callback(item);
           closeMenu();
         "
       >
-        <p :class="item.value ? 'flex' : ''">
+        <p :class="item.value ? 'flex' : ''" v-if="kind == 'normal'">
           <img :src="item.icon" width="17px" />
           <span style="margin-right: 10px">{{ item.text }}</span
           ><span>{{ item.value }}</span>
         </p>
-        <div>
-          
+        <div v-if="kind == 'accounts'" class="accounts-item">
+          <img :src="item.icon" width="33px" />
+          <div>
+            <div class="accounts-name">{{ item.meta.name }}</div>
+            <div class="accounts-add">{{ item.address }}</div>
+          </div>
         </div>
       </li>
     </ul>
@@ -30,7 +37,7 @@ export default {
   data() {
     return {};
   },
-  props: ["items", "visible"],
+  props: ["items", "visible", "kind", "height"],
   async created() {},
   mounted() {
     document.addEventListener("click", this.autoCloseMenu, false);
@@ -46,7 +53,8 @@ export default {
         if (newVal) {
           anime({
             targets: this.$refs.menu,
-            height: [0, 36 * this.$refs.ul.childNodes.length + 20],
+            height: this.height,
+            // height: [0, height * this.$refs.ul.childNodes.length + 20],
             duration: 350,
             easing: "easeOutExpo",
           });
@@ -96,13 +104,16 @@ export default {
   font-size: 14px;
   overflow: hidden;
   display: none;
-  width: 176px;
-  height: 158px;
+  min-width: 176px;
   background: #ffffff;
   border: 1px solid #d7d7d7;
   border-radius: 20px;
   padding: 12px 12px;
   box-sizing: border-box;
+  position: absolute;
+  top: 65px;
+  right: 0;
+
   &.visible {
     display: block;
   }
@@ -113,6 +124,19 @@ export default {
     width: 100%;
     margin: 0;
     padding-left: 10px;
+    overflow-y: auto;
+    height: 100%;
+    .accounts-title {
+      display: flex;
+      align-items: center;
+      border-bottom: 1px solid #d7d7d7;
+      padding-bottom: 16px;
+      font-size: 14px;
+      color: #303030;
+      img {
+        margin-right: 15px;
+      }
+    }
     li {
       position: relative;
       transition: 0.2s linear color;
@@ -123,8 +147,8 @@ export default {
         box-sizing: border-box;
         color: #303030;
         margin: 0;
-        height: 36px;
-        line-height: 36px;
+        height: 46px;
+        line-height: 46px;
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
@@ -132,14 +156,68 @@ export default {
         text-align: left;
         display: flex;
         align-items: center;
+        cursor: pointer;
         img {
           margin-right: 10px;
         }
       }
-      // p:last-child {
-      //   border-bottom: none;
-      // }
+      li:last-child > p {
+        border-bottom: none;
+      }
+
+      .accounts-item {
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        line-height: 1;
+        border-bottom: 1px solid #d7d7d7;
+        color: #303030;
+        padding: 16px 20px;
+        text-align: left;
+        cursor: pointer;
+        img {
+          margin-right: 10px;
+        }
+        .accounts-name {
+          font-size: 14px;
+        }
+        .accounts-add {
+          font-size: 10px;
+          white-space: nowrap;
+          overflow: hidden;
+          text-overflow: ellipsis;
+        }
+      }
     }
+  }
+}
+.customDropDown {
+  position: relative;
+  &::-webkit-scrollbar {
+    width: 2px;
+    height: 10px;
+    position: absolute;
+    right: 20px;
+    top: 50px;
+  }
+
+  /* 滑块 */
+  &::-webkit-scrollbar-thumb {
+    border-left: 3px solid rgba(0, 0, 0, 0.3);
+    border-radius: 0px;
+    width: 10px;
+    position: absolute;
+    right: 20px;
+    top: 50px;
+  }
+
+  &::-webkit-scrollbar-thumb:hover {
+    background-color: #d7d7d7;
+  }
+
+  &::-webkit-scrollbar-track {
+    width: 2px;
+    margin-right: 20px;
   }
 }
 </style>

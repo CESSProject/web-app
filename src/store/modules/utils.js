@@ -1,5 +1,4 @@
-// console.log('MobileDetect===', MobileDetect)
-// const md = new MobileDetect(window.navigator.userAgent)
+
 const utils = {
 	namespaced: true,
 	state: {
@@ -8,9 +7,7 @@ const utils = {
 		language: 'en'
 	},
 	mutations: {
-		setLanguage(state, language) {
-			state.language = language
-		},
+
 		setDevice(state, device) {
 			state.device = device
 		}

@@ -3211,6 +3211,11 @@ crypto-browserify@^3.11.0:
     randombytes "^2.0.0"
     randomfill "^1.0.3"
 
+crypto-js@^4.1.1:
+  version "4.1.1"
+  resolved "https://r.cnpmjs.org/crypto-js/download/crypto-js-4.1.1.tgz#9e485bcf03521041bd85844786b83fb7619736cf"
+  integrity sha1-nkhbzwNSEEG9hYRHhrg/t2GXNs8=
+
 css-color-names@0.0.4, css-color-names@^0.0.4:
   version "0.0.4"
   resolved "https://r.cnpmjs.org/css-color-names/download/css-color-names-0.0.4.tgz#808adc2e79cf84738069b646cb20ec27beb629e0"
@@ -5506,6 +5511,11 @@ js-queue@2.0.2:
   integrity sha1-C+WQM4+QOzbHPTPDGIOoIUEs1II=
   dependencies:
     easy-stack "^1.0.1"
+
+js-sha256@^0.9.0:
+  version "0.9.0"
+  resolved "https://r.cnpmjs.org/js-sha256/download/js-sha256-0.9.0.tgz#0b89ac166583e91ef9123644bd3c5334ce9d0966"
+  integrity sha1-C4msFmWD6R75EjZEvTxTNM6dCWY=
 
 js-sha3@^0.8.0:
   version "0.8.0"

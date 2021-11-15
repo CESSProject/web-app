@@ -38,27 +38,30 @@ export function renderSize(size) {
 export function fileType(type) {
   let typeTxt = type.toLowerCase();
   if (typeTxt === '.pptx' || typeTxt === '.ppt') {
-    return require('../assets/file/ppt.png');
+    return require('../assets/files/ppt.png');
   } else if (typeTxt === '.pdf') {
-    return require('../assets/file/pdf.png');
+    return require('../assets/files/pdf.png');
   } else if (typeTxt === '.jpg' || typeTxt === '.jpeg' || typeTxt === '.png') {
-    return require('../assets/file/jpg.png');
+    return require('../assets/files/image.png');
   } else if (typeTxt === '.xlsx' || typeTxt === '.csv') {
-    return require('../assets/file/excel.png');
-  } else if (typeTxt === '.doc' || typeTxt === '.docx') {
-    return require('../assets/file/word.png');
+    return require('../assets/files/xls.png');
+  } 
+  else if (typeTxt === '.doc' || typeTxt === '.docx') {
+    return require('../assets/files/doc.png');
   } else if (typeTxt === '.txt') {
-    return require('../assets/file/txt.png');
+    return require('../assets/files/txt.png');
   } else if (typeTxt === '.mp3') {
-    return require('../assets/file/audio.png');
+    return require('../assets/files/mp3.png');
   } else if (typeTxt === '.mp4') {
-    return require('../assets/file/video.png');
+    return require('../assets/files/video.png');
   } else if (typeTxt === '.zip' || typeTxt === '.rar') {
-    return require('../assets/file/zip.png');
-  } else if (typeTxt === '.folder') {
-    return require('../assets/file/folder.png');
-  } else {
-    return require('../assets/file/unknown.png');
+    return require('../assets/files/zip.png');
+  }
+  //  else if (typeTxt === '.folder') {
+  //   return require('../assets/files/folder.png');
+  // } 
+  else {
+    return require('../assets/files/other.png');
       }
 }
 

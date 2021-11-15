@@ -1,9 +1,17 @@
 <template>
   <div class="header-container">
-    <div class="logo">
-      <img src="../../assets/header-logo.png" height="55px" />
-    </div>
-    <div class="title">Matket</div>
+    <router-link to="/">
+      <div class="logo">
+        <img src="../../assets/header-logo.png" height="55px" />
+      </div>
+    </router-link>
+    <router-link to="/">
+      <div class="title" >Home</div>
+    </router-link>
+    <router-link to="/market">
+      <div class="title" >Matket</div>
+    </router-link>
+
     <div class="search-bar">
       <el-input
         v-model="searchKey"
@@ -40,12 +48,25 @@
           <span class="username">{{
             $store.state.userInfo.data.myAddress
           }}</span>
-          <!-- <img src="../assets/icon_xia.png" class="arrow" /> -->
+          <img
+            src="../../assets/icons/icon_xia.png"
+            class="arrow"
+            width="12px"
+          />
         </div>
-        <!-- <CustomDropDown :items="userOperator" :visible.sync="userInfoVisible" /> -->
-        <CustomDropDown :items="accountOperator" :visible.sync="userInfoVisible" />
-
       </div>
+      <CustomDropDown
+        :items="userOperator"
+        :visible.sync="userInfoVisible"
+        :kind="'normal'"
+        :height="158"
+      />
+      <CustomDropDown
+        :items="accountOperator"
+        :visible.sync="accountsVisible"
+        :kind="'accounts'"
+        :height="268"
+      />
     </div>
   </div>
 </template>
@@ -70,6 +91,7 @@ export default {
   data() {
     return {
       userInfoVisible: false,
+      accountsVisible: false,
       searchBarFlag: false,
       userOperator: [
         {
@@ -88,17 +110,21 @@ export default {
         },
       ],
       accountOperator: [
-        {
-          icon: require("../../assets/icons/default-avater.png"),
-          text: "5454353454",
-          callback: (item) => {
-            console.log(item);
-          },
-        },
+        // {
+        //   icon: require("../../assets/icons/default-avater.png"),
+        //   name: "",
+        //   address: "",
+        //   callback: (item) => {
+        //     console.log(item);
+        //   },
+        // },
       ],
+      imgUrl: require("../../assets/icons/default-avater.png"),
+      errorImg: "",
       account: null,
       searchKey: "",
       showSearchIcon: true,
+      accountList: [],
     };
   },
   computed: {
@@ -120,6 +146,7 @@ export default {
       this.showSearchIcon = false;
     },
     async loginTest() {
+      let _this = this;
       const extensions = await web3Enable("my cool dapp");
       if (extensions.length === 0) {
         // no extension installed, or the user did not accept the authorization
@@ -129,12 +156,29 @@ export default {
       // returns an array of { address, meta: { name, source } }
       // meta.source contains the name of the extension that provides this account  meta.source 包含提供此帐户的扩展名
       let allAccounts = await web3Accounts();
-      //   console.log("allAccounts========", allAccounts);
-      const account = allAccounts[0];
-      //   console.log("account", account);
-      this.account = account;
+      console.log("allAccounts========", allAccounts);
+      this.accountList = allAccounts;
+      this.accountList.forEach((item) => {
+        let obj = {
+          icon: require("../../assets/icons/default-avater.png"),
+          meta: item.meta,
+          address: item.address,
+          callback: (item) => {
+            console.log(item);
+            _this.account = item;
+            _this.login();
+          },
+        };
+        _this.accountOperator.push(obj);
+      });
+      _this.accountsVisible = true;
+    },
 
-      const injector = await web3FromSource(account.meta.source);
+    async login() {
+      let _this = this;
+      console.log("account", this.account);
+
+      const injector = await web3FromSource(_this.account.meta.source);
       console.log(
         "we can use web3FromSource which will return an InjectedExtension type",
         injector
@@ -147,34 +191,28 @@ export default {
         // we can use it to sign our message
         console.log(
           "!!!!!!!!!!",
-          account.address,
-          stringToHex(account.address)
+          _this.account.address,
+          stringToHex(_this.account.address)
         );
         await signRaw({
-          address: account.address,
-          data: stringToHex(account.address),
+          address: _this.account.address,
+          data: stringToHex(_this.account.address),
           type: "bytes",
         })
           .then((res) => {
-            console.log(res);
-            this.userInfoVisible = true;
+            console.log(res, res.signature.slice(2));
+            _this.userInfoVisible = true;
             let userInfo = {
-              myAddress: account.address,
+              myAddress: _this.account.address,
+              signature: res.signature.slice(2),
+              account: _this.account,
             };
-            this.$store.dispatch("userInfo/saveInfo", userInfo);
+            _this.$store.dispatch("userInfo/saveInfo", userInfo);
           })
           .catch((err) => {
             console.log(err);
           });
-        // console.log(signature)
       }
-    },
-
-    login() {
-      this.userInfoVisible = true;
-      this.isLogined = true;
-      this.$store.state.userInfo.data.myAddress =
-        "0xdehfefhiasuyfiabewfkzhewfjb";
     },
     async keys() {},
     ...mapActions("userInfo", ["logout"]),
@@ -197,6 +235,10 @@ export default {
   box-sizing: border-box;
   background: white;
   top: 0px;
+  a{
+  text-decoration: none;
+
+  }
   .logo {
     margin-right: 55px;
   }
@@ -207,6 +249,7 @@ export default {
     line-height: 44px;
     color: #5078fe;
     position: relative;
+    margin-right: 20px;
   }
   .title::after {
     position: absolute;
@@ -293,7 +336,6 @@ export default {
     box-sizing: border-box;
   }
   .language-selector {
-    cursor: pointer;
     display: flex;
     align-items: center;
     .user-avatar {
@@ -313,6 +355,10 @@ export default {
       white-space: nowrap;
       overflow: hidden;
       text-overflow: ellipsis;
+    }
+    .arrow {
+      position: absolute;
+      right: 18px;
     }
   }
 }

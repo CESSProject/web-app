@@ -16,10 +16,10 @@ const service = axios.create({
 service.interceptors.request.use(config => {
   if (store.state.userInfo.data) {
     config.headers = {
-      "cess-token": store.state.userInfo.data.myAddress + ':' + store.state.userInfo.token
+      "cess-token": store.state.userInfo.data.myAddress + ':' + store.state.userInfo.data.signature
     }
   }
-  // console.log("request Header====================", config.headers)
+  console.log("request Header====================", config.headers)
   // console.log("request url==================", config.url)
 
   return config

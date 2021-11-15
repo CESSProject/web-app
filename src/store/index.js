@@ -7,7 +7,7 @@ import userInfo from './modules/userInfo'
 
 const vuexLocal = new VuexPersistence({
 	storage: window.localStorage,
-	key: 'udfs_status'
+	key: 'cess_status'
 })
 
 Vue.use(Vuex)

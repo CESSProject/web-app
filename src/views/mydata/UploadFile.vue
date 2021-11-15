@@ -20,7 +20,7 @@
               <el-input
                 v-model="ruleFormFile.name"
                 readonly
-                placeholder="'Select file'"
+                placeholder="Select file"
                 maxlength="200"
               ></el-input>
 
@@ -54,7 +54,7 @@
             <span slot="label" class="not-required">File creator：</span>
             <el-input
               type="text"
-              v-model="ruleFormFile.overview"
+              v-model="ruleFormFile.fileCreator"
               placeholder="Please enter an overview"
               class="overview"
             ></el-input>
@@ -63,7 +63,7 @@
             <span slot="label" class="not-required">E-mail：</span>
             <el-input
               type="text"
-              v-model="ruleFormFile.overview"
+              v-model="ruleFormFile.email"
               placeholder="Please enter an overview"
               class="overview"
             ></el-input>
@@ -72,7 +72,7 @@
             <span slot="label" class="not-required">Keywords：</span>
             <el-input
               type="text"
-              v-model="ruleFormFile.overview"
+              v-model="ruleFormFile.keywords"
               placeholder="Please enter an overview"
               class="overview"
             ></el-input>
@@ -148,18 +148,71 @@
         </div>
       </div>
     </div>
+    <div class="drawer-dialog" v-if="isDrawer">
+      <div class="drawer-main">
+        <div class="drawer-left">
+          <span class="name">{{ getFileInfo.name }}</span>
+          <el-progress
+            :percentage="progress"
+            color="#4A71FE"
+            v-if="showProcess"
+          ></el-progress>
+          <span class="status" :class="{ success: isSuccess }" v-else
+            ><span>{{ isSuccess ? "success" : "" }}</span>
+          </span>
+          <span class="status retry" v-if="isFailed" @click="uploadtoDataBase">
+            <span>Fail！</span> Re-Upload</span
+          >
+        </div>
+        <div class="close-icon" @click="onClose"></div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
+import axios from "axios";
 import { types } from "@/utils/config";
+import * as SparkMD5 from "spark-md5";
+import { getSHA256 } from "../../utils/docHashFun";
+import {
+  web3Accounts,
+  web3Enable,
+  web3FromAddress,
+  web3ListRpcProviders,
+  web3UseRpcProvider,
+  web3AccountsSubscribe,
+  web3FromSource,
+} from "@polkadot/extension-dapp";
+// Import
+import { ApiPromise, WsProvider, Keyring } from "@polkadot/api"; // Construct
+import { stringToHex } from "@polkadot/util";
+import { renderSize, fileType } from "@/utils/valid";
+import { addFileData, getFileInfo, reUploadFile, modifyFile } from "@/api/api";
 export default {
   data() {
     return {
+      loading: null,
+      reuploadFileId: null, 
+      uploadType: 0, 
+      uploadUrl: "",
+      isDrawer: false,
+      showProcess: false,
+      md5: "",
+      suffix: "",
+      size: "",
+      isSuccess: false,
+      isError: false,
+      isFailed: false,
+      progress: 0,
+      fileHash: "",
+      fileIDHash: "",
+      fileInfo: {},
+      getFileInfo: {},
       ruleFormFile: {
         name: "",
         size: "",
-        estimateSpent: 1, 
+        estimateSpent: 1,
         expireTime: null,
         visibility: 1,
         path: "",
@@ -171,9 +224,19 @@ export default {
         parentId: 0,
         filePath: "",
         classification: "",
+        fileCreator: "",
+        email: "",
+        keywords: "",
         overview: "",
         fileName: "",
       },
+      reloadInfo: {
+        parentId: 0,
+        filePath: "My cloud disk",
+        fileName: "",
+        md5: "",
+      },
+      confirmDisabled: true,
       rulesForm: {
         name: [{ required: true, message: "Upload file", trigger: "change" }],
         visibility: [
@@ -206,16 +269,346 @@ export default {
           },
         ],
       },
+      expireTimeOption: {
+        disabledDate(date) {
+          let date1 = new Date();
+          let date2 = new Date(date1);
+          date2.setDate(date1.getDate() + 179);
+          date2.setHours(0, 0, 0, 0);
+          let minYear = date2.getFullYear() + 1;
+          console.log("最大年份", minYear);
+          return (
+            date.getTime() < date2.getTime() ||
+            date.getTime() > new Date(JSON.stringify(minYear))
+          );
+        },
+      },
       options: types,
-      source: {}, 
+      source: {},
+      api: null,
     };
   },
   computed: {
     storageCost() {
-      return 0;
+      return 10000;
     },
   },
   components: {},
+  methods: {
+    onClose() {
+      this.source.cancel("文件上传已取消");
+      this.isDrawer = false;
+      this.showProcess = false;
+      this.progress = 0;
+      this.fileInfo = {};
+    },
+    oninput(e) {
+      console.log(e, typeof e, e.length);
+      e = e.replace(/^(-)*(\d{1,10})\.(\d\d\d\d).*$/, "$1$2.$3"); 
+      this.ruleFormFile.estimateSpent = e;
+    },
+    localFileUpload(file) {
+      this.confirmDisabled = true;
+      let data = file.target.files[0];
+      getSHA256(data).then((res) => {
+        console.log("计算文件hash", res);
+        this.fileHash = "0x" + res;
+      });
+      // const isLt100M = data.size / 1024 / 1024 < 100;
+      const isAbove0 = data.size > 0;
+      // if (!isLt100M) {
+      //   this.$message.error(this.$t("subNav.s19"));
+      //   return false;
+      // }
+      if (!isAbove0) {
+        this.$message.error(this.$t("subNav.s27"));
+        return false;
+      }
+      if (this.uploadType === 0) {
+        this.ruleFormFile.name = data.name;
+        this.source = axios.CancelToken.source();
+        console.log("this.source===== ", this.source.token, data);
+        this.fileInfo = data;
+        this.size = data.size;
+        this.suffix = data.name.substr(data.name.lastIndexOf("."));
+        this.$refs.fileInput.value = "";
+        this.calculate(data, (md5) => {
+          this.md5 = md5;
+          this.confirmDisabled = false;
+        });
+      } else {
+        this.reloadInfo.md5 = "";
+        this.confirmDisabled = true;
+        let data = file.target.files[0];
+        this.source = axios.CancelToken.source();
+        console.log("this.source===== ", this.source.token, data);
+        this.fileInfo = data;
+        this.reloadInfo.fileName = data.name;
+        this.size = data.size;
+        this.suffix = data.name.substr(data.name.lastIndexOf("."));
+        this.calculate(data, (md5) => {
+          this.reloadInfo.md5 = md5;
+        });
+        // this.$refs.inputFile.value = "";
+      }
+    },
+    calculate(file, callBack) {
+      let fileReader = new FileReader();
+      let blobSlice =
+        File.prototype.mozSlice ||
+        File.prototype.webkitSlice ||
+        File.prototype.slice;
+      let chunkSize = 2097152;
+      // read in chunks of 2MB
+      let chunks = Math.ceil(file.size / chunkSize);
+      let currentChunk = 0;
+      let spark = new SparkMD5();
+
+      fileReader.onload = (e) => {
+        spark.appendBinary(e.target.result); // append binary string
+        currentChunk++;
+
+        if (currentChunk < chunks) {
+          this.loadNext(file, currentChunk, chunkSize, fileReader, blobSlice);
+        } else {
+          callBack(spark.end());
+        }
+      };
+
+      this.loadNext(file, currentChunk, chunkSize, fileReader, blobSlice);
+    },
+    loadNext(file, currentChunk, chunkSize, fileReader, blobSlice) {
+      let start = currentChunk * chunkSize;
+      let end = start + chunkSize >= file.size ? file.size : start + chunkSize;
+      fileReader.readAsBinaryString(blobSlice.call(file, start, end));
+    },
+    cancleUpload() {
+      this.$router.go(-1);
+    },
+    async submitForm(formName) {
+      let _this = this;
+      this.$refs[formName].validate((valid) => {
+        if (valid) {
+          console.log(this.ruleFormFile);
+          _this.loading = _this.$loading({
+            lock: true,
+            text: "Loading",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)",
+          });
+          _this.dialogVisible = false;
+          // Check account balances
+          _this.queryBanlance();
+        } else {
+          console.log("error submit!!");
+          return false;
+        }
+      });
+    },
+    async queryBanlance() {
+      let _this = this;
+      // Create the instance  
+      const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
+
+      this.api = await ApiPromise.create({ provider: wsProvider });
+      console.log(_this.$store.state.userInfo.data.account);
+      // this call fires up the authorization popup
+      const extensions = await web3Enable("my cool dapp");
+      if (extensions.length === 0) {
+        // no extension installed, or the user did not accept the authorization
+        // in this case we should inform the use and give a link to the extension
+        return;
+      }
+      console.log("", extensions);
+      // 查询余额
+      // The actual address that we use
+      const ADDR = this.$store.state.userInfo.data.myAddress;
+      console.log("ADDR============", ADDR);
+      const acct = await this.api.query.system.account(ADDR);
+      let freeBalance = acct.data.free.toString(10);
+      console.log("", freeBalance);
+      if (freeBalance > 0) {
+        this.uploadPay();
+      } else {
+        _this.loading.close();
+        _this.$message({
+          type: "error",
+          message: "",
+        });
+      }
+    },
+    async uploadPay() {
+      let _this = this;
+      let ADDR = this.$store.state.userInfo.data.myAddress;
+      let timestamp = Date.parse(new Date()) / 1000;
+      // console.log("timestamp", timestamp);
+      let fileID = _this.fileHash + ADDR + timestamp;
+      let sha256 = require("js-sha256").sha256;
+      this.fileIDHash = "0x" + sha256(fileID);
+      console.log("fileIDHash", this.fileIDHash);
+      console.log("_this.fileHash===========", _this.fileHash);
+      let isPublic = _this.ruleFormFile.visibility;
+      console.log("_isPublic ", isPublic);
+      let uploadCost = Number(_this.storageCost);
+      let downloadFee = Number(_this.ruleFormFile.estimateSpent);
+      console.log("fileSize", _this.size);
+      let fileSize = Number(_this.size);
+      console.log("uploadCost", uploadCost);
+      console.log("downloadFee", downloadFee);
+      console.log("fileSize", fileSize);
+      let date = this.ruleFormFile.expireTime;
+      let expireTime = new Date(date).getTime() / 1000;
+      expireTime = Number(expireTime);
+      console.log("deadline", expireTime);
+      const transferExtrinsic = _this.api.tx.fileBank.upload(
+        ADDR,
+        this.fileIDHash,
+        this.fileHash,
+        "null",
+        isPublic,
+        3,
+        fileSize,
+        _this.ruleFormFile.keywords,
+        _this.ruleFormFile.email,
+        uploadCost,
+        downloadFee,
+        expireTime
+      );
+      const injector = await web3FromSource(
+        _this.$store.state.userInfo.data.account.meta.source
+      );
+
+      let txhash = transferExtrinsic
+        .signAndSend(
+          ADDR,
+          { signer: injector.signer },
+          ({ events = [], status }) => {
+            console.log("status==========", status);
+            console.log("events", events);
+            if (status.isInBlock) {
+              console.log(
+                `Completed at block hash #${status.asInBlock.toString()}`
+              );
+              console.log(
+                "===================",
+                txhash,
+                "txhash ???",
+                transferExtrinsic
+              );
+              _this.loading.close();
+              _this.uploadFile();
+            } else {
+              console.log(`Current status: ${status.type}`);
+            }
+          }
+        )
+        .catch((error) => {
+          console.log(":( transaction failed", error);
+        });
+    },
+    uploadFile() {
+      let date = this.ruleFormFile.expireTime;
+      let expireTime = new Date(
+        new Date(date.toLocaleDateString()).getTime() +
+          24 * 60 * 60 * 1000 -
+          1000
+      );
+      console.log("expireTime=======", expireTime);
+      let _this = this;
+      let data = {
+        estimateSpent: Number(_this.ruleFormFile.estimateSpent),
+        expireTime: expireTime,
+        md5: _this.md5,
+        visibility: _this.ruleFormFile.visibility,
+        name: _this.ruleFormFile.name,
+        size: _this.size,
+        suffix: _this.suffix,
+        txHash: _this.fileIDHash,
+        hash: _this.fileHash,
+        fid: _this.fileIDHash,
+        parentId: 0,
+        overview: _this.ruleFormFile.overview,
+        classification: Number(_this.ruleFormFile.classification),
+        creator: _this.ruleFormFile.fileCreator,
+        email: _this.ruleFormFile.email,
+        keywords: _this.ruleFormFile.keywords,
+        copy: 3,
+        priceMb: 1,
+      };
+      addFileData(data).then((res) => {
+        console.log("===", res);
+        if (res.success) {
+          _this.uploadUrl = res.uploadUrl;
+          _this.uploadtoDataBase();
+        } else {
+          _this.loading.close();
+          if (_this.isEn) {
+            _this.$message({
+              type: "error",
+              message: "File upload failed",
+            });
+          } else {
+            _this.$message({
+              type: "error",
+              message: res.errorMsg,
+            });
+          }
+        }
+      });
+    },
+    uploadtoDataBase() {
+      let _this = this;
+      let formData = new FormData();
+      _this.getFileInfo = _this.fileInfo;
+      formData.append("file", _this.fileInfo);
+      _this.isDrawer = true;
+      _this.loading = _this.$loading({
+        lock: true,
+        text: "Loading",
+        background: "rgba(0, 0, 0, 0.7)",
+      });
+      axios
+        .post(_this.uploadUrl, formData, {
+          cancelToken: _this.source.token,
+          onUploadProgress: (progressEvent) => {
+            if (_this.isDrawer === true) {
+              _this.showProcess = true;
+              let process =
+                ((progressEvent.loaded / progressEvent.total) * 100) | 0;
+              _this.progress = process;
+            }
+          },
+        })
+        .then((result) => {
+          console.log("uploadresult===", result);
+          _this.showProcess = false;
+          if (result.data.code === 0) {
+            _this.$router.push({
+              path: "/myCloud",
+            });
+            _this.loading.close();
+
+          } else {
+            _this.loading.close();
+            _this.isSuccess = false;
+            _this.isFailed = true;
+             _this.$message({
+                type: "error",
+                message: "Upload failed",
+              });
+          }
+        })
+        .catch(() => {
+          _this.loading.close();
+          _this.isSuccess = false;
+          _this.isFailed = true;
+          _this.$message({
+            type: "error",
+            message: "Cancel file upload",
+          });
+        });
+    },
+  },
 };
 </script>
 
@@ -229,6 +622,7 @@ body {
 .layout-content {
   padding: 36px 0px;
   text-align: left;
+  position: relative;
 }
 .bread {
   width: 1559px;
@@ -374,6 +768,60 @@ body {
       color: white;
       font-size: 18px;
       border: none;
+    }
+  }
+}
+.drawer-dialog {
+  position: absolute;
+  right: 50%;
+  top: 0;
+  width: 50%;
+  padding: 12px 0;
+  border-radius: 4px;
+  z-index: 2999;
+  .drawer-main {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: #363636;
+    .drawer-left {
+      display: flex;
+      align-items: center;
+      font-size: 18px;
+      /deep/.el-progress{
+        width: 560px;
+      }
+      /deep/.el-progress__text{
+        display: none;
+      }
+      .name {
+        width: 350px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+        margin: 0 10px;
+        text-align: right;
+      }
+      .status {
+        &.success {
+          color: #20d68e;
+        }
+      }
+      .retry {
+        width: 200px;
+        span {
+          color: #fd6b6d;
+        }
+        margin-left: 10px;
+        color: #5078fe;
+      }
+    }
+    .close-icon {
+      min-width: 15px;
+      min-height: 15px;
+      cursor: pointer;
+      background-size: contain;
+      background: url(../../assets/icons/close-icon.png) no-repeat;
     }
   }
 }

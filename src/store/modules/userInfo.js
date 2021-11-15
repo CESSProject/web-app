@@ -40,7 +40,7 @@ const userInfo = {
       state.isMinerLogined = false
       state.minterAddress = ''
       state.fileSize = 0
-
+      state.token = ''
     },
     modifyUserInfo(state, newInfo) {
       state.data = Object.assign(state.data, newInfo)

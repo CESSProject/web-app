@@ -5,23 +5,18 @@
         <img src="../../assets/icons/home-icon.png" width="17px" /> My data
       </div>
       <div class="action-bar">
-        <div class="action-btn">
-          <img src="../../assets/icons/upload-btn.png" width="14px" />Upload
-        </div>
-        <div class="action-btn">
-          <img src="../../assets/icons/folder-plus.png" width="15px" />New
-          Folder
-        </div>
+        <router-link to="/uploadFile">
+          <div class="action-btn">
+            <img src="../../assets/icons/upload-btn.png" width="14px" />Upload
+          </div>
+        </router-link>
       </div>
-      <el-table
-        :data="tableData"
-        style="width: 100%"
-      >
+      <el-table :data="tableData" style="width: 100%">
         <el-table-column label="File name">
           <template slot-scope="scope">
             <div class="file-name-column">
-              <img src="../../assets/files/ppt.png" class="image" />
-              <div class="file-name">{{ scope.row.filename }}</div>
+              <img :src="scope.row.imageUrl" class="image" />
+              <div class="file-name">{{ scope.row.name }}</div>
             </div>
           </template>
         </el-table-column>
@@ -30,32 +25,31 @@
             <div class="action-btns">
               <span
                 class="share-icon"
-                @click.stop="handleShareCode(scope.row.file)"
+                @click.stop="handleShareCode(scope.row)"
               ></span>
               <span
                 class="download-icon"
-                @click.stop="open(1, scope.row.file)"
+                @click.stop="open(1, scope.row)"
               ></span>
-              <span
-                class="delete-icon"
-                @click.stop="open(2, scope.row.file)"
-              ></span>
+              <span class="delete-icon" @click.stop="open(2, scope.row)"></span>
             </div>
           </template>
         </el-table-column>
         <el-table-column prop="state" label="state" width="150">
           <template slot-scope="scope">
-            <div class="state-tag">{{ scope.row.state }}</div>
+            <div class="state-tag">{{ scope.row.visibility | statusType }}</div>
           </template>
         </el-table-column>
         <el-table-column label="size" width="150">
           <template slot-scope="scope">
-            <span class="custom-cell">{{ scope.row.size }}</span>
+            <span class="custom-cell">{{ scope.row.size | sizeFilter }}</span>
           </template>
         </el-table-column>
         <el-table-column label="time" width="150">
           <template slot-scope="scope">
-            <span class="custom-cell">{{ scope.row.time }}</span>
+            <span class="custom-cell">{{
+              scope.row.createTime | dealWithDate
+            }}</span>
           </template>
         </el-table-column>
       </el-table>
@@ -83,39 +77,265 @@
         </div>
       </div>
     </div>
+    <el-dialog
+      :visible.sync="dialogVisible"
+      :close-on-click-modal="false"
+      width="460px"
+    >
+      <span class="white">{{ content }}</span>
+      <span slot="footer" class="dialog-footer">
+        <el-button size="medium" @click="dialogVisible = false"
+          >Cancle</el-button
+        >
+        <el-button
+          size="medium"
+          type="primary"
+          @click="handleClick"
+          :loading="isLoading"
+          >Confirm</el-button
+        >
+      </span>
+    </el-dialog>
   </div>
 </template>
 
 <script>
+import axios from "axios";
+import moment from "moment";
+import { parseTime, renderSize, fileType } from "@/utils/valid";
+import { filesList, getShareCode, deleteFiles, fileDownload } from "@/api/api";
 export default {
   data() {
     return {
-      tableData: [
-        {
-          filename: "9283y23852",
-          state: "Private",
-          size: "4324",
-          time: "2021-25-14",
-        },
-        {
-          filename: "9283y23852",
-          state: "Public",
-          size: "4324",
-          time: "2021-25-14",
-        },
-      ],
+      isLoading: false,
+      tableData: [],
       listQuery: {
         pageNum: 1,
         pageSize: 10,
+        parentId: 0,
       },
       maxlengthPage: 10,
       total: 20,
-      jumpPage:0,
+      jumpPage: 0,
+      shareCode: "",
+      fileId: null,
+      txHash: "",
+      type: 1,
+      dialogVisible: false,
+      content: "",
     };
+  },
+  filters: {
+    statusType(value) {
+      const data = ["Private", "Public", "Checking"];
+      return data[parseInt(value, 10)];
+    },
+    sizeFilter(value) {
+      return renderSize(value);
+    },
+    dealWithDate(date) {
+      return moment(date).format("YYYY-MM-DD HH:mm");
+    },
+    ellipsis(value) {
+      if (!value) return "";
+      if (value.length > 85) {
+        return value.slice(0, 85) + "...";
+      }
+      return value;
+    },
+  },
+  mounted() {
+    this.listQuery.pageNum = 1;
+    this.getFileUploadList(this.listQuery);
+  },
+  activated() {
+
   },
   components: {},
   methods: {
+
+    handleClick() {
+
+      if (this.type === 1) {
+        this.dialogVisible = false;
+        this.isLoading = false;
+        this.getFileDownload();
+      } else if (this.type === 2) {
+
+        this.isLoading = true;
+        deleteFiles(this.fileId)
+          .then((res) => {
+            console.log("===", res);
+            this.isLoading = false;
+            if (res.success) {
+              this.$message({
+                type: "success",
+                message: "",
+              });
+              this.dialogVisible = false;
+              this.listQuery.pageNum = 1;
+              this.getFileUploadList(this.listQuery);
+            } else {
+              this.$message({
+                type: "error",
+                message: '',
+              });
+            }
+          })
+          .catch(() => {
+            this.isLoading = false;
+          });
+      }
+    },
+    getFileDownload() {
+      let _this = this;
+      fileDownload({
+        fileId: _this.fileId,
+        txHash: _this.txHash,
+      }).then((res) => {
+        console.log("===", res);
+        if (res.success) {
+          axios
+            .get(res.downloadUrl, {
+              headers: {
+                token: this.$store.state.userInfo.data.token,
+              },
+              responseType: "blob",
+            })
+            .then((result) => {
+              console.log("===", result);
+              if (result.status === 200) {
+                let blob = new Blob([result.data]);
+                let linkUrl = URL.createObjectURL(blob);
+                const link = document.createElement("a");
+                link.download = res.downloadInfomationDO.name;
+                link.href = linkUrl;
+                link.click();
+                link.remove();
+              } else {
+                this.status = 2;
+                this.$message({
+                  type: "error",
+                  message: '',
+                });
+              }
+            })
+            .catch((error) => {
+              console.log("===", error);
+            });
+        } else {
+          if (this.isEn) {
+            this.$message({
+              type: "error",
+              message: this.$t("downloadList.d6"),
+            });
+          } else {
+            this.$message({
+              type: "error",
+              message: res.errorMsg,
+            });
+          }
+        }
+      });
+    },
+
+    open(type, row) {
+      console.log("ID===", row);
+      this.dialogVisible = true;
+      this.type = type;
+      if (type === 1) {
+        this.fileId = row.fileId;
+        this.txHash = row.hash;
+        this.content = "Download the file ?";
+      } else if (type === 2) {
+        this.fileId = row.fileId;
+        this.content = "Delete the file ?";
+      }
+    },
     JumpTo() {},
+   getFileUploadList(params) {
+      this.loading = true;
+      filesList(params)
+        .then((res) => {
+          this.loading = false;
+          console.log("===", res.fileInfomationDOList);
+          if (res.success) {
+            let arr = res.fileInfomationDOList;
+            arr.forEach((v) => {
+              v.imageUrl = fileType(v.suffix);
+              console.log(v.imageUrl);
+            });
+            this.tableData = arr;
+            console.log(this.tableData);
+            this.total = res.totalPages;
+          } else {
+            this.$message({
+              type: "error",
+              message: res.errorMsg,
+            });
+          }
+        })
+        .catch((err) => {
+          console.log("err===============", err);
+          this.loading = false;
+        });
+    },
+    sortBySize() {
+      this.orderType = "size";
+      this.sizeDesc = !this.sizeDesc;
+      let params = {
+        order: this.orderType,
+        asc: this.sizeDesc,
+      };
+      this.listQuery.pageNum = 1;
+      params = Object.assign(params, this.listQuery);
+      this.getFileUploadList(params);
+    },
+    sortByTime() {
+      this.orderType = "time";
+      this.timeDesc = !this.timeDesc;
+      let params = {
+        order: this.orderType,
+        asc: this.timeDesc,
+      };
+      this.listQuery.pageNum = 1;
+      console.log(params);
+      params = Object.assign(params, this.listQuery);
+      this.getFileUploadList(params);
+    },
+    handleCommand(command) {
+      if (this.newFolderFlag) {
+        this.newFolderFlag = false;
+      }
+      if (command === "time") {
+        this.sortByTime();
+      } else {
+        this.sortBySize();
+      }
+    },
+    handleShareCode(row) {
+      getShareCode({
+        fileId: row.fileId,
+        uploadId: row.uploadId,
+      })
+        .then((res) => {
+          console.log("===========", res);
+          if (res.success) {
+
+            this.shareCode = res.shareCode;
+            console.log("===", res);
+            window.open(`/fileDetail?shareCode=${this.shareCode}`);
+          } else {
+            this.$message({
+              type: "error",
+              message: res.errorMsg,
+            });
+          }
+        })
+        .catch(() => {
+          this.isCopyLoading = false;
+        });
+    },
   },
 };
 </script>

@@ -75,14 +75,14 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    // const nextRoute = ['MyCloud', ] 
-    // let isLogin = store.state.userInfo.isLogined;
-    // if (nextRoute.indexOf(to.name) >= 0) {
-    //     if (!isLogin) {
-    //         next('/')
-    //         return
-    //     }
-    // }
+    const nextRoute = ['MyCloud', ] 
+    let isLogin = store.state.userInfo.isLogined;
+    if (nextRoute.indexOf(to.name) >= 0) {
+        if (!isLogin) {
+            next('/')
+            return
+        }
+    }
     document.documentElement.scrollTop = 0
     next()
 })

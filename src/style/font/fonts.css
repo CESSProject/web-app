@@ -1,0 +1,19 @@
+
+@font-face {
+    font-family: "Open-Sans";
+    src: url('Open-Sans.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "Open-Sans-Bold";
+    src: url('Open-Sans-Bold.ttf');
+    font-weight: normal;
+    font-style: normal;
+}
+@font-face {
+    font-family: "AlegreyaSansSC-ExtraBold";
+    src: url('AlegreyaSansSC-ExtraBold.ttf');
+    font-weight: 800;
+    font-style: normal;
+}

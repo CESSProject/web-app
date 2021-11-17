@@ -11,7 +11,7 @@
           :model="ruleFormFile"
           :rules="rulesForm"
           ref="ruleFormFile"
-          label-width="350px"
+          label-width="380px"
           class="demo-ruleFormFile uploadruleFormFile"
         >
           <el-form-item prop="name">
@@ -55,16 +55,18 @@
             <el-input
               type="text"
               v-model="ruleFormFile.fileCreator"
+              maxlength="50"
               placeholder="Please enter an overview"
               class="overview"
             ></el-input>
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="email">
             <span slot="label" class="not-required">E-mail：</span>
             <el-input
               type="text"
               v-model="ruleFormFile.email"
-              placeholder="Please enter an overview"
+              maxlength="50"
+              placeholder="Please enter E-mail"
               class="overview"
             ></el-input>
           </el-form-item>
@@ -73,7 +75,8 @@
             <el-input
               type="text"
               v-model="ruleFormFile.keywords"
-              placeholder="Please enter an overview"
+              maxlength="200"
+              placeholder="Please enter keywords"
               class="overview"
             ></el-input>
           </el-form-item>
@@ -184,17 +187,19 @@ import {
   web3AccountsSubscribe,
   web3FromSource,
 } from "@polkadot/extension-dapp";
+import { createType } from "@polkadot/types";
+import { Balance } from "@polkadot/types/interfaces";
 // Import
 import { ApiPromise, WsProvider, Keyring } from "@polkadot/api"; // Construct
-import { stringToHex } from "@polkadot/util";
+import { stringToHex, stringToU8a } from "@polkadot/util";
 import { renderSize, fileType } from "@/utils/valid";
 import { addFileData, getFileInfo, reUploadFile, modifyFile } from "@/api/api";
 export default {
   data() {
     return {
       loading: null,
-      reuploadFileId: null, 
-      uploadType: 0, 
+      reuploadFileId: null,
+      uploadType: 0,
       uploadUrl: "",
       isDrawer: false,
       showProcess: false,
@@ -268,6 +273,15 @@ export default {
             trigger: "change",
           },
         ],
+        email: [
+          {
+            required: false,
+            pattern:
+              /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+            message: "Please enter the correct e-mail address",
+            trigger: "change",
+          },
+        ],
       },
       expireTimeOption: {
         disabledDate(date) {
@@ -276,7 +290,7 @@ export default {
           date2.setDate(date1.getDate() + 179);
           date2.setHours(0, 0, 0, 0);
           let minYear = date2.getFullYear() + 1;
-          console.log("最大年份", minYear);
+          // console.log("", minYear);
           return (
             date.getTime() < date2.getTime() ||
             date.getTime() > new Date(JSON.stringify(minYear))
@@ -294,9 +308,52 @@ export default {
     },
   },
   components: {},
+  async mounted() {
+    // var str =
+    //   "0x5d42a51e4070f27df119ffe135668098f392f9b2b9a1bb80be7a2008c1a18829";
+    // let arr = [];
+    // for (let i = 0; i < str.length; i++) {
+    //   arr[i] = str.charCodeAt(i);
+    // }
+    // console.log(arr);
+    // let www = stringToU8a(str);
+    // console.log("wwww", www);
+    // let _this = this;
+    // //   let u8 = "0x7465737466696c6531eae4e97377b94dee545f64cdf87692b44f52f721aee69d181b7bedde63c16071";
+    // //  let aaa = this.toUint8Arr(u8);
+    // //   console.log("u8", aaa);
+
+    // // Create the instance
+    // const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
+    // this.api = await ApiPromise.create({
+    //   provider: wsProvider,
+    //   types: {
+    //     FileInfo: {
+    //       owner: "AccountId",
+    //       filehash: "Vec<u8>",
+    //       similarityhash: "Vec<u8>",
+    //       ispublic: "u8",
+    //       backups: "u8",
+    //       creator: "Vec<u8>",
+    //       filesize: "u128",
+    //       keywords: "Vec<u8>",
+    //       email: "Vec<u8>",
+    //       uploadfee: "Balance",
+    //       downloadfee: "Balance",
+    //       deadline: "BlockNumber",
+    //     },
+    //   },
+    // });
+    // console.log(
+    //   ' "0x5d42a51e4070f27df119ffe135668098f392f9b2b9a1bb80be7a2008c1a18829"'
+    // );
+    // const testInfo = await this.api.query.fileBank.file(arr);
+
+    // console.log("testInfo=========", testInfo);
+  },
   methods: {
     onClose() {
-      this.source.cancel("文件上传已取消");
+      this.source.cancel("");
       this.isDrawer = false;
       this.showProcess = false;
       this.progress = 0;
@@ -304,24 +361,26 @@ export default {
     },
     oninput(e) {
       console.log(e, typeof e, e.length);
-      e = e.replace(/^(-)*(\d{1,10})\.(\d\d\d\d).*$/, "$1$2.$3"); 
+      e = e.replace(/^(-)*(\d{1,10})\.(\d\d\d\d).*$/, "$1$2.$3");
       this.ruleFormFile.estimateSpent = e;
     },
     localFileUpload(file) {
       this.confirmDisabled = true;
       let data = file.target.files[0];
       getSHA256(data).then((res) => {
-        console.log("计算文件hash", res);
+        console.log("hash", res);
         this.fileHash = "0x" + res;
       });
       // const isLt100M = data.size / 1024 / 1024 < 100;
       const isAbove0 = data.size > 0;
       // if (!isLt100M) {
-      //   this.$message.error(this.$t("subNav.s19"));
+      //   this.$message.error('File storage larger than 100MB is not supported');
       //   return false;
       // }
       if (!isAbove0) {
-        this.$message.error(this.$t("subNav.s27"));
+        this.$message.error(
+          "You have selected an empty file, please select again!"
+        );
         return false;
       }
       if (this.uploadType === 0) {
@@ -407,7 +466,7 @@ export default {
     },
     async queryBanlance() {
       let _this = this;
-      // Create the instance  
+      // Create the instance
       const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
 
       this.api = await ApiPromise.create({ provider: wsProvider });
@@ -420,7 +479,6 @@ export default {
         return;
       }
       console.log("", extensions);
-      // 查询余额
       // The actual address that we use
       const ADDR = this.$store.state.userInfo.data.myAddress;
       console.log("ADDR============", ADDR);
@@ -433,7 +491,7 @@ export default {
         _this.loading.close();
         _this.$message({
           type: "error",
-          message: "",
+          message: "Insufficient tokens",
         });
       }
     },
@@ -445,7 +503,11 @@ export default {
       let fileID = _this.fileHash + ADDR + timestamp;
       let sha256 = require("js-sha256").sha256;
       this.fileIDHash = "0x" + sha256(fileID);
+      //  let aaa = this.toUint8Arr(fileID);
+      //  this.fileIDHash = aaa
       console.log("fileIDHash", this.fileIDHash);
+      // let test = this.fileIDHash.toU8a();
+
       console.log("_this.fileHash===========", _this.fileHash);
       let isPublic = _this.ruleFormFile.visibility;
       console.log("_isPublic ", isPublic);
@@ -467,6 +529,7 @@ export default {
         "null",
         isPublic,
         3,
+        _this.ruleFormFile.fileCreator,
         fileSize,
         _this.ruleFormFile.keywords,
         _this.ruleFormFile.email,
@@ -492,7 +555,7 @@ export default {
               console.log(
                 "===================",
                 txhash,
-                "txhash ???",
+                "txhash toU8a()",
                 transferExtrinsic
               );
               _this.loading.close();
@@ -587,15 +650,14 @@ export default {
               path: "/myCloud",
             });
             _this.loading.close();
-
           } else {
             _this.loading.close();
             _this.isSuccess = false;
             _this.isFailed = true;
-             _this.$message({
-                type: "error",
-                message: "Upload failed",
-              });
+            _this.$message({
+              type: "error",
+              message: "Upload failed",
+            });
           }
         })
         .catch(() => {
@@ -788,10 +850,10 @@ body {
       display: flex;
       align-items: center;
       font-size: 18px;
-      /deep/.el-progress{
+      /deep/.el-progress {
         width: 560px;
       }
-      /deep/.el-progress__text{
+      /deep/.el-progress__text {
         display: none;
       }
       .name {

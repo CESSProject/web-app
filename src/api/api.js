@@ -66,15 +66,13 @@ export function getShareCode(params) {
 
 export function decryptShareCode(shareCode) {
   return network({
-    url: '/cess-hacknet/share/decryptCode.Action',
+    url: '/cess-hacknet/share/openShare.Action',
     method: 'get',
     params: {
       shareCode
     }
   });
 }
-
-
 
 
 export function queryFileNeedPay(fileId) {

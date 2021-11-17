@@ -59,7 +59,9 @@ export default {
             easing: "easeOutExpo",
           });
         } else {
+         
           this.closeMenu();
+          
         }
       });
     },

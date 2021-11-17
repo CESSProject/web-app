@@ -7,14 +7,15 @@
     <div class="datadetail-container">
       <div class="data-info-detail">
         <div class="file-header">
-          <img src="../../assets/files/doc.png" />
+          <img :src="fileTypeImg" width="122px" />
           <div class="price">
-            <span
-              ><img
-                src="../../assets/icons/download-icon.png"
-                width="24px" /></span
-            ><span>{{ detailData.estimateSpent }}</span
-            >tCESS
+            <div class="price-top">
+              <span>
+                <img src="../../assets/icons/download-icon.png" width="24px"
+              /></span>
+              <span>{{ detailData.estimateSpent }}</span>
+              <span class="unit">tCESS</span>
+            </div>
             <div class="buy-btn" @click="open">buy</div>
           </div>
         </div>
@@ -44,7 +45,9 @@
           </div>
           <div class="info-detail">
             <div class="info-label">Upload time:</div>
-            <div class="info-content">{{ detailData.time | dealWithDate }}</div>
+            <div class="info-content">
+              {{ detailData.createTime | dealWithDate }}
+            </div>
           </div>
           <div class="info-detail">
             <div class="info-label">Data validity period:</div>
@@ -60,15 +63,15 @@
             <div class="info-label">Characteristic:</div>
             <div class="info-content">{{ detailData.classification }}</div>
           </div>
-          <div class="info-detail">
+          <div class="info-detail" v-if="detailData.creator !== ''">
             <div class="info-label">Data creator:</div>
             <div class="info-content">{{ detailData.creator }}</div>
           </div>
-          <div class="info-detail">
+          <div class="info-detail" v-if="detailData.email !== ''">
             <div class="info-label">E-mail:</div>
             <div class="info-content">{{ detailData.email }}</div>
           </div>
-          <div class="info-detail">
+          <div class="info-detail" v-if="detailData.keywords !== ''">
             <div class="info-label">keyword:</div>
             <div class="info-content">{{ detailData.keywords }}</div>
           </div>
@@ -114,6 +117,8 @@ import axios from "axios";
 import moment from "moment";
 import { types } from "@/utils/config";
 import { parseTime, renderSize, fileType } from "@/utils/valid";
+import { mapGetters } from "vuex";
+
 import {
   queryFileNeedPay,
   getFileInfo,
@@ -142,6 +147,7 @@ export default {
         classification: "1",
         time: "",
       },
+      fileTypeImg: "",
       fileId: "",
       shareCode: "",
       sililar: [{}],
@@ -153,6 +159,9 @@ export default {
     };
   },
   components: {},
+  computed: {
+    ...mapGetters(["isLogined"]),
+  },
   mounted() {
     this.loading = this.$loading({
       lock: true,
@@ -183,8 +192,15 @@ export default {
     },
   },
   methods: {
+    test() {
+      this.$store.dispatch("userInfo/authorization");
+    },
     open() {
       console.log(this.fileId);
+      if (!this.isLogined) {
+        this.test();
+        return;
+      }
       this.dialogVisible = true;
       this.txHash = this.detailData.hash;
       this.content = "Download the file ?";
@@ -195,7 +211,8 @@ export default {
         console.log("===", res);
         if (res.success) {
           _this.loading.close();
-          _this.detailData = res;
+          _this.detailData = res.fileInformation;
+          _this.fileTypeImg = fileType(res.fileInformation.suffix);
         } else {
           _this.loading.close();
           if (res.errorCode === "100055") {
@@ -217,29 +234,33 @@ export default {
         t: parseTime(data.t, "{y}-{m}-{d}"),
         cost: data.cost,
         hash: data.hash,
-        fileId: Number(data.id),
+        fileId: Number(data.fileId),
         shareCode: data.code,
         chainAccount: data.chainAccount,
         overview: data.overview,
         classification: data.classification,
       };
-    },
-    downloadBtn() {
-      this.title = this.$t("detail.d7");
-      this.content = this.$t("detail.d8");
-      this.dialogVisible = true;
+      this.fileId = this.detailData.fileId;
     },
     handleClick() {
       let _this = this;
       this.dialogVisible = false;
       this.isLoading = false;
+      this.fileId = this.fileId ? this.fileId : this.detailData.detailData;
+      this.txHash = this.detailData.hash;
       queryFileNeedPay(this.fileId).then((res) => {
-        console.log("查询下载文件是否需要支付===", res);
-        if (res.needPay) {
-          this.queryBanlance();
+        if (res.success) {
+          if (res.needPay) {
+            this.queryBanlance();
+          } else {
+            _this.dialogVisible = false;
+            this.getFileDownload();
+          }
         } else {
-          _this.dialogVisible = false;
-          this.getFileDownload();
+          this.$message({
+            type: "error",
+            message: "The file resource is expired!",
+          });
         }
       });
     },
@@ -257,17 +278,9 @@ export default {
                 token: this.$store.state.userInfo.data.token,
               },
               responseType: "blob",
-              // onDownloadProgress: (progressEvent) => {
-              //   this.showProcess = true;
-              //   let process =
-              //     ((progressEvent.loaded / progressEvent.total) * 100) | 0;
-              //   this.progress = process;
-              //   console.log("progress===", this.showProcess, this.progress);
-              // }
             })
             .then((result) => {
               console.log("===", result);
-              // this.showProcess = false;
               if (result.status === 200) {
                 let blob = new Blob([result.data]);
                 let linkUrl = URL.createObjectURL(blob);
@@ -280,7 +293,7 @@ export default {
                 this.status = 2;
                 this.$message({
                   type: "error",
-                  message: '',
+                  message: "",
                 });
               }
             })
@@ -288,17 +301,10 @@ export default {
               console.log("===", error);
             });
         } else {
-          if (this.isEn) {
-            this.$message({
-              type: "error",
-              message: this.$t("downloadList.d6"),
-            });
-          } else {
-            this.$message({
-              type: "error",
-              message: res.errorMsg,
-            });
-          }
+          this.$message({
+            type: "error",
+            message: "The file resource is expired!",
+          });
         }
       });
     },
@@ -402,6 +408,43 @@ export default {
 .layout-content {
   padding: 36px 0px;
   text-align: left;
+      /deep/.el-dialog {
+      margin-top: 30vh !important;
+      width: 666px !important;
+      height: 273px;
+      background: #ffffff;
+      border: 1px solid #d7d7d7;
+      border-radius: 14px;
+    }
+    /deep/.el-dialog__body {
+      font-size: 30px;
+      line-height: 44px;
+      color: #606060;
+      text-align: center !important;
+
+    }
+    /deep/.el-dialog__footer {
+      text-align: center !important;
+    }
+    /deep/.el-button--medium {
+      width: 172px;
+      height: 44px;
+  
+      border-radius: 22px;
+      border: none;
+    }
+    /deep/.el-button--primary {
+      background: linear-gradient(180deg, #4a71fe 0%, #8fbfff 100%);
+    }
+    /deep/.el-button--default {
+      background: linear-gradient(180deg, #fd6b6d 0%, #ed7a5d 100%);
+    }
+    /deep/.el-button:hover,.el-button:focus{
+      color: white;
+    }
+    /deep/.el-dialog__headerbtn{
+      display: none;
+    }
 }
 .bread {
   width: 1559px;
@@ -436,14 +479,23 @@ export default {
     margin-bottom: 40px;
     .price {
       font-size: 24px;
-      font-weight: bold;
       color: #5078fe;
-      img {
-        margin-right: 5px;
+      padding-top: 28px;
+      font-family: "Open-Sans-Bold";
+      line-height: 1;
+      .price-top {
+        display: flex;
+        align-items: center;
+        justify-content: center;
       }
-      span:last-child {
+      img {
+        margin-right: 10px;
+      }
+      .unit {
         font-size: 18px;
         color: #303030;
+        font-family: "Open-Sans";
+        margin-left: 8px;
       }
       .buy-btn {
         width: 235px;

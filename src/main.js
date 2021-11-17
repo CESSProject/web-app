@@ -5,6 +5,8 @@ import store from './store'
 import Element from 'element-ui';
 import 'element-ui/lib/theme-chalk/index.css'
 import './style/common.less'
+import "./style/font/fonts.css";
+
 Vue.config.productionTip = false
 Vue.use(Element)
 new Vue({

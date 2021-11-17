@@ -41,11 +41,31 @@
           </template>
         </el-table-column>
         <el-table-column label="size" width="150">
+          <template slot="header" slot-scope="slot">
+            <div class="custom-sort">
+              <span>size</span>
+              <img
+                src="../../assets/icons/sort3.png"
+                width="14px"
+                @click.stop="sortBySize"
+              />
+            </div>
+          </template>
           <template slot-scope="scope">
             <span class="custom-cell">{{ scope.row.size | sizeFilter }}</span>
           </template>
         </el-table-column>
         <el-table-column label="time" width="150">
+          <template slot="header" slot-scope="slot">
+            <div class="custom-sort">
+              <span>time</span>
+              <img
+                src="../../assets/icons/sort3.png"
+                width="14px"
+                @click.stop="sortByTime"
+              />
+            </div>
+          </template>
           <template slot-scope="scope">
             <span class="custom-cell">{{
               scope.row.createTime | dealWithDate
@@ -55,7 +75,7 @@
       </el-table>
       <div class="pagination-container">
         <el-pagination
-          @current-change="getData()"
+          @current-change="handleCurrentChange"
           background
           :current-page.sync="listQuery.page"
           :pager-count="5"
@@ -114,9 +134,12 @@ export default {
         pageSize: 10,
         parentId: 0,
       },
-      maxlengthPage: 10,
-      total: 20,
-      jumpPage: 0,
+      orderType: "",
+      sizeDesc: true,
+      timeDesc: false,
+      maxlengthPage: 0,
+      total: 0,
+      jumpPage: "Jump to page",
       shareCode: "",
       fileId: null,
       txHash: "",
@@ -148,20 +171,15 @@ export default {
     this.listQuery.pageNum = 1;
     this.getFileUploadList(this.listQuery);
   },
-  activated() {
-
-  },
+  activated() {},
   components: {},
   methods: {
-
     handleClick() {
-
       if (this.type === 1) {
         this.dialogVisible = false;
         this.isLoading = false;
         this.getFileDownload();
       } else if (this.type === 2) {
-
         this.isLoading = true;
         deleteFiles(this.fileId)
           .then((res) => {
@@ -178,7 +196,7 @@ export default {
             } else {
               this.$message({
                 type: "error",
-                message: '',
+                message: "",
               });
             }
           })
@@ -216,7 +234,7 @@ export default {
                 this.status = 2;
                 this.$message({
                   type: "error",
-                  message: '',
+                  message: "",
                 });
               }
             })
@@ -224,17 +242,10 @@ export default {
               console.log("===", error);
             });
         } else {
-          if (this.isEn) {
-            this.$message({
-              type: "error",
-              message: this.$t("downloadList.d6"),
-            });
-          } else {
-            this.$message({
-              type: "error",
-              message: res.errorMsg,
-            });
-          }
+          this.$message({
+            type: "error",
+            message: "The file resource is expired!",
+          });
         }
       });
     },
@@ -253,7 +264,22 @@ export default {
       }
     },
     JumpTo() {},
-   getFileUploadList(params) {
+    handleCurrentChange(val) {
+      let asc = null;
+      if (this.orderType === "size") {
+        asc = this.sizeDesc;
+      } else if (this.orderType === "time") {
+        asc = this.timeDesc;
+      }
+      let params = {
+        order: this.orderType,
+        asc: asc,
+      };
+      this.listQuery.pageNum = val;
+      params = Object.assign(params, this.listQuery);
+      this.getFileUploadList(params);
+    },
+    getFileUploadList(params) {
       this.loading = true;
       filesList(params)
         .then((res) => {
@@ -268,6 +294,9 @@ export default {
             this.tableData = arr;
             console.log(this.tableData);
             this.total = res.totalPages;
+            this.maxlengthPage = Math.ceil(
+              this.total / this.listQuery.pageSize
+            );
           } else {
             this.$message({
               type: "error",
@@ -294,6 +323,7 @@ export default {
     sortByTime() {
       this.orderType = "time";
       this.timeDesc = !this.timeDesc;
+
       let params = {
         order: this.orderType,
         asc: this.timeDesc,
@@ -321,7 +351,6 @@ export default {
         .then((res) => {
           console.log("===========", res);
           if (res.success) {
-
             this.shareCode = res.shareCode;
             console.log("===", res);
             window.open(`/fileDetail?shareCode=${this.shareCode}`);
@@ -343,6 +372,43 @@ export default {
 <style scoped lang="less">
 .layout-content {
   padding: 27px 0px;
+    /deep/.el-dialog {
+      margin-top: 30vh !important;
+      width: 666px !important;
+      height: 273px;
+      background: #ffffff;
+      border: 1px solid #d7d7d7;
+      border-radius: 14px;
+    }
+    /deep/.el-dialog__body {
+      font-size: 30px;
+      line-height: 44px;
+      color: #606060;
+      text-align: center !important;
+
+    }
+    /deep/.el-dialog__footer {
+      text-align: center !important;
+    }
+    /deep/.el-button--medium {
+      width: 172px;
+      height: 44px;
+  
+      border-radius: 22px;
+      border: none;
+    }
+    /deep/.el-button--primary {
+      background: linear-gradient(180deg, #4a71fe 0%, #8fbfff 100%);
+    }
+    /deep/.el-button--default {
+      background: linear-gradient(180deg, #fd6b6d 0%, #ed7a5d 100%);
+    }
+    /deep/.el-button:hover,.el-button:focus{
+      color: white;
+    }
+    /deep/.el-dialog__headerbtn{
+      display: none;
+    }
 }
 .mycloud-container {
   width: 1559px;
@@ -354,11 +420,7 @@ export default {
   padding: 0px 12px;
   color: #303030;
   text-align: left;
-  /deep/.tableHeader {
-    th {
-      background: #f6f7fb;
-    }
-  }
+
   .pagination-container {
     margin-top: 30px;
     text-align: center;
@@ -494,6 +556,9 @@ export default {
   justify-content: flex-start;
   margin: 20px auto 26px;
   margin-left: 53px;
+  a {
+    text-decoration: none;
+  }
   .action-btn {
     width: 154px;
     height: 32px;
@@ -567,5 +632,13 @@ export default {
 }
 .state-tag-check {
   background: #ffb609;
+}
+.custom-sort {
+  display: flex;
+  align-items: center;
+  img {
+    margin-left: 9px;
+    cursor: pointer;
+  }
 }
 </style>

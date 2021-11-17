@@ -6,18 +6,24 @@
       </div>
     </router-link>
     <router-link to="/">
-      <div class="title" >Home</div>
+      <div class="title" :class="currentPath === '/' ? 'title-active' : ''">
+        HOME
+      </div>
     </router-link>
     <router-link to="/market">
-      <div class="title" >Matket</div>
+      <div
+        class="title"
+        :class="currentPath === '/market' ? 'title-active' : ''"
+      >
+        MARKET
+      </div>
     </router-link>
-
     <div class="search-bar">
       <el-input
         v-model="searchKey"
         placeholder=""
-        @focus="showSearchIcon = false"
-        @blur="showSearchIcon = true"
+        @focus="focusSearch"
+        @blur.prevent="blurSearchBar"
         ref="searchInput"
       ></el-input>
       <div class="placeholder" v-show="showSearchIcon" @click="focusSearch">
@@ -28,12 +34,12 @@
         />
         <div>Search files...</div>
       </div>
-      <div class="search-icon2" v-show="!showSearchIcon">
+      <div class="search-icon2" v-show="!showSearchIcon" @mousedown="searchFiles">
         <img src="../../assets/icons/search2.png" width="22px" />
       </div>
     </div>
     <div class="login-box nav-menu">
-      <div class="login-btn" v-if="!isLogined" @click.stop="loginTest()">
+      <div class="login-btn" v-if="!isLogined" @click.stop="authorization()">
         <img src="../../assets/icons/logo-icon.png" width="15px" />
         Log in
       </div>
@@ -41,7 +47,10 @@
       <div class="user-center" v-else style="min-width: 60px">
         <div
           class="language-selector"
-          @click="userInfoVisible = !userInfoVisible"
+          @click="
+            $store.state.userInfo.userInfoVisible =
+              !$store.state.userInfo.userInfoVisible
+          "
         >
           <img :src="imgUrl" alt="" class="user-avatar" :onerror="errorImg" />
           <!-- <Identicon :size="128" :theme="'polkadot'" :value="account" /> -->
@@ -57,13 +66,13 @@
       </div>
       <CustomDropDown
         :items="userOperator"
-        :visible.sync="userInfoVisible"
+        :visible.sync="$store.state.userInfo.userInfoVisible"
         :kind="'normal'"
         :height="158"
       />
       <CustomDropDown
-        :items="accountOperator"
-        :visible.sync="accountsVisible"
+        :items="$store.state.userInfo.accountOperator"
+        :visible.sync="$store.state.userInfo.accountsVisible"
         :kind="'accounts'"
         :height="268"
       />
@@ -73,25 +82,11 @@
 
 <script>
 import Identicon from "@polkadot/vue-identicon";
-import {
-  web3Accounts,
-  web3Enable,
-  web3FromAddress,
-  web3ListRpcProviders,
-  web3UseRpcProvider,
-  web3AccountsSubscribe,
-  web3FromSource,
-} from "@polkadot/extension-dapp";
-// Import
-import { ApiPromise, WsProvider, Keyring } from "@polkadot/api"; // Construct
-import { stringToHex } from "@polkadot/util";
 import { mapActions, mapGetters } from "vuex";
 import CustomDropDown from "../../components/customDropDown.vue";
 export default {
   data() {
     return {
-      userInfoVisible: false,
-      accountsVisible: false,
       searchBarFlag: false,
       userOperator: [
         {
@@ -109,112 +104,48 @@ export default {
           },
         },
       ],
-      accountOperator: [
-        // {
-        //   icon: require("../../assets/icons/default-avater.png"),
-        //   name: "",
-        //   address: "",
-        //   callback: (item) => {
-        //     console.log(item);
-        //   },
-        // },
-      ],
+      accountOperator: [],
       imgUrl: require("../../assets/icons/default-avater.png"),
       errorImg: "",
       account: null,
       searchKey: "",
       showSearchIcon: true,
       accountList: [],
+      currentPath: "",
     };
   },
   computed: {
     ...mapGetters(["isLogined"]),
   },
+  watch: {},
   components: {
     CustomDropDown,
     Identicon,
   },
+
   mounted() {
-    this.keys();
+    this.currentPath = this.$route.path;
   },
   methods: {
+    authorization() {
+      this.$store.dispatch("userInfo/authorization");
+    },
     focusSearch() {
       this.$refs.searchInput.focus();
       this.showSearchIcon = false;
     },
-    searchBar() {
-      this.showSearchIcon = false;
+    blurSearchBar() {
+      this.showSearchIcon = true;
+      this.searchKey = "";
     },
-    async loginTest() {
-      let _this = this;
-      const extensions = await web3Enable("my cool dapp");
-      if (extensions.length === 0) {
-        // no extension installed, or the user did not accept the authorization
-        // in this case we should inform the use and give a link to the extension
-        return;
-      }
-      // returns an array of { address, meta: { name, source } }
-      // meta.source contains the name of the extension that provides this account  meta.source 包含提供此帐户的扩展名
-      let allAccounts = await web3Accounts();
-      console.log("allAccounts========", allAccounts);
-      this.accountList = allAccounts;
-      this.accountList.forEach((item) => {
-        let obj = {
-          icon: require("../../assets/icons/default-avater.png"),
-          meta: item.meta,
-          address: item.address,
-          callback: (item) => {
-            console.log(item);
-            _this.account = item;
-            _this.login();
-          },
-        };
-        _this.accountOperator.push(obj);
+    searchFiles() {
+      this.$router.push({
+        path: "/market",
+        query: {
+          keyword: this.searchKey,
+        },
       });
-      _this.accountsVisible = true;
     },
-
-    async login() {
-      let _this = this;
-      console.log("account", this.account);
-
-      const injector = await web3FromSource(_this.account.meta.source);
-      console.log(
-        "we can use web3FromSource which will return an InjectedExtension type",
-        injector
-      );
-
-      const signRaw = injector?.signer?.signRaw;
-      console.log("signRaw=============", signRaw);
-      if (signRaw) {
-        // after making sure that signRaw is defined
-        // we can use it to sign our message
-        console.log(
-          "!!!!!!!!!!",
-          _this.account.address,
-          stringToHex(_this.account.address)
-        );
-        await signRaw({
-          address: _this.account.address,
-          data: stringToHex(_this.account.address),
-          type: "bytes",
-        })
-          .then((res) => {
-            console.log(res, res.signature.slice(2));
-            _this.userInfoVisible = true;
-            let userInfo = {
-              myAddress: _this.account.address,
-              signature: res.signature.slice(2),
-              account: _this.account,
-            };
-            _this.$store.dispatch("userInfo/saveInfo", userInfo);
-          })
-          .catch((err) => {
-            console.log(err);
-          });
-      }
-    },
-    async keys() {},
     ...mapActions("userInfo", ["logout"]),
   },
 };
@@ -235,31 +166,25 @@ export default {
   box-sizing: border-box;
   background: white;
   top: 0px;
-  a{
-  text-decoration: none;
-
+  a {
+    text-decoration: none;
   }
   .logo {
     margin-right: 55px;
   }
   .title {
     font-size: 24px;
-    font-family: "Alegreya Sans SC";
+    font-family: "AlegreyaSansSC-ExtraBold";
     font-weight: 800;
-    line-height: 44px;
+    line-height: 67px;
     color: #5078fe;
     position: relative;
     margin-right: 20px;
   }
-  .title::after {
-    position: absolute;
-    content: "";
-    width: 86px;
-    height: 2px;
-    background: #5078fe;
-    bottom: -13px;
-    left: 0px;
+  .title-active {
+    border-bottom: 2px solid #5078fe;
   }
+
   .search-bar {
     width: 521px;
     height: 44px;
@@ -278,7 +203,6 @@ export default {
       line-height: 50px;
       transform: translate(-50%, -50%);
       font-size: 16px;
-      font-family: "Roboto";
       color: #9f9f9f;
       font-weight: 500;
       line-height: 50px;
@@ -294,7 +218,6 @@ export default {
     }
     /deep/.el-input__inner {
       font-size: 16px;
-      font-family: "Roboto";
       color: #9f9f9f;
       font-weight: 500;
       line-height: 50px;

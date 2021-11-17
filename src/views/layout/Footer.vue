@@ -73,7 +73,6 @@ export default {
 .footer-bottom {
   height: 43px;
   font-size: 14px;
-  font-family: "Open Sans";
   line-height: 43px;
   color: #363636;
   border-top: 1px solid #d7d7d7;

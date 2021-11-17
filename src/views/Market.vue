@@ -11,7 +11,7 @@
           <div class="content-left-header">
             <div class="delete">
               <div>selected</div>
-              <div><i class="el-icon-delete"></i></div>
+              <div @click="clearFilter"><i class="el-icon-delete"></i></div>
             </div>
             <div class="select-label">
               <div>{{ selectLabel }}</div>
@@ -31,8 +31,8 @@
             </el-checkbox-group>
           </div>
         </div>
-        <div class="content-right">
-          <div class="sort-bar">
+        <div class="content-right" v-if="list.length > 0">
+          <div class="sort-bar" v-show="!isSearchResult">
             <span
               @click="sortChange(0)"
               :style="sortType === 0 ? 'color:#5078FE' : ''"
@@ -46,6 +46,25 @@
                 :src="sortType === 1 ? sortSrc1 : sortSrc2"
                 width="13px"
             /></span>
+          </div>
+          <div class="sort-bar-result sort-bar" v-show="isSearchResult">
+            <div class="result">{{total}} results found</div>
+            <div>
+            <span
+              @click="sortChange(0)"
+              :style="sortType === 0 ? 'color:#5078FE' : ''"
+              >Correlation<img
+                :src="sortType === 0 ? sortSrc1 : sortSrc2"
+                width="13px" /></span
+            ><span
+              @click="sortChange(1)"
+              :style="sortType === 1 ? 'color:#5078FE' : ''"
+              >Price<img
+                :src="sortType === 1 ? sortSrc1 : sortSrc2"
+                width="13px"
+            /></span>
+            </div>
+
           </div>
           <div
             class="content-right-inner"
@@ -63,12 +82,6 @@
                   <span class="file-tag">{{
                     item.classification | typeFilter
                   }}</span>
-                  <!-- <div class="download-btn" @click.stop="downloadFile">
-                    <img
-                      src="../assets/icons/download-icon2.png"
-                      width="42px"
-                    />
-                  </div> -->
                 </div>
                 <div class="file-info-center">
                   <span
@@ -117,6 +130,10 @@
             </div>
           </div>
         </div>
+        <div class="content-right content-empty" v-else>
+          <img src="../assets/empty.png" width="208px" />
+          <p>no results found...</p>
+        </div>
       </div>
     </div>
   </div>
@@ -131,6 +148,7 @@ import { renderSize, fileType } from "@/utils/valid";
 export default {
   data() {
     return {
+      isSearchResult:false,
       sortType: 0,
       sortSrc1: require("../assets/icons/sort1.png"),
       sortSrc2: require("../assets/icons/sort2.png"),
@@ -145,6 +163,15 @@ export default {
       checkedCities: ["All", "Text", "Audio", "Video", "Image", "Others"],
       cities: cityOptions,
       isIndeterminate: true,
+      queryParams: {
+        classificationList: [],
+        formatList: [],
+        keyword: "",
+        order: "default",
+        pageNum: 1,
+        pageSize: 10,
+      },
+      formatList:[]
     };
   },
   filters: {
@@ -177,24 +204,30 @@ export default {
         this.selectLabel = this.selectLabel + it + ";";
       }
     });
-    this.getData();
+    if (this.$route.query.keyword){
+      this.isSearchResult = true
+      this.queryParams.keyword = this.$route.query.keyword;
+    }
+
+    this.getData(this.queryParams);
   },
   methods: {
+    clearFilter() {
+      this.selectLabel = "Format: ";
+      this.checkedCities = [];
+      this.isSearchResult = false
+      this.queryParams.formatList = this.checkedCities
+            this.getData(this.queryParams);
+    },
     sortChange(val) {
       this.sortType = val;
-      this.getData();
+      console.log(this.sortType)
+      this.queryParams.order = this.sortType==0 ? 'default' :'price'
+      this.getData(this.queryParams);
     },
     getData() {
       let _this = this;
-      let data = {
-        classificationList: [],
-        formatList: [],
-        keyword: "",
-        order: this.sortType === 0 ? "default" : "price",
-        pageNum: 1,
-        pageSize: 10,
-      };
-      queryFilesList(data)
+      queryFilesList(this.queryParams)
         .then((res) => {
           if (res.success) {
             console.log("===", res);
@@ -224,23 +257,28 @@ export default {
         },
       });
     },
-    downloadFile() {},
 
     handleCheckedCitiesChange(value) {
       console.log(value);
+      let _this = this
       let checkedCount = value.length;
       this.checkAll = checkedCount === this.cities.length;
       this.checkedCities = value;
       console.log("this.checkAll", this.checkAll);
       if (!this.checkAll) {
         let newArr = [];
+        _this.formatList = []
         this.checkedCities.forEach((item) => {
           if (item !== "All") {
             newArr.push(item);
+            _this.formatList.push(item.toLowerCase())
           }
         });
         this.checkedCities = newArr;
       }
+      this.queryParams.formatList = _this.formatList
+
+      this.getData(this.queryParams);
     },
     JumpTo() {},
   },
@@ -288,7 +326,7 @@ export default {
     width: 361px;
     background: #ffffff;
     border-radius: 14px;
-    height: 500px;
+    height: 600px;
     margin-right: 14px;
     padding: 20px 32px;
     box-sizing: border-box;
@@ -344,6 +382,20 @@ export default {
       }
     }
   }
+  .content-empty {
+    background: #ffffff;
+    border-radius: 14px;
+    text-align: center;
+    height: 600px !important;
+    box-sizing: border-box;
+    padding-top: 130px;
+    p {
+      font-size: 36px;
+      font-family: "Open Sans";
+      line-height: 50px;
+      color: #737373;
+    }
+  }
   .content-right {
     flex: 1;
     height: 2000px;
@@ -369,6 +421,21 @@ export default {
           margin-left: 8px;
         }
       }
+    }
+    .sort-bar-result {
+      height: 94px;
+      background: #ffffff;
+      border-radius: 14px;
+        justify-content: space-between;
+        align-items: center;
+      .result {
+        font-family: "Open-Sans-Bold";
+        line-height: 40px;
+        color: #858585;
+      }
+       span{
+         display: inline-block;
+       }
     }
     .content-right-inner {
       margin-top: 7px;

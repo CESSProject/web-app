@@ -2,7 +2,6 @@ import Vue from 'vue'
 import Vuex from 'vuex'
 import utils from './modules/utils'
 import VuexPersistence from 'vuex-persist'
-import identity from './modules/identity'
 import userInfo from './modules/userInfo'
 
 const vuexLocal = new VuexPersistence({
@@ -26,7 +25,6 @@ export default new Vuex.Store({
   modules: {
     userInfo,
     utils,
-		identity
   },
   getters: {
     isLogined: state => {

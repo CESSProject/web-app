@@ -37,50 +37,29 @@
             />
           </div>
           <div class="popular-data">
-            <div
-              class="popular-data-item"
-              v-for="(item, index) in 4"
-              :key="index"
-            >
+            <div class="popular-data-item">
               <img src="../assets/home2.png" width="85px" class="popular-img" />
               <div class="data-info">
-                <div class="data-name">{{ popularObj.image[0].name }}</div>
+                <div class="data-name">{{ image[0].name }}</div>
                 <div class="price">
                   <span
                     ><img
                       :src="require('../assets/icons/download-icon2.png')"
                       width="32px"
                   /></span>
-                  <span
-                    >Downloads: <br />{{
-                      popularObj.image[0].downloadTimes
-                    }}</span
-                  >
-                  <div>{{ popularObj.image[0].estimateSpent }} <br />tCESS</div>
-                </div>
-              </div>
-            </div>
-            <!-- <div class="popular-data-item">
-              <img src="../assets/home3.png" width="115px"  class="popular-img" />
-              <div class="data-info">
-                <div class="data-name">{{popularObj.text[0].downloadTimes}}</div>
-                <div class="price">
-                  <div>
-                    <span
-                      ><img
-                        src="../assets/icons/download-icon2.png"
-                        width="32px"
-                    /></span>
-                    <span>{{popularObj.text[0].downloadTimes}}</span>
-                  </div>
-                  <div>{{popularObj.text[0].downloadTimes}} tCESS</div>
+                  <span>Downloads: <br />{{ image[0].downloadTimes }}</span>
+                  <div>{{ image[0].estimateSpent }} <br />tCESS</div>
                 </div>
               </div>
             </div>
             <div class="popular-data-item">
-              <img src="../assets/home4.png" width="95px" class="popular-img"  />
+              <img
+                src="../assets/home3.png"
+                width="115px"
+                class="popular-img"
+              />
               <div class="data-info">
-                <div class="data-name">{{popularObj.audio[0].downloadTimes}}</div>
+                <div class="data-name">{{ text[0].name }}</div>
                 <div class="price">
                   <div>
                     <span
@@ -88,16 +67,33 @@
                         src="../assets/icons/download-icon2.png"
                         width="32px"
                     /></span>
-                    <span>Downloads: {{popularObj.audio[0].downloadTimes}}</span>
+                    <span>Downloads: <br />{{ text[0].downloadTimes }}</span>
                   </div>
-                  <div>{{popularObj.audio[0].downloadTimes}} tCESS</div>
+                  <div>{{ text[0].estimateSpent }} tCESS</div>
+                </div>
+              </div>
+            </div>
+            <div class="popular-data-item">
+              <img src="../assets/home4.png" width="95px" class="popular-img" />
+              <div class="data-info">
+                <div class="data-name">{{ audio[0].name }}</div>
+                <div class="price">
+                  <div>
+                    <span
+                      ><img
+                        src="../assets/icons/download-icon2.png"
+                        width="32px"
+                    /></span>
+                    <span>Downloads: <br />{{ audio[0].downloadTimes }}</span>
+                  </div>
+                  <div>{{ audio[0].estimateSpent }} tCESS</div>
                 </div>
               </div>
             </div>
             <div class="popular-data-item">
               <img src="../assets/home5.png" width="85px" class="popular-img" />
               <div class="data-info">
-                <div class="data-name">{{popularObj.video[0].downloadTimes}}</div>
+                <div class="data-name">{{ video[0].name }}</div>
                 <div class="price">
                   <div>
                     <span
@@ -105,12 +101,12 @@
                         src="../assets/icons/download-icon2.png"
                         width="32px"
                     /></span>
-                    <span>Downloads: {{popularObj.video[0].downloadTimes}}</span>
+                    <span>Downloads: <br />{{ video[0].downloadTimes }}</span>
                   </div>
-                  <div>{{popularObj.video[0].downloadTimes}} tCESS</div>
+                  <div>{{ video[0].estimateSpent }} tCESS</div>
                 </div>
               </div>
-            </div> -->
+            </div>
           </div>
         </div>
       </div>
@@ -155,11 +151,16 @@ export default {
     return {
       keyword: "",
       popularObj: {},
+      audio: [],
+      text: [],
+      video: [],
+      image: [],
     };
   },
-  mounted() {
+  created() {
     this.queryPopular();
   },
+  mounted() {},
   methods: {
     queryPopular() {
       let _this = this;
@@ -167,6 +168,11 @@ export default {
         console.log("queryPopular===", res);
         if (res.success) {
           _this.popularObj = res.fileMap;
+          _this.image = res.fileMap.image;
+          _this.text = res.fileMap.text;
+          _this.audio = res.fileMap.audio;
+          _this.video = res.fileMap.video;
+          console.log(_this.popularObj);
         } else {
           _this.$message({
             type: "error",
@@ -177,7 +183,7 @@ export default {
     },
     searchData() {
       this.$router.push({
-        path: "market",
+        path: "/market",
         query: {
           keyword: this.keyword,
         },
@@ -210,7 +216,7 @@ export default {
   }
   .block-title {
     font-size: 45px;
-    font-family: "Alegreya Sans SC";
+    font-family: "AlegreyaSansSC-ExtraBold";
     font-weight: 800;
     line-height: 38px;
     color: #5078fe;
@@ -304,7 +310,7 @@ export default {
 
           .data-name {
             font-size: 18px;
-            font-family: Open Sans;
+
             font-weight: 400;
             line-height: 26px;
             color: #363636;
@@ -353,7 +359,7 @@ export default {
   .block3-inner-item {
     p {
       font-size: 30px;
-      font-family: "Roboto";
+      font-family: "Open-Sans-Bold";
       font-weight: 500;
       line-height: 44px;
       color: #363636;

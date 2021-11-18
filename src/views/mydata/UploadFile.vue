@@ -1,6 +1,9 @@
 <template>
   <div class="layout-content">
-    <div class="bread">My data <span> > </span> Upload</div>
+    <div class="bread">
+      <router-link to="/myCloud">
+        data
+        </router-link>  <span> > </span> Upload</div>
     <div class="uploadFile-container">
       <div class="upload-img">
         <img src="../../assets/upload1.png" width="99px" />
@@ -304,7 +307,7 @@ export default {
   },
   computed: {
     storageCost() {
-      return 10000;
+      return 0;
     },
   },
   components: {},
@@ -323,7 +326,7 @@ export default {
     // //  let aaa = this.toUint8Arr(u8);
     // //   console.log("u8", aaa);
 
-    // // Create the instance
+    // Create the instance
     // const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
     // this.api = await ApiPromise.create({
     //   provider: wsProvider,
@@ -347,7 +350,7 @@ export default {
     // console.log(
     //   ' "0x5d42a51e4070f27df119ffe135668098f392f9b2b9a1bb80be7a2008c1a18829"'
     // );
-    // const testInfo = await this.api.query.fileBank.file(arr);
+    // const testInfo = await this.api.query.fileBank.file('0x5d42a51e4070f27df119ffe135668098f392f9b2b9a1bb80be7a2008c1a18829"');
 
     // console.log("testInfo=========", testInfo);
   },
@@ -692,6 +695,7 @@ body {
   margin-bottom: 5px;
   color: #303030;
   font-size: 18px;
+
 }
 .uploadFile-container {
   width: 1559px;

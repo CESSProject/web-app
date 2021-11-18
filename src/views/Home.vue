@@ -37,22 +37,21 @@
             />
           </div>
           <div class="popular-data">
-            <div class="popular-data-item">
+            <div class="popular-data-item" @click="showDetail(image[0])">
               <img src="../assets/home2.png" width="85px" class="popular-img" />
               <div class="data-info">
                 <div class="data-name">{{ image[0].name }}</div>
                 <div class="price">
-                  <span
-                    ><img
-                      :src="require('../assets/icons/download-icon2.png')"
-                      width="32px"
-                  /></span>
+                  <img
+                    :src="require('../assets/icons/download-icon2.png')"
+                    width="32px"
+                  />
                   <span>Downloads: <br />{{ image[0].downloadTimes }}</span>
                   <div>{{ image[0].estimateSpent }} <br />tCESS</div>
                 </div>
               </div>
             </div>
-            <div class="popular-data-item">
+            <div class="popular-data-item" @click="showDetail(text[0])">
               <img
                 src="../assets/home3.png"
                 width="115px"
@@ -61,49 +60,37 @@
               <div class="data-info">
                 <div class="data-name">{{ text[0].name }}</div>
                 <div class="price">
+                  <img src="../assets/icons/download-icon2.png" width="32px" />
+                  <span>Downloads: <br />{{ text[0].downloadTimes }}</span>
                   <div>
-                    <span
-                      ><img
-                        src="../assets/icons/download-icon2.png"
-                        width="32px"
-                    /></span>
-                    <span>Downloads: <br />{{ text[0].downloadTimes }}</span>
+                    {{ text[0].estimateSpent }}<br />
+                    tCESS
                   </div>
-                  <div>{{ text[0].estimateSpent }} tCESS</div>
                 </div>
               </div>
             </div>
-            <div class="popular-data-item">
+            <div class="popular-data-item" @click="showDetail(audio[0])">
               <img src="../assets/home4.png" width="95px" class="popular-img" />
               <div class="data-info">
                 <div class="data-name">{{ audio[0].name }}</div>
                 <div class="price">
+                  <img src="../assets/icons/download-icon2.png" width="32px" />
+                  <span>Downloads: <br />{{ audio[0].downloadTimes }}</span>
                   <div>
-                    <span
-                      ><img
-                        src="../assets/icons/download-icon2.png"
-                        width="32px"
-                    /></span>
-                    <span>Downloads: <br />{{ audio[0].downloadTimes }}</span>
+                    {{ audio[0].estimateSpent }}<br />
+                    tCESS
                   </div>
-                  <div>{{ audio[0].estimateSpent }} tCESS</div>
                 </div>
               </div>
             </div>
-            <div class="popular-data-item">
+            <div class="popular-data-item" @click="showDetail(video[0])">
               <img src="../assets/home5.png" width="85px" class="popular-img" />
               <div class="data-info">
                 <div class="data-name">{{ video[0].name }}</div>
                 <div class="price">
-                  <div>
-                    <span
-                      ><img
-                        src="../assets/icons/download-icon2.png"
-                        width="32px"
-                    /></span>
-                    <span>Downloads: <br />{{ video[0].downloadTimes }}</span>
-                  </div>
-                  <div>{{ video[0].estimateSpent }} tCESS</div>
+                  <img src="../assets/icons/download-icon2.png" width="32px" />
+                  <span>Downloads: <br />{{ video[0].downloadTimes }}</span>
+                  <div>{{ video[0].estimateSpent }} <br />tCESS</div>
                 </div>
               </div>
             </div>
@@ -189,6 +176,14 @@ export default {
         },
       });
     },
+    showDetail(value) {
+      this.$router.push({
+        path: "/fileDetail",
+        query: {
+          fileId: value.fileId,
+        },
+      });
+    },
   },
 };
 </script>
@@ -233,11 +228,12 @@ export default {
   height: 1016px;
   background-image: url("../assets/home-bg.png");
   background-repeat: no-repeat;
-  background-size: 145%;
+  background-size: cover;
   background-position: top;
   margin-top: -75px;
   text-align: left;
   position: relative;
+  z-index: -1;
   .block2-inner {
     width: 1564px;
     margin: 0 auto;
@@ -299,6 +295,7 @@ export default {
         text-align: center;
         margin: 0 23px;
         overflow: hidden;
+        cursor: pointer;
         .popular-img {
           height: 95px;
         }
@@ -310,7 +307,6 @@ export default {
 
           .data-name {
             font-size: 18px;
-
             font-weight: 400;
             line-height: 26px;
             color: #363636;
@@ -325,10 +321,21 @@ export default {
           }
           .price {
             display: flex;
-            justify-content: space-between;
+            justify-content: flex-start;
+            align-items: center;
             padding: 10px 0px;
-
             color: #606060;
+            span {
+              width: 40%;
+            }
+            div {
+              width: 40%;
+              text-align: right;
+            }
+            img {
+              height: max-content;
+              margin-right: 8px;
+            }
           }
         }
       }

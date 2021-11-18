@@ -2,7 +2,9 @@
   <div class="layout-content">
     <div class="mycloud-container">
       <div class="mycloud-header">
-        <img src="../../assets/icons/home-icon.png" width="17px" /> My data
+        <router-link to="/">
+          <img src="../../assets/icons/home-icon.png" width="17px" /> My data
+        </router-link>
       </div>
       <div class="action-bar">
         <router-link to="/uploadFile">
@@ -83,7 +85,7 @@
           :layout="'prev,pager,next'"
           :total="total"
         ></el-pagination>
-        <div class="jumper-bar">
+        <div class="jumper-bar" v-if="maxlengthPage > 5">
           <el-input v-model="jumpPage" placeholder="Jump to page" type="number">
             <span slot="append">{{ listQuery.page }}/{{ maxlengthPage }}</span>
           </el-input>
@@ -263,7 +265,9 @@ export default {
         this.content = "Delete the file ?";
       }
     },
-    JumpTo() {},
+    JumpTo() {
+      this.handleCurrentChange(Number(this.jumpPage));
+    },
     handleCurrentChange(val) {
       let asc = null;
       if (this.orderType === "size") {
@@ -372,52 +376,52 @@ export default {
 <style scoped lang="less">
 .layout-content {
   padding: 27px 0px;
-    /deep/.el-dialog {
-      margin-top: 30vh !important;
-      width: 666px !important;
-      height: 273px;
-      background: #ffffff;
-      border: 1px solid #d7d7d7;
-      border-radius: 14px;
-    }
-    /deep/.el-dialog__body {
-      font-size: 30px;
-      line-height: 44px;
-      color: #606060;
-      text-align: center !important;
+  /deep/.el-dialog {
+    margin-top: 30vh !important;
+    width: 666px !important;
+    height: 273px;
+    background: #ffffff;
+    border: 1px solid #d7d7d7;
+    border-radius: 14px;
+  }
+  /deep/.el-dialog__body {
+    font-size: 30px;
+    line-height: 44px;
+    color: #606060;
+    text-align: center !important;
+  }
+  /deep/.el-dialog__footer {
+    text-align: center !important;
+  }
+  /deep/.el-button--medium {
+    width: 172px;
+    height: 44px;
 
-    }
-    /deep/.el-dialog__footer {
-      text-align: center !important;
-    }
-    /deep/.el-button--medium {
-      width: 172px;
-      height: 44px;
-  
-      border-radius: 22px;
-      border: none;
-    }
-    /deep/.el-button--primary {
-      background: linear-gradient(180deg, #4a71fe 0%, #8fbfff 100%);
-    }
-    /deep/.el-button--default {
-      background: linear-gradient(180deg, #fd6b6d 0%, #ed7a5d 100%);
-    }
-    /deep/.el-button:hover,.el-button:focus{
-      color: white;
-    }
-    /deep/.el-dialog__headerbtn{
-      display: none;
-    }
+    border-radius: 22px;
+    border: none;
+  }
+  /deep/.el-button--primary {
+    background: linear-gradient(180deg, #4a71fe 0%, #8fbfff 100%);
+  }
+  /deep/.el-button--default {
+    background: linear-gradient(180deg, #fd6b6d 0%, #ed7a5d 100%);
+  }
+  /deep/.el-button:hover,
+  .el-button:focus {
+    color: white;
+  }
+  /deep/.el-dialog__headerbtn {
+    display: none;
+  }
 }
 .mycloud-container {
   width: 1559px;
-  height: 1559px;
+  min-height: 850px;
   background: #ffffff;
   opacity: 1;
   border-radius: 14px;
   margin: 0 auto;
-  padding: 0px 12px;
+  padding: 0px 12px 73px 12px;
   color: #303030;
   text-align: left;
 
@@ -449,6 +453,9 @@ export default {
       background: #f6f7fb;
       color: #303030;
       margin: 0 10px !important;
+    }
+    /deep/.btn-prev:hover,.btn-next:hover{
+      color: white;
     }
     /deep/.el-pagination.is-background .el-pager li:not(.disabled):hover,
     /deep/.el-pagination.is-background .btn-next:hover,
@@ -547,6 +554,7 @@ export default {
   font-size: 18px;
   padding: 18px 20px;
   border-bottom: 1px solid #d7d7d7;
+
   img {
     margin-right: 5px;
   }
@@ -556,9 +564,7 @@ export default {
   justify-content: flex-start;
   margin: 20px auto 26px;
   margin-left: 53px;
-  a {
-    text-decoration: none;
-  }
+
   .action-btn {
     width: 154px;
     height: 32px;

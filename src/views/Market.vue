@@ -48,23 +48,22 @@
             /></span>
           </div>
           <div class="sort-bar-result sort-bar" v-show="isSearchResult">
-            <div class="result">{{total}} results found</div>
+            <div class="result">{{ total }} results found</div>
             <div>
-            <span
-              @click="sortChange(0)"
-              :style="sortType === 0 ? 'color:#5078FE' : ''"
-              >Correlation<img
-                :src="sortType === 0 ? sortSrc1 : sortSrc2"
-                width="13px" /></span
-            ><span
-              @click="sortChange(1)"
-              :style="sortType === 1 ? 'color:#5078FE' : ''"
-              >Price<img
-                :src="sortType === 1 ? sortSrc1 : sortSrc2"
-                width="13px"
-            /></span>
+              <span
+                @click="sortChange(0)"
+                :style="sortType === 0 ? 'color:#5078FE' : ''"
+                >Correlation<img
+                  :src="sortType === 0 ? sortSrc1 : sortSrc2"
+                  width="13px" /></span
+              ><span
+                @click="sortChange(1)"
+                :style="sortType === 1 ? 'color:#5078FE' : ''"
+                >Price<img
+                  :src="sortType === 1 ? sortSrc1 : sortSrc2"
+                  width="13px"
+              /></span>
             </div>
-
           </div>
           <div
             class="content-right-inner"
@@ -104,7 +103,7 @@
           </div>
           <div class="pagination-container">
             <el-pagination
-              @current-change="getData()"
+              @current-change="handleCurrentChange"
               background
               :current-page.sync="page"
               :pager-count="5"
@@ -148,11 +147,11 @@ import { renderSize, fileType } from "@/utils/valid";
 export default {
   data() {
     return {
-      isSearchResult:false,
+      isSearchResult: false,
       sortType: 0,
       sortSrc1: require("../assets/icons/sort1.png"),
       sortSrc2: require("../assets/icons/sort2.png"),
-      selectLabel: "Format: ",
+      selectLabel: "Format:",
       list: [],
       pageSize: 10,
       page: 1,
@@ -160,7 +159,7 @@ export default {
       jumpPage: "Jump to page",
       total: 0,
       checkAll: true,
-      checkedCities: ["All", "Text", "Audio", "Video", "Image", "Others"],
+      checkedCities: ["All"],
       cities: cityOptions,
       isIndeterminate: true,
       queryParams: {
@@ -171,7 +170,7 @@ export default {
         pageNum: 1,
         pageSize: 10,
       },
-      formatList:[]
+      formatList: [],
     };
   },
   filters: {
@@ -187,25 +186,10 @@ export default {
       return moment(date).format("YYYY-MM-DD HH:mm");
     },
   },
-  watch: {
-    checkedCities(newVal, oldVal) {
-      console.log(newVal, oldVal);
-      this.selectLabel = "Format: ";
-      this.checkedCities.forEach((it) => {
-        if (it !== "All") {
-          this.selectLabel = this.selectLabel + it + ";";
-        }
-      });
-    },
-  },
   mounted() {
-    this.checkedCities.forEach((it) => {
-      if (it !== "All") {
-        this.selectLabel = this.selectLabel + it + ";";
-      }
-    });
-    if (this.$route.query.keyword){
-      this.isSearchResult = true
+
+    if (this.$route.query.keyword) {
+      this.isSearchResult = true;
       this.queryParams.keyword = this.$route.query.keyword;
     }
 
@@ -214,15 +198,15 @@ export default {
   methods: {
     clearFilter() {
       this.selectLabel = "Format: ";
-      this.checkedCities = [];
-      this.isSearchResult = false
-      this.queryParams.formatList = this.checkedCities
-            this.getData(this.queryParams);
+      this.checkedCities = ['All'];
+      this.isSearchResult = false;
+      this.queryParams.formatList = [];
+      this.getData(this.queryParams);
     },
     sortChange(val) {
       this.sortType = val;
-      console.log(this.sortType)
-      this.queryParams.order = this.sortType==0 ? 'default' :'price'
+      console.log(this.sortType);
+      this.queryParams.order = this.sortType == 0 ? "default" : "price";
       this.getData(this.queryParams);
     },
     getData() {
@@ -260,27 +244,39 @@ export default {
 
     handleCheckedCitiesChange(value) {
       console.log(value);
-      let _this = this
-      let checkedCount = value.length;
-      this.checkAll = checkedCount === this.cities.length;
+      console.log(value);
+      if (value.length === 0) {
+        this.checkedCities.push("All");
+        return
+      } else if (value.length < 6) {
+        if (value.indexOf("All") != -1) {
+          console.log(value.indexOf("All"));
+        value.splice(value.indexOf("All"), 1);
+        }
       this.checkedCities = value;
-      console.log("this.checkAll", this.checkAll);
-      if (!this.checkAll) {
-        let newArr = [];
-        _this.formatList = []
-        this.checkedCities.forEach((item) => {
-          if (item !== "All") {
-            newArr.push(item);
-            _this.formatList.push(item.toLowerCase())
-          }
-        });
-        this.checkedCities = newArr;
+      } else {
+        this.checkedCities = ["All"];
       }
-      this.queryParams.formatList = _this.formatList
+      this.selectLabel = "Format: ";
+      this.formatList = [];
+      this.checkedCities.forEach((it) => {
+        if (it !== "All") {
+          this.formatList.push(it.toLowerCase());
+          this.selectLabel = this.selectLabel + it + ";";
+        }
 
+      });
+      this.queryParams.formatList = this.formatList;
       this.getData(this.queryParams);
     },
-    JumpTo() {},
+    handleCurrentChange(value) {
+      console.log(value);
+      this.queryParams.pageNum = value;
+      this.getData(this.queryParams);
+    },
+    JumpTo() {
+      this.handleCurrentChange(Number(this.jumpPage));
+    },
   },
 };
 </script>
@@ -426,20 +422,21 @@ export default {
       height: 94px;
       background: #ffffff;
       border-radius: 14px;
-        justify-content: space-between;
-        align-items: center;
+      justify-content: space-between;
+      align-items: center;
       .result {
         font-family: "Open-Sans-Bold";
         line-height: 40px;
         color: #858585;
       }
-       span{
-         display: inline-block;
-       }
+      span {
+        display: inline-block;
+      }
     }
     .content-right-inner {
       margin-top: 7px;
       width: 100%;
+      cursor: pointer;
     }
     .content-right-inner-item {
       height: 253px;

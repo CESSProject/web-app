@@ -80,12 +80,17 @@
       </div>
       <div class="similar-data" v-if="sililar.length > 0">
         <p>Similar data</p>
-        <div class="sililar-item" v-for="(i, index) in sililar" :key="index">
-          <img src="../../assets/files/doc.png" width="52px" />
+        <div
+          class="sililar-item"
+          v-for="(i, index) in sililar"
+          :key="index"
+          @click="viewFileDetail(i)"
+        >
+          <img :src="i.fileImg" width="52px" />
           <div>
-            <div class="file-name">42352.doc</div>
-            <div>Similarity: 23%</div>
-            <div>Date owner: Qmy...Ydi</div>
+            <div class="file-name">{{ i.name }}</div>
+            <div>Similarity: {{ i.similarity | similarityFilter }}</div>
+            <div class="owner">Date owner: {{ i.chainAccount }}</div>
           </div>
         </div>
       </div>
@@ -116,7 +121,7 @@
 import axios from "axios";
 import moment from "moment";
 import { types } from "@/utils/config";
-import { parseTime, renderSize, fileType } from "@/utils/valid";
+import { parseTime, renderSize, fileType, similarValue } from "@/utils/valid";
 import { mapGetters } from "vuex";
 
 import {
@@ -124,6 +129,7 @@ import {
   getFileInfo,
   decryptShareCode,
   fileDownload,
+  getSimilarFiles,
 } from "@/api/api";
 import { ApiPromise, WsProvider } from "@polkadot/api"; // Construct
 import { web3Enable, web3FromSource } from "@polkadot/extension-dapp";
@@ -150,7 +156,7 @@ export default {
       fileTypeImg: "",
       fileId: "",
       shareCode: "",
-      sililar: [{}],
+      sililar: [],
       dialogVisible: false,
       content: "",
       txHash: "",
@@ -176,6 +182,7 @@ export default {
     if (this.$route.query.fileId) {
       this.fileId = this.$route.query.fileId;
       this.queryFileInfo();
+      this.querySimilarFiles();
     }
   },
   filters: {
@@ -190,15 +197,26 @@ export default {
     dealWithDate(date) {
       return moment(date).format("YYYY-MM-DD HH:mm");
     },
+    similarityFilter(value) {
+      return similarValue(value);
+    },
   },
   methods: {
-    test() {
+    viewFileDetail(value) {
+      this.$router.push({
+        path: "/fileDetail",
+        query: {
+          fileId: value.fileId,
+        },
+      });
+    },
+    authorization() {
       this.$store.dispatch("userInfo/authorization");
     },
     open() {
       console.log(this.fileId);
       if (!this.isLogined) {
-        this.test();
+        this.authorization();
         return;
       }
       this.dialogVisible = true;
@@ -212,7 +230,9 @@ export default {
         if (res.success) {
           _this.loading.close();
           _this.detailData = res.fileInformation;
+          _this.fileId = res.fileInformation.fileId;
           _this.fileTypeImg = fileType(res.fileInformation.suffix);
+          _this.querySimilarFiles();
         } else {
           _this.loading.close();
           if (res.errorCode === "100055") {
@@ -314,10 +334,27 @@ export default {
         console.log(res);
         _this.detailData = res.fileInformation;
         _this.fileIDHash = res.fileInformation.fid;
+        _this.fileTypeImg = fileType(res.fileInformation.suffix);
+
         _this.loading.close();
       });
     },
-
+    querySimilarFiles() {
+      getSimilarFiles(this.fileId).then((res) => {
+        console.log("querySimilarFiles", res);
+        this.sililar = res.fileList;
+        this.sililar.forEach((item) => {
+          item.fileImg = fileType(item.suffix);
+        });
+        // if (res.success) {
+        // } else {
+        //   this.$message({
+        //     type: "error",
+        //     message: res.errorMsg,
+        //   });
+        // }
+      });
+    },
     async queryBanlance() {
       let _this = this;
       _this.loading = _this.$loading({
@@ -408,43 +445,43 @@ export default {
 .layout-content {
   padding: 36px 0px;
   text-align: left;
-      /deep/.el-dialog {
-      margin-top: 30vh !important;
-      width: 666px !important;
-      height: 273px;
-      background: #ffffff;
-      border: 1px solid #d7d7d7;
-      border-radius: 14px;
-    }
-    /deep/.el-dialog__body {
-      font-size: 30px;
-      line-height: 44px;
-      color: #606060;
-      text-align: center !important;
+  /deep/.el-dialog {
+    margin-top: 30vh !important;
+    width: 666px !important;
+    height: 273px;
+    background: #ffffff;
+    border: 1px solid #d7d7d7;
+    border-radius: 14px;
+  }
+  /deep/.el-dialog__body {
+    font-size: 30px;
+    line-height: 44px;
+    color: #606060;
+    text-align: center !important;
+  }
+  /deep/.el-dialog__footer {
+    text-align: center !important;
+  }
+  /deep/.el-button--medium {
+    width: 172px;
+    height: 44px;
 
-    }
-    /deep/.el-dialog__footer {
-      text-align: center !important;
-    }
-    /deep/.el-button--medium {
-      width: 172px;
-      height: 44px;
-  
-      border-radius: 22px;
-      border: none;
-    }
-    /deep/.el-button--primary {
-      background: linear-gradient(180deg, #4a71fe 0%, #8fbfff 100%);
-    }
-    /deep/.el-button--default {
-      background: linear-gradient(180deg, #fd6b6d 0%, #ed7a5d 100%);
-    }
-    /deep/.el-button:hover,.el-button:focus{
-      color: white;
-    }
-    /deep/.el-dialog__headerbtn{
-      display: none;
-    }
+    border-radius: 22px;
+    border: none;
+  }
+  /deep/.el-button--primary {
+    background: linear-gradient(180deg, #4a71fe 0%, #8fbfff 100%);
+  }
+  /deep/.el-button--default {
+    background: linear-gradient(180deg, #fd6b6d 0%, #ed7a5d 100%);
+  }
+  /deep/.el-button:hover,
+  .el-button:focus {
+    color: white;
+  }
+  /deep/.el-dialog__headerbtn {
+    display: none;
+  }
 }
 .bread {
   width: 1559px;
@@ -452,9 +489,6 @@ export default {
   margin-bottom: 5px;
   color: #303030;
   font-size: 18px;
-  a {
-    text-decoration: none;
-  }
 }
 .datadetail-container {
   position: relative;
@@ -551,6 +585,7 @@ export default {
   }
   img {
     margin-right: 16px;
+    height: max-content;
   }
   .sililar-item {
     display: flex;
@@ -560,9 +595,24 @@ export default {
     line-height: 20px;
     padding: 24px 0px 33px 0px;
     border-bottom: 1px solid #d7d7d7;
+    cursor: pointer;
     .file-name {
       font-size: 18px;
       line-height: 24px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      word-break: break-all;
+      -webkit-line-clamp: 1;
+    }
+    .owner {
+      overflow: hidden;
+      text-overflow: ellipsis;
+      display: -webkit-box;
+      -webkit-box-orient: vertical;
+      word-break: break-all;
+      -webkit-line-clamp: 1;
     }
   }
   .sililar-item:last-child {

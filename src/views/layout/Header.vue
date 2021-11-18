@@ -166,9 +166,7 @@ export default {
   box-sizing: border-box;
   background: white;
   top: 0px;
-  a {
-    text-decoration: none;
-  }
+
   .logo {
     margin-right: 55px;
   }

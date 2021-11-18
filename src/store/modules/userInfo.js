@@ -120,10 +120,7 @@ const userInfo = {
         };
         state.accountOperator.push(obj);
       });
-
-
       state.accountsVisible = true;
-      console.log("=============",state)
     },
     saveInfo({
       commit

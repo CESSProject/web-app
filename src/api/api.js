@@ -35,6 +35,14 @@ export function getFileInfo(fileId) {
   })
 }
 
+export function getSimilarFiles(fileId) {
+  return network({
+    url: `/cess-hacknet/files/similarFiles?fileId=` + fileId,
+    method: "get"
+  })
+}
+
+
 export function deleteFiles(fileId) {
   return network({
     url: '/cess-hacknet/files/files.Action',

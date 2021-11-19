@@ -1,9 +1,8 @@
 <template>
   <div class="layout-content">
     <div class="bread">
-      <router-link to="/myCloud">
-        data
-        </router-link>  <span> > </span> Upload</div>
+      <router-link to="/myCloud"> data </router-link> <span> > </span> Upload
+    </div>
     <div class="uploadFile-container">
       <div class="upload-img">
         <img src="../../assets/upload1.png" width="99px" />
@@ -325,7 +324,6 @@ export default {
     // //   let u8 = "0x7465737466696c6531eae4e97377b94dee545f64cdf87692b44f52f721aee69d181b7bedde63c16071";
     // //  let aaa = this.toUint8Arr(u8);
     // //   console.log("u8", aaa);
-
     // Create the instance
     // const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
     // this.api = await ApiPromise.create({
@@ -351,7 +349,6 @@ export default {
     //   ' "0x5d42a51e4070f27df119ffe135668098f392f9b2b9a1bb80be7a2008c1a18829"'
     // );
     // const testInfo = await this.api.query.fileBank.file('0x5d42a51e4070f27df119ffe135668098f392f9b2b9a1bb80be7a2008c1a18829"');
-
     // console.log("testInfo=========", testInfo);
   },
   methods: {
@@ -486,8 +483,9 @@ export default {
       const ADDR = this.$store.state.userInfo.data.myAddress;
       console.log("ADDR============", ADDR);
       const acct = await this.api.query.system.account(ADDR);
-      let freeBalance = acct.data.free.toString(10);
-      console.log("", freeBalance);
+      let free = acct.data.free.toString(10);
+      let freeBalance = (Number(free)/1000000000000).toFixed(4)
+      console.log("freeBalance", freeBalance,typeof(freeBalance));
       if (freeBalance > 0) {
         this.uploadPay();
       } else {
@@ -515,7 +513,7 @@ export default {
       let isPublic = _this.ruleFormFile.visibility;
       console.log("_isPublic ", isPublic);
       let uploadCost = Number(_this.storageCost);
-      let downloadFee = Number(_this.ruleFormFile.estimateSpent);
+      let downloadFee = Number(_this.ruleFormFile.estimateSpent) * 1000000000000;
       console.log("fileSize", _this.size);
       let fileSize = Number(_this.size);
       console.log("uploadCost", uploadCost);
@@ -570,6 +568,8 @@ export default {
         )
         .catch((error) => {
           console.log(":( transaction failed", error);
+        _this.loading.close();
+
         });
     },
     uploadFile() {
@@ -605,6 +605,7 @@ export default {
         console.log("===", res);
         if (res.success) {
           _this.uploadUrl = res.uploadUrl;
+            _this.loading.close();
           _this.uploadtoDataBase();
         } else {
           _this.loading.close();
@@ -695,7 +696,6 @@ body {
   margin-bottom: 5px;
   color: #303030;
   font-size: 18px;
-
 }
 .uploadFile-container {
   width: 1559px;
@@ -742,6 +742,7 @@ body {
         border: 1px solid #858585 !important;
         border-radius: 8px;
         font-size: 18px !important;
+        font-family: 'Open-Sans';
       }
       /deep/.el-textarea__inner {
         width: 444px !important;
@@ -750,6 +751,7 @@ body {
         border: 1px solid #858585 !important;
         border-radius: 8px;
         font-size: 18px !important;
+        font-family: 'Open-Sans';
       }
       /deep/.el-textarea__inner::-webkit-scrollbar {
         width: 5px;
@@ -841,14 +843,14 @@ body {
   position: absolute;
   right: 50%;
   top: 0;
-  width: 50%;
+  width: 26%;
   padding: 12px 0;
   border-radius: 4px;
   z-index: 2999;
   .drawer-main {
     display: flex;
     align-items: center;
-    justify-content: space-between;
+    justify-content: flex-start;
     color: #363636;
     .drawer-left {
       display: flex;
@@ -856,6 +858,7 @@ body {
       font-size: 18px;
       /deep/.el-progress {
         width: 560px;
+        z-index: 9999;
       }
       /deep/.el-progress__text {
         display: none;
@@ -880,6 +883,7 @@ body {
         }
         margin-left: 10px;
         color: #5078fe;
+        cursor: pointer;
       }
     }
     .close-icon {
@@ -888,6 +892,8 @@ body {
       cursor: pointer;
       background-size: contain;
       background: url(../../assets/icons/close-icon.png) no-repeat;
+      background-position: center;
+      background-size: contain;
     }
   }
 }

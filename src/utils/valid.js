@@ -68,6 +68,7 @@ export function similarValue(key) {
   if (key > 15) {
     similarValue = 48 + (key - 16) * 5 + '%'
   }else {
+    // to do something
     return 'Aligning'
   }
   return similarValue;

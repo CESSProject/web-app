@@ -34,7 +34,11 @@
         />
         <div>Search files...</div>
       </div>
-      <div class="search-icon2" v-show="!showSearchIcon" @mousedown="searchFiles">
+      <div
+        class="search-icon2"
+        v-show="!showSearchIcon"
+        @mousedown="searchFiles"
+      >
         <img src="../../assets/icons/search2.png" width="22px" />
       </div>
     </div>
@@ -55,7 +59,7 @@
           <img :src="imgUrl" alt="" class="user-avatar" :onerror="errorImg" />
           <!-- <Identicon :size="128" :theme="'polkadot'" :value="account" /> -->
           <span class="username">{{
-            $store.state.userInfo.data.myAddress
+            $store.state.userInfo.account.address
           }}</span>
           <img
             src="../../assets/icons/icon_xia.png"
@@ -166,7 +170,9 @@ export default {
   box-sizing: border-box;
   background: white;
   top: 0px;
-
+  a {
+    text-decoration: none;
+  }
   .logo {
     margin-right: 55px;
   }

@@ -75,7 +75,7 @@ const router = new VueRouter({
 })
 
 router.beforeEach((to, from, next) => {
-    const nextRoute = ['MyCloud', ] 
+    const nextRoute = ['MyCloud','UploadFile' ] 
     let isLogin = store.state.userInfo.isLogined;
     if (nextRoute.indexOf(to.name) >= 0) {
         if (!isLogin) {

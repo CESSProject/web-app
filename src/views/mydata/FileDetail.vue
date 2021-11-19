@@ -381,7 +381,8 @@ export default {
       const ADDR = this.$store.state.userInfo.data.myAddress;
       console.log("ADDR============", ADDR);
       const acct = await this.api.query.system.account(ADDR);
-      let freeBalance = acct.data.free.toString(10);
+      let free = acct.data.free.toString(10);
+         let freeBalance = (Number(free)/1000000000000).toFixed(4)
       console.log("freeBalance", freeBalance);
       if (freeBalance > _this.detailData.estimateSpent) {
         _this.toBuy();
@@ -432,6 +433,8 @@ export default {
         )
         .catch((error) => {
           console.log(":( transaction failed", error);
+              _this.loading.close();
+
         });
     },
     goBack() {

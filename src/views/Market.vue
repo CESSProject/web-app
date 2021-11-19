@@ -187,7 +187,6 @@ export default {
     },
   },
   mounted() {
-
     if (this.$route.query.keyword) {
       this.isSearchResult = true;
       this.queryParams.keyword = this.$route.query.keyword;
@@ -198,7 +197,7 @@ export default {
   methods: {
     clearFilter() {
       this.selectLabel = "Format: ";
-      this.checkedCities = ['All'];
+      this.checkedCities = ["All"];
       this.isSearchResult = false;
       this.queryParams.formatList = [];
       this.getData(this.queryParams);
@@ -244,27 +243,27 @@ export default {
 
     handleCheckedCitiesChange(value) {
       console.log(value);
-      console.log(value);
       if (value.length === 0) {
         this.checkedCities.push("All");
-        return
+        this.formatList = [];
+        return;
       } else if (value.length < 6) {
+        if(this.formatList.length ==0){}
         if (value.indexOf("All") != -1) {
+          this.checkedCities = ["All"];
+        } else {
           console.log(value.indexOf("All"));
-        value.splice(value.indexOf("All"), 1);
+          value.splice(value.indexOf("All"), 1);
+          this.checkedCities = value;
         }
-      this.checkedCities = value;
-      } else {
-        this.checkedCities = ["All"];
       }
       this.selectLabel = "Format: ";
-      this.formatList = [];
+
       this.checkedCities.forEach((it) => {
         if (it !== "All") {
           this.formatList.push(it.toLowerCase());
           this.selectLabel = this.selectLabel + it + ";";
         }
-
       });
       this.queryParams.formatList = this.formatList;
       this.getData(this.queryParams);

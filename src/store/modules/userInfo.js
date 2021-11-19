@@ -32,14 +32,15 @@ const userInfo = {
     userInfoVisible:false
   },
   getters: {
-    // userInfo: state => {
-    //   return state.data
-    // }
+    userInfo: state => {
+      return state.data
+    }
   },
   mutations: {
     setUserInfo(state, userInfo) {
       state.data = userInfo
       state.isLogined = true
+      state.userInfoVisible = true;
     },
     clearUserInfo(state) {
       state.data = {}
@@ -73,15 +74,15 @@ const userInfo = {
           type: "bytes",
         })
           .then((res) => {
+            debugger
             console.log(res, res.signature.slice(2));
             let userInfo = {
               myAddress: state.account.address,
               signature: res.signature.slice(2),
               account: state.account,
             };
-            state.data = userInfo
-            state.isLogined = true
-            state.userInfoVisible = true;
+            state.data = userInfo;
+            state.isLogined = true;
 
           })
           .catch((err) => {
@@ -115,7 +116,7 @@ const userInfo = {
           callback: (item) => {
             console.log(item);
             state.account = item;
-            commit('login')
+            commit('login',item)
           },
         };
         state.accountOperator.push(obj);

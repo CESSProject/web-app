@@ -39,7 +39,7 @@
         </el-table-column>
         <el-table-column prop="state" label="state" width="150">
           <template slot-scope="scope">
-            <div class="state-tag">{{ scope.row.visibility | statusType }}</div>
+            <div class="state-tag" :class="scope.row.visibility == 1 ? 'state-tag-pub' : scope.row.visibility == 0 ? 'state-tag-private' :''">{{ scope.row.visibility | statusType }}</div>
           </template>
         </el-table-column>
         <el-table-column label="size" width="150">
@@ -75,7 +75,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="pagination-container">
+      <div class="pagination-container" v-if="total>10">
         <el-pagination
           @current-change="handleCurrentChange"
           background
@@ -152,8 +152,13 @@ export default {
   },
   filters: {
     statusType(value) {
-      const data = ["Private", "Public", "Checking"];
-      return data[parseInt(value, 10)];
+      if(value ==0){
+        return 'Private'
+      }else if(value ==1){
+        return 'Public'
+      }else {
+        return 'Checking'
+      }
     },
     sizeFilter(value) {
       return renderSize(value);
@@ -190,7 +195,7 @@ export default {
             if (res.success) {
               this.$message({
                 type: "success",
-                message: "",
+                message: "Delete success",
               });
               this.dialogVisible = false;
               this.listQuery.pageNum = 1;
@@ -198,7 +203,7 @@ export default {
             } else {
               this.$message({
                 type: "error",
-                message: "",
+                message: "Delete failed",
               });
             }
           })
@@ -624,10 +629,10 @@ export default {
   color: #858585;
 }
 .state-tag {
-  width: 52px;
+  width: 55px;
   height: 16px;
   line-height: 16px;
-  background: #6b7fa0;
+  background: #ffb609;
   border-radius: 3px;
   font-size: 10px;
   color: white;
@@ -636,8 +641,8 @@ export default {
 .state-tag-pub {
   background: #4f92ff;
 }
-.state-tag-check {
-  background: #ffb609;
+.state-tag-private {
+  background: #6b7fa0 ;
 }
 .custom-sort {
   display: flex;

@@ -3,27 +3,6 @@ export function validEmail(val) {
   return reg.test(val)
 }
 
-export function validPass(val) {
-  return /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{8,16}$/.test(val);
-  // return /^(?![0-9]+$)(?![a-zA-Z]+$)[0-9A-Za-z]{6,16}$/.test(val);
-  // return /^.{6,16}$/.test(val);
-}
-
-export function validCode(val) {
-  return /^[0-9]{6}$/.test(val);
-}
-
-
-
-export function isAllMoney(obj) {
-  obj.target.value = obj.target.value.replace(/[^\d.]/g, "");
-  obj.target.value = obj.target.value.replace(/^\./g, "");
-  obj.target.value = obj.target.value.replace(/\.{2,}/g, ".");
-  obj.target.value = obj.target.value.replace(".", "$#$").replace(/\./g, "").replace("$#$", ".");
-  obj.target.value = obj.target.value.replace(/^()*(\d+)\.(\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d\d).*$/, '$1$2.$3');
-  return obj.target.value;
-}
-
 // Unit conversion
 export function renderSize(size) {
   let value = size;
@@ -63,22 +42,62 @@ export function fileType(type) {
   }
 }
 
+
+export function parseTime(time, pattern) {
+  if (arguments.length === 0 || !time) {
+    return null;
+  }
+  const format = pattern || "{y}-{m}-{d} {h}:{i}:{s}";
+  let date;
+  if (typeof time === "object") {
+    date = time;
+  } else {
+    if (typeof time === "string" && /^[0-9]+$/.test(time)) {
+      time = parseInt(time);
+    } else if (typeof time === "string") {
+      time = time.replace(new RegExp(/-/gm), "/");
+    }
+    if (typeof time === "number" && time.toString().length === 10) {
+      time = time * 1000;
+    }
+    date = new Date(time);
+  }
+  const formatObj = {
+    y: date.getFullYear(),
+    m: date.getMonth() + 1,
+    d: date.getDate(),
+    h: date.getHours(),
+    i: date.getMinutes(),
+    s: date.getSeconds(),
+    a: date.getDay()
+  };
+  const timeStr = format.replace(/{(y|m|d|h|i|s|a)+}/g, (result, key) => {
+    let value = formatObj[key];
+    // Note: getDay() returns 0 on Sunday
+    if (key === "a") {
+      return ["日", "一", "二", "三", "四", "五", "六"][value];
+    }
+    if (result.length > 0 && value < 10) {
+      value = "0" + value;
+    }
+    return value || 0;
+  });
+  return timeStr;
+}
 export function similarValue(key) {
   let similarValue
-  if (key > 15) {
-    similarValue = 48 + (key - 16) * 5 + '%'
-  }else {
-    // to do something
-    return 'Aligning'
+  if (15 < key && key < 25) {
+    similarValue = 48 + (16 - key) * 5 + '%'
+  } else {
+    return '0%'
   }
   return similarValue;
 }
 
 export default {
   validEmail,
-  validCode,
-  validPass,
-  isAllMoney,
   renderSize,
-  fileType
+  fileType,
+  similarValue,
+  parseTime
 }

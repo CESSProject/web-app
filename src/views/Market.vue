@@ -242,23 +242,29 @@ export default {
     },
 
     handleCheckedCitiesChange(value) {
-      console.log(value);
+      console.log(value, this.formatList);
+      this.formatList = [];
+      this.queryParams.formatList = this.formatList;
+
       if (value.length === 0) {
         this.checkedCities.push("All");
-        this.formatList = [];
+        this.selectLabel = "Format: ";
+        this.getData(this.queryParams);
         return;
-      } else if (value.length < 6) {
-        if(this.formatList.length ==0){}
-        if (value.indexOf("All") != -1) {
-          this.checkedCities = ["All"];
-        } else {
-          console.log(value.indexOf("All"));
-          value.splice(value.indexOf("All"), 1);
-          this.checkedCities = value;
-        }
+      }
+      if (value[value.length - 1] === "All") {
+        this.checkedCities = ["All"];
+        this.selectLabel = "Format: ";
+        this.getData(this.queryParams);
+        return;
+      }
+      if (value.indexOf("All") != -1) {
+        value.splice(value.indexOf("All"), 1);
+        this.checkedCities = value;
+      } else {
+        this.checkedCities = value;
       }
       this.selectLabel = "Format: ";
-
       this.checkedCities.forEach((it) => {
         if (it !== "All") {
           this.formatList.push(it.toLowerCase());
@@ -370,6 +376,29 @@ export default {
         margin-top: 10px;
         color: #858585;
         font-size: 18px !important;
+      }
+      /deep/.el-checkbox__label {
+        font-size: 18px;
+        
+      }
+      /deep/.el-checkbox__inner{
+        width: 18px;
+        height: 18px;
+      }
+      /deep/.el-checkbox__inner::after {
+        content: "";
+        border: 1px solid #5078fe;
+        border-color: #5078FE;
+        border-left: 0;
+        border-top: 0;
+        width: 5px;
+        height: 12px;
+        left: 5px;
+      }
+      /deep/.el-checkbox__input.is-checked .el-checkbox__inner {
+        background-color: white;
+        width: 18px;
+        height: 18px;
       }
       /deep/.el-checkbox__input.is-checked + .el-checkbox__label {
         color: #5078fe;

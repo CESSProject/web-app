@@ -57,11 +57,11 @@
           </div>
           <div class="info-detail">
             <div class="info-label">Proof of existence:</div>
-            <div class="info-content">{{ detailData.classification }}</div>
+            <div class="info-content">0x{{ detailData.hash }}</div>
           </div>
           <div class="info-detail">
             <div class="info-label">Characteristic:</div>
-            <div class="info-content">{{ detailData.classification }}</div>
+            <div class="info-content">{{ detailData.simhash.toString(16) }}</div>
           </div>
           <div class="info-detail" v-if="detailData.creator !== ''">
             <div class="info-label">Data creator:</div>
@@ -123,7 +123,6 @@ import moment from "moment";
 import { types } from "@/utils/config";
 import { parseTime, renderSize, fileType, similarValue } from "@/utils/valid";
 import { mapGetters } from "vuex";
-
 import {
   queryFileNeedPay,
   getFileInfo,
@@ -131,7 +130,7 @@ import {
   fileDownload,
   getSimilarFiles,
 } from "@/api/api";
-import { ApiPromise, WsProvider } from "@polkadot/api"; // Construct
+import { ApiPromise, WsProvider } from "@polkadot/api"; 
 import { web3Enable, web3FromSource } from "@polkadot/extension-dapp";
 export default {
   data() {
@@ -199,6 +198,9 @@ export default {
     },
     similarityFilter(value) {
       return similarValue(value);
+    },
+    ToHex(value) {
+    return value.toString(16);
     },
   },
   methods: {
@@ -382,7 +384,7 @@ export default {
       console.log("ADDR============", ADDR);
       const acct = await this.api.query.system.account(ADDR);
       let free = acct.data.free.toString(10);
-         let freeBalance = (Number(free)/1000000000000).toFixed(4)
+      let freeBalance = (Number(free) / 1000000000000).toFixed(4);
       console.log("freeBalance", freeBalance);
       if (freeBalance > _this.detailData.estimateSpent) {
         _this.toBuy();
@@ -433,8 +435,7 @@ export default {
         )
         .catch((error) => {
           console.log(":( transaction failed", error);
-              _this.loading.close();
-
+          _this.loading.close();
         });
     },
     goBack() {

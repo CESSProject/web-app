@@ -841,9 +841,9 @@ body {
 }
 .drawer-dialog {
   position: absolute;
-  right: 50%;
+left: 50%;
   top: 0;
-  width: 26%;
+  transform: translate(-50%,0);
   padding: 12px 0;
   border-radius: 4px;
   z-index: 2999;
@@ -864,7 +864,6 @@ body {
         display: none;
       }
       .name {
-        width: 350px;
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;

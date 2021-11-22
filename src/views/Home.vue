@@ -19,6 +19,9 @@
         </div>
       </div>
       <div class="block2">
+        <div class="block2-bg">
+          <img src="../assets/home-bg.png" />
+        </div>
         <div class="block2-inner">
           <div class="block2-title">
             Popular data<br />
@@ -37,7 +40,7 @@
             />
           </div>
           <div class="popular-data">
-            <div class="popular-data-item" @click="showDetail(image[0])">
+            <div class="popular-data-item" @click="showDetail(image[0])" v-if="image.length>0">
               <img src="../assets/home2.png" width="85px" class="popular-img" />
               <div class="data-info">
                 <div class="data-name">{{ image[0].name }}</div>
@@ -51,7 +54,7 @@
                 </div>
               </div>
             </div>
-            <div class="popular-data-item" @click="showDetail(text[0])">
+            <div class="popular-data-item" @click="showDetail(text[0])" v-if="text.length>0">
               <img
                 src="../assets/home3.png"
                 width="115px"
@@ -69,7 +72,7 @@
                 </div>
               </div>
             </div>
-            <div class="popular-data-item" @click="showDetail(audio[0])">
+            <div class="popular-data-item" @click="showDetail(audio[0])" v-if="audio.length>0" >
               <img src="../assets/home4.png" width="95px" class="popular-img" />
               <div class="data-info">
                 <div class="data-name">{{ audio[0].name }}</div>
@@ -83,7 +86,7 @@
                 </div>
               </div>
             </div>
-            <div class="popular-data-item" @click="showDetail(video[0])">
+            <div class="popular-data-item" @click="showDetail(video[0])" v-if="video.length>0">
               <img src="../assets/home5.png" width="85px" class="popular-img" />
               <div class="data-info">
                 <div class="data-name">{{ video[0].name }}</div>
@@ -197,6 +200,8 @@ export default {
   position: relative;
   z-index: 1;
   margin-top: 65px;
+  overflow: hidden;
+
 }
 .block1 {
   height: 358px;
@@ -226,19 +231,32 @@ export default {
 }
 .block2 {
   height: 1016px;
-  background-image: url("../assets/home-bg.png");
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: top;
+  // background-image: url("../assets/home-bg.png");
+  // background-repeat: no-repeat;
+  // background-size: cover;
+  // background-position: top;
   margin-top: -75px;
   text-align: left;
   position: relative;
   z-index: -1;
+  .block2-bg {
+
+    position: absolute;
+    height: 1017px;
+    z-index: 1;
+    img {
+      left: -300px;
+      top: -15px;
+      height: 1017px;
+      position: absolute;
+    }
+  }
   .block2-inner {
     width: 1564px;
     margin: 0 auto;
     position: relative;
     height: 1016px;
+z-index: 10;
     .block2-title {
       font-size: 30px;
       font-weight: bold;
@@ -246,7 +264,7 @@ export default {
       color: #ffffff;
       top: 143px;
       position: absolute;
-      left: 170px;
+      left: 135px;
     }
     .search-bar {
       width: 607px;
@@ -254,7 +272,7 @@ export default {
       background: #ffffff;
       border-radius: 28px;
       top: 266px;
-      left: 170px;
+      left: 135px;
       position: absolute;
       margin-bottom: 80px;
       /deep/.el-input__inner {
@@ -310,7 +328,6 @@ export default {
             font-weight: 400;
             line-height: 26px;
             color: #363636;
-            border-bottom: 1px solid #d7d7d7;
             height: 50px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -325,6 +342,8 @@ export default {
             align-items: center;
             padding: 10px 0px;
             color: #606060;
+            border-top: 1px solid #d7d7d7;
+            margin-top: 15px;
             span {
               width: 40%;
             }
@@ -355,6 +374,7 @@ export default {
     font-weight: bold;
     line-height: 44px;
     color: #5078fe;
+    margin-bottom: 55px;
   }
   .block3-inner {
     display: flex;
@@ -364,6 +384,7 @@ export default {
     margin-top: 35px;
   }
   .block3-inner-item {
+    flex: 1;
     p {
       font-size: 30px;
       font-family: "Open-Sans-Bold";

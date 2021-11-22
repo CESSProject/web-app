@@ -162,12 +162,11 @@
             color="#4A71FE"
             v-if="showProcess"
           ></el-progress>
-          <span class="status" :class="{ success: isSuccess }" v-else
+          <span class="status" :class="{ success: isSuccess }" v-if="showProcess"
             ><span>{{ isSuccess ? "success" : "" }}</span>
           </span>
           <span class="status retry" v-if="isFailed" @click="uploadtoDataBase">
-            <span>Fail！</span> Re-Upload</span
-          >
+            <span>Fail！</span> Re-Upload</span>
         </div>
         <div class="close-icon" @click="onClose"></div>
       </div>

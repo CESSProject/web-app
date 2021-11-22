@@ -1,4 +1,3 @@
-/* eslint-disable no-debugger */
 <template>
   <div class="market-container layout-content">
     <div class="market-content">
@@ -131,7 +130,8 @@
         </div>
         <div class="content-right content-empty" v-else>
           <img src="../assets/empty.png" width="208px" />
-          <p>no results found...</p>
+          <p v-show="isSearchResult">no results found...</p>
+          <p v-show="!isSearchResult">no data</p>
         </div>
       </div>
     </div>
@@ -379,16 +379,15 @@ export default {
       }
       /deep/.el-checkbox__label {
         font-size: 18px;
-        
       }
-      /deep/.el-checkbox__inner{
+      /deep/.el-checkbox__inner {
         width: 18px;
         height: 18px;
       }
       /deep/.el-checkbox__inner::after {
         content: "";
         border: 1px solid #5078fe;
-        border-color: #5078FE;
+        border-color: #5078fe;
         border-left: 0;
         border-top: 0;
         width: 5px;
@@ -422,7 +421,6 @@ export default {
   }
   .content-right {
     flex: 1;
-    height: 2000px;
 
     .sort-bar {
       width: 100%;
@@ -479,8 +477,9 @@ export default {
       text-align: left;
       display: flex;
       justify-content: flex-start;
+      width: 1190px;
       .file-info {
-        width: 100%;
+        width: inherit;
       }
       .file-type {
         margin-right: 23px;
@@ -493,6 +492,12 @@ export default {
         justify-content: flex-start;
         align-items: center;
         position: relative;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 2;
+        -webkit-box-orient: vertical;
+        word-break: break-all;
       }
       .file-name {
         font-size: 24px;
@@ -598,6 +603,12 @@ export default {
         min-width: 36px !important;
         border-radius: 50%;
         background: #ffffff;
+      }
+      /deep/.el-pagination.is-background .el-pager li:hover{
+        color: white !important;
+      }
+      /deep/.btn-nex:hover,.btn-next:hover {
+        color: white !important;
       }
       /deep/.el-pagination .is-background {
         display: none;

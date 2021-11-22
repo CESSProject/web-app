@@ -59,9 +59,7 @@ export default {
             easing: "easeOutExpo",
           });
         } else {
-         
           this.closeMenu();
-          
         }
       });
     },
@@ -126,7 +124,6 @@ export default {
     width: 100%;
     margin: 0;
     padding-left: 10px;
-    overflow-y: auto;
     height: 100%;
     .accounts-title {
       display: flex;
@@ -163,9 +160,6 @@ export default {
           margin-right: 10px;
         }
       }
-      li:last-child > p {
-        border-bottom: none;
-      }
 
       .accounts-item {
         display: flex;
@@ -189,6 +183,14 @@ export default {
           overflow: hidden;
           text-overflow: ellipsis;
         }
+      }
+    }
+    li:last-child {
+      p {
+        border-bottom: none;
+      }
+      .accounts-item {
+        border-bottom: none;
       }
     }
   }

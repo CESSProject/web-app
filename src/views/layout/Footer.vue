@@ -1,5 +1,6 @@
 <template>
   <div class="footer-container">
+    
     <div class="footer-top">
       <div class="footer-info">
         <div class="img">
@@ -44,14 +45,15 @@ export default {
 <style scoped lang="less">
 .footer-container {
   height: 273px;
-  width: 1564px;
-  margin: 0 auto;
+
   background: white;
 }
 .footer-top {
   display: flex;
   justify-content: space-around;
   color: #363636;
+    width: 1564px;
+  margin: 0 auto;
   .footer-info{
     width: 372px;
     font-weight: bold;

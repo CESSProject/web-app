@@ -39,7 +39,18 @@
         </el-table-column>
         <el-table-column prop="state" label="state" width="150">
           <template slot-scope="scope">
-            <div class="state-tag" :class="scope.row.visibility == 1 ? 'state-tag-pub' : scope.row.visibility == 0 ? 'state-tag-private' :''">{{ scope.row.visibility | statusType }}</div>
+            <div
+              class="state-tag"
+              :class="
+                scope.row.visibility == 1
+                  ? 'state-tag-pub'
+                  : scope.row.visibility == 0
+                  ? 'state-tag-private'
+                  : ''
+              "
+            >
+              {{ scope.row.visibility | statusType }}
+            </div>
           </template>
         </el-table-column>
         <el-table-column label="size" width="150">
@@ -75,7 +86,7 @@
           </template>
         </el-table-column>
       </el-table>
-      <div class="pagination-container" v-if="total>10">
+      <div class="pagination-container" v-if="total > 10">
         <el-pagination
           @current-change="handleCurrentChange"
           background
@@ -152,12 +163,12 @@ export default {
   },
   filters: {
     statusType(value) {
-      if(value ==0){
-        return 'Private'
-      }else if(value ==1){
-        return 'Public'
-      }else {
-        return 'Checking'
+      if (value == 0) {
+        return "Private";
+      } else if (value == 1) {
+        return "Public";
+      } else {
+        return "Checking";
       }
     },
     sizeFilter(value) {
@@ -410,6 +421,7 @@ export default {
   }
   /deep/.el-button--default {
     background: linear-gradient(180deg, #fd6b6d 0%, #ed7a5d 100%);
+    color: white;
   }
   /deep/.el-button:hover,
   .el-button:focus {
@@ -459,7 +471,8 @@ export default {
       color: #303030;
       margin: 0 10px !important;
     }
-    /deep/.btn-prev:hover,.btn-next:hover{
+    /deep/.btn-prev:hover,
+    .btn-next:hover {
       color: white;
     }
     /deep/.el-pagination.is-background .el-pager li:not(.disabled):hover,
@@ -477,6 +490,9 @@ export default {
     /deep/.el-pagination .is-background {
       display: none;
     }
+          /deep/.el-pagination.is-background .el-pager li:hover{
+        color: white !important;
+      }
     /deep/.el-pagination.is-background .el-pager li:not(.disabled).active,
     li:hover {
       width: 36px;
@@ -559,7 +575,9 @@ export default {
   font-size: 18px;
   padding: 18px 20px;
   border-bottom: 1px solid #d7d7d7;
-
+  a {
+    color: #303030;
+  }
   img {
     margin-right: 5px;
   }
@@ -642,7 +660,7 @@ export default {
   background: #4f92ff;
 }
 .state-tag-private {
-  background: #6b7fa0 ;
+  background: #6b7fa0;
 }
 .custom-sort {
   display: flex;

@@ -16,7 +16,7 @@
               <span>{{ detailData.estimateSpent }}</span>
               <span class="unit">tCESS</span>
             </div>
-            <div class="buy-btn" @click="open">buy</div>
+            <div class="buy-btn" @click="open">{{needPay ? 'buy': 'download'}}</div>
           </div>
         </div>
         <div class="file-info">
@@ -61,7 +61,9 @@
           </div>
           <div class="info-detail">
             <div class="info-label">Characteristic:</div>
-            <div class="info-content">{{ detailData.simhash.toString(16) }}</div>
+            <div class="info-content">
+              {{ detailData.simhash.toString(16) }}
+            </div>
           </div>
           <div class="info-detail" v-if="detailData.creator !== ''">
             <div class="info-label">Data creator:</div>
@@ -75,7 +77,9 @@
             <div class="info-label">keyword:</div>
             <div class="info-content">{{ detailData.keywords }}</div>
           </div>
-          <div class="overview">Overview: {{ detailData.overview }}</div>
+          <div class="overview" v-if="detailData.overview !== ''">
+            Overview: {{ detailData.overview }}
+          </div>
         </div>
       </div>
       <div class="similar-data" v-if="sililar.length > 0">
@@ -130,7 +134,7 @@ import {
   fileDownload,
   getSimilarFiles,
 } from "@/api/api";
-import { ApiPromise, WsProvider } from "@polkadot/api"; 
+import { ApiPromise, WsProvider } from "@polkadot/api";
 import { web3Enable, web3FromSource } from "@polkadot/extension-dapp";
 export default {
   data() {
@@ -161,6 +165,7 @@ export default {
       txHash: "",
       api: null,
       fid: "",
+      needPay: true,
     };
   },
   components: {},
@@ -182,6 +187,7 @@ export default {
       this.fileId = this.$route.query.fileId;
       this.queryFileInfo();
       this.querySimilarFiles();
+      this.checkNeedPay();
     }
   },
   filters: {
@@ -200,7 +206,7 @@ export default {
       return similarValue(value);
     },
     ToHex(value) {
-    return value.toString(16);
+      return value.toString(16);
     },
   },
   methods: {
@@ -235,14 +241,13 @@ export default {
           _this.fileId = res.fileInformation.fileId;
           _this.fileTypeImg = fileType(res.fileInformation.suffix);
           _this.querySimilarFiles();
+          _this.checkNeedPay();
         } else {
           _this.loading.close();
-          if (res.errorCode === "100055") {
-            _this.$message({
-              type: "error",
-              message: "",
-            });
-          }
+          _this.$message({
+            type: "error",
+            message: "",
+          });
         }
       });
     },
@@ -268,21 +273,18 @@ export default {
       let _this = this;
       this.dialogVisible = false;
       this.isLoading = false;
-      this.fileId = this.fileId ? this.fileId : this.detailData.detailData;
+      if (_this.needPay) {
+        this.queryBanlance();
+      } else {
+        this.dialogVisible = false;
+        this.getFileDownload();
+      }
       this.txHash = this.detailData.hash;
+    },
+    checkNeedPay() {
       queryFileNeedPay(this.fileId).then((res) => {
         if (res.success) {
-          if (res.needPay) {
-            this.queryBanlance();
-          } else {
-            _this.dialogVisible = false;
-            this.getFileDownload();
-          }
-        } else {
-          this.$message({
-            type: "error",
-            message: "The file resource is expired!",
-          });
+          this.needPay = res.needPay;
         }
       });
     },
@@ -311,16 +313,23 @@ export default {
                 link.href = linkUrl;
                 link.click();
                 link.remove();
+                this.$message({
+                  type: "success",
+                  message: "Download succeed",
+                });
               } else {
-                this.status = 2;
                 this.$message({
                   type: "error",
-                  message: "",
+                  message: "Download failed",
                 });
               }
             })
             .catch((error) => {
               console.log("===", error);
+              this.$message({
+                type: "error",
+                message: "Download failed",
+              });
             });
         } else {
           this.$message({
@@ -392,7 +401,7 @@ export default {
         _this.loading.close();
         _this.$message({
           type: "error",
-          message: "",
+          message: "Insufficient tokens",
         });
       }
     },
@@ -478,6 +487,7 @@ export default {
   }
   /deep/.el-button--default {
     background: linear-gradient(180deg, #fd6b6d 0%, #ed7a5d 100%);
+    color: white;
   }
   /deep/.el-button:hover,
   .el-button:focus {
@@ -493,6 +503,9 @@ export default {
   margin-bottom: 5px;
   color: #303030;
   font-size: 18px;
+  a {
+    color: #303030;
+  }
 }
 .datadetail-container {
   position: relative;

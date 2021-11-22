@@ -18,7 +18,7 @@
         MARKET
       </div>
     </router-link>
-    <div class="search-bar">
+    <div class="search-bar" v-show="currentPath !== '/'">
       <el-input
         v-model="searchKey"
         placeholder=""
@@ -32,7 +32,7 @@
           src="../../assets/icons/search.png"
           width="22px"
         />
-        <div>Search files...</div>
+        <div>Search in the data market</div>
       </div>
       <div
         class="search-icon2"
@@ -57,7 +57,7 @@
           "
         >
           <img :src="imgUrl" alt="" class="user-avatar" :onerror="errorImg" />
-          <!-- <Identicon :size="128" :theme="'polkadot'" :value="account" /> -->
+          <Identicon :size="128" :theme="'polkadot'" :value="account" />
           <span class="username">{{
             $store.state.userInfo.account.address
           }}</span>
@@ -72,7 +72,7 @@
         :items="userOperator"
         :visible.sync="$store.state.userInfo.userInfoVisible"
         :kind="'normal'"
-        :height="158"
+        :height="120"
       />
       <CustomDropDown
         :items="$store.state.userInfo.accountOperator"
@@ -124,15 +124,18 @@ export default {
   watch: {},
   components: {
     CustomDropDown,
-    Identicon,
+    Identicon
   },
-
   mounted() {
     this.currentPath = this.$route.path;
   },
   methods: {
     authorization() {
-      this.$store.dispatch("userInfo/authorization");
+      if (this.$store.state.userInfo.accountOperator.length === 0) {
+        this.$store.dispatch("userInfo/authorization");
+      } else {
+        this.$store.state.userInfo.accountsVisible = true;
+      }
     },
     focusSearch() {
       this.$refs.searchInput.focus();
@@ -143,12 +146,14 @@ export default {
       this.searchKey = "";
     },
     searchFiles() {
-      this.$router.push({
-        path: "/market",
-        query: {
-          keyword: this.searchKey,
-        },
-      });
+      if (this.searchKey !== "") {
+        this.$router.push({
+          path: "/market",
+          query: {
+            keyword: this.searchKey,
+          },
+        });
+      }
     },
     ...mapActions("userInfo", ["logout"]),
   },

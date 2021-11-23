@@ -5,6 +5,7 @@ import {
 } from "@polkadot/extension-dapp";
 
 import { stringToHex } from "@polkadot/util";
+import { Message } from 'element-ui';
 const userInfo = {
   namespaced: true,
   state: {
@@ -48,58 +49,62 @@ const userInfo = {
       state
     }) {
       const extensions = await web3Enable("my cool dapp");
-      if (extensions.length === 0) { this.$message.error(
-          "No Polkawallet was found."
-        );
+      if (extensions.length === 0) {
+        Message.error('No Polkawallet was found.');
         return;
       }
       let allAccounts = await web3Accounts();
       console.log("allAccounts========", allAccounts);
       state.accountList = allAccounts;
-    state.accountList.forEach((item) => {
-        let obj = {
-          icon: require("../../assets/icons/default-avater.png"),
-          meta: item.meta,
-          address: item.address,
-          callback: async (item) => {
-            console.log(item);
-            state.account = item;
-            const injector = await web3FromSource(item.meta.source);
-            console.log(
-              "we can use web3FromSource which will return an InjectedExtension type",
-              injector
-            );
-            const signRaw = injector?.signer?.signRaw;
-            console.log("signRaw=============", signRaw);
-            if (signRaw) {
-              // console.log(
-              //   "!!!!!!!!!!",
-              //   item.address,
-              //   stringToHex(item.address)
-              // );
-              await signRaw({
-                address: item.address,
-                data: stringToHex(item.address),
-                type: "bytes",
-              })
-                .then((res) => {
-                  console.log(res, res.signature.slice(2));
-                  let data = {
-                    myAddress: item.address,
-                    signature: res.signature.slice(2),
-                    account: item,
-                  };
-                  commit('setUserInfo',data)
+      if(allAccounts.length ==0){
+        Message.error('Please create cess-hacknet chain account.');
+      }else {
+        state.accountList.forEach((item) => {
+          let obj = {
+            icon: require("../../assets/icons/default-avater.png"),
+            meta: item.meta,
+            address: item.address,
+            callback: async (item) => {
+              console.log(item);
+              state.account = item;
+              const injector = await web3FromSource(item.meta.source);
+              console.log(
+                "we can use web3FromSource which will return an InjectedExtension type",
+                injector
+              );
+              const signRaw = injector?.signer?.signRaw;
+              console.log("signRaw=============", signRaw);
+              if (signRaw) {
+                // console.log(
+                //   "!!!!!!!!!!",
+                //   item.address,
+                //   stringToHex(item.address)
+                // );
+                await signRaw({
+                  address: item.address,
+                  data: stringToHex(item.address),
+                  type: "bytes",
                 })
-                .catch((err) => {
-                  console.log(err);
-                });
-            }
-          },
-        };
-        state.accountOperator.push(obj);
-      });
-      state.accountsVisible = true;
+                  .then((res) => {
+                    console.log(res, res.signature.slice(2));
+                    let data = {
+                      myAddress: item.address,
+                      signature: res.signature.slice(2),
+                      account: item,
+                    };
+                    commit('setUserInfo',data)
+                  })
+                  .catch((err) => {
+                    console.log(err);
+                  });
+              }
+            },
+          };
+          state.accountOperator.push(obj);
+        });
+        state.accountsVisible = true;
+      }
+
     },
     saveInfo({
       commit

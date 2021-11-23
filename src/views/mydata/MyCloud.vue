@@ -1,11 +1,7 @@
 <template>
   <div class="layout-content">
     <div class="mycloud-container">
-      <div class="mycloud-header">
-        <router-link to="/">
-          <img src="../../assets/icons/home-icon.png" width="17px" /> My data
-        </router-link>
-      </div>
+      <div class="mycloud-header">My data</div>
       <div class="action-bar">
         <router-link to="/uploadFile">
           <div class="action-btn">
@@ -13,12 +9,12 @@
           </div>
         </router-link>
       </div>
-      <el-table :data="tableData" style="width: 100%">
+      <el-table :data="tableData" style="width: 100%" @row-click="rowClick">
         <el-table-column label="File name">
           <template slot-scope="scope">
             <div class="file-name-column">
               <img :src="scope.row.imageUrl" class="image" />
-              <div class="file-name">{{ scope.row.name }}</div>
+              <div class="file-name">{{ scope.row.name | ellipsis }}</div>
             </div>
           </template>
         </el-table-column>
@@ -27,11 +23,15 @@
             <div class="action-btns">
               <span
                 class="share-icon"
-                @click.stop="handleShareCode(scope.row)"
+                @click.stop="open(3, scope.row)"
+                v-if="scope.row.visibility !== 11"
               ></span>
               <span
                 class="download-icon"
-                @click.stop="open(1, scope.row)"
+                @click.stop="
+                  getFileDownload(scope.row.fileId, scope.row.txHash)
+                "
+                v-if="scope.row.visibility !== 11"
               ></span>
               <span class="delete-icon" @click.stop="open(2, scope.row)"></span>
             </div>
@@ -155,6 +155,7 @@ export default {
       jumpPage: "Jump to page",
       shareCode: "",
       fileId: null,
+      uploadId: null,
       txHash: "",
       type: 1,
       dialogVisible: false,
@@ -192,12 +193,17 @@ export default {
   activated() {},
   components: {},
   methods: {
+    rowClick(row, column) {
+      console.log(row, column);
+      this.$router.push({
+        path: "/fileDetail",
+        query: {
+          fileId: row.fileId,
+        },
+      });
+    },
     handleClick() {
-      if (this.type === 1) {
-        this.dialogVisible = false;
-        this.isLoading = false;
-        this.getFileDownload();
-      } else if (this.type === 2) {
+      if (this.type === 2) {
         this.isLoading = true;
         deleteFiles(this.fileId)
           .then((res) => {
@@ -221,13 +227,16 @@ export default {
           .catch(() => {
             this.isLoading = false;
           });
+      } else if (this.type === 3) {
+        this.dialogVisible = false;
+        this.isLoading = false;
+        this.handleShareCode(this.fileId, this.uploadId);
       }
     },
-    getFileDownload() {
-      let _this = this;
+    getFileDownload(fileId, txHash) {
       fileDownload({
-        fileId: _this.fileId,
-        txHash: _this.txHash,
+        fileId: fileId,
+        txHash: txHash,
       }).then((res) => {
         console.log("===", res);
         if (res.success) {
@@ -269,16 +278,16 @@ export default {
     },
 
     open(type, row) {
-      console.log("ID===", row);
-      this.dialogVisible = true;
       this.type = type;
-      if (type === 1) {
-        this.fileId = row.fileId;
-        this.txHash = row.hash;
-        this.content = "Download the file ?";
-      } else if (type === 2) {
+      this.dialogVisible = true;
+      console.log("ID===", row);
+      if (type === 2) {
         this.fileId = row.fileId;
         this.content = "Delete the file ?";
+      } else if (type === 3) {
+        this.fileId = row.fileId;
+        this.uploadId = row.uploadId;
+        this.content = "Share the file ?";
       }
     },
     JumpTo() {
@@ -363,10 +372,10 @@ export default {
         this.sortBySize();
       }
     },
-    handleShareCode(row) {
+    handleShareCode(fileId, uploadId) {
       getShareCode({
-        fileId: row.fileId,
-        uploadId: row.uploadId,
+        fileId: fileId,
+        uploadId: uploadId,
       })
         .then((res) => {
           console.log("===========", res);
@@ -391,7 +400,7 @@ export default {
 
 <style scoped lang="less">
 .layout-content {
-  padding: 27px 0px;
+  padding: 27px 50px;
   /deep/.el-dialog {
     margin-top: 30vh !important;
     width: 666px !important;
@@ -432,7 +441,7 @@ export default {
   }
 }
 .mycloud-container {
-  width: 1559px;
+  max-width: 1559px;
   min-height: 850px;
   background: #ffffff;
   opacity: 1;
@@ -441,7 +450,9 @@ export default {
   padding: 0px 12px 73px 12px;
   color: #303030;
   text-align: left;
-
+  /deep/.el-table tr {
+    cursor: pointer;
+  }
   .pagination-container {
     margin-top: 30px;
     text-align: center;
@@ -472,17 +483,17 @@ export default {
       margin: 0 10px !important;
     }
     /deep/.btn-prev:hover,
-    .btn-next:hover {
+    /deep/.btn-next:hover {
       color: white;
     }
-    /deep/.el-pagination.is-background .el-pager li:not(.disabled):hover,
-    /deep/.el-pagination.is-background .btn-next:hover,
+    /deep/.el-pager li:not(.disabled):hover,
+    /deep/.btn-next:hover,
     /deep/.el-pagination.is-background .btn-prev:hover {
       background-color: #5078fe !important;
     }
-    /deep/.el-pagination.is-background .btn-next,
-    /deep/.el-pagination.is-background .btn-prev,
-    /deep/.el-pagination.is-background .el-pager li {
+    /deep/.btn-next,
+    /deep/.btn-prev,
+    /deep/.el-pager li {
       min-width: 36px !important;
       border-radius: 50%;
       background: #f6f7fb;
@@ -490,10 +501,10 @@ export default {
     /deep/.el-pagination .is-background {
       display: none;
     }
-          /deep/.el-pagination.is-background .el-pager li:hover{
-        color: white !important;
-      }
-    /deep/.el-pagination.is-background .el-pager li:not(.disabled).active,
+    /deep/.el-pager li:hover {
+      color: white !important;
+    }
+    /deep/.el-pager li:not(.disabled).active,
     li:hover {
       width: 36px;
       height: 36px;
@@ -606,7 +617,10 @@ export default {
     }
   }
 }
-
+.action-btns {
+  text-align: right;
+  padding-right: 30px;
+}
 .share-icon,
 .download-icon,
 .delete-icon {

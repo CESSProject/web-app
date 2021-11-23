@@ -18,12 +18,12 @@ export function fileType(type) {
   let typeTxt = type.toLowerCase();
   let audioList = ['.cd', '.wave', '.aiff', '.mpeg', '.mpeg-4', '.mp3', '.midi', '.wma', '.realaudio', '.vqf', '.offvorbis', '.amr', '.ape', '.flac', '.aac'];
   let imageList = ['.jpg', '.jpeg', '.png', '.gif', '.psd', '.psb', '.ai', '.svg'];
-  let videoList = ['.avi', '.wmv', 'mpeg', 'mp4', 'mov', 'mkv', 'flv', 'f4v', 'm4v', 'rmvb', 'rm', '3gp', 'dat', 'ts', 'mts', 'vob']
+  let videoList = ['.avi', '.wmv', '.mpeg', '.mp4', '.mov', '.mkv', '.flv', '.f4v', '.m4v', '.rmvb', '.rm', '.3gp', '.dat', '.ts', '.mts', '.vob']
   if (typeTxt === '.pptx' || typeTxt === '.ppt') {
     return require('../assets/files/ppt.png');
   } else if (typeTxt === '.pdf') {
     return require('../assets/files/pdf.png');
-  } else if (typeTxt === '.xlsx' || typeTxt === '.csv') {
+  } else if (typeTxt === '.xlsx' || typeTxt === '.csv'|| typeTxt === '.xls') {
     return require('../assets/files/xls.png');
   } else if (typeTxt === '.doc' || typeTxt === '.docx') {
     return require('../assets/files/doc.png');

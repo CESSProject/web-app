@@ -40,8 +40,67 @@
             />
           </div>
           <div class="popular-data">
-            <div class="popular-data-item" @click="showDetail(image[0])" v-if="image.length>0">
+            <div
+              class="popular-data-item"
+              @click="showDetail(text[0])"
+              v-if="text.length > 0"
+            >
               <img src="../assets/home2.png" width="85px" class="popular-img" />
+              <div class="data-info">
+                <div class="data-name">{{ text[0].name }}</div>
+                <div class="price">
+                  <img src="../assets/icons/download-icon2.png" width="32px" />
+                  <span>Downloads: <br />{{ text[0].downloadTimes }}</span>
+                  <div>
+                    {{ text[0].estimateSpent }}
+                    tCESS
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="popular-data-item"
+              @click="showDetail(audio[0])"
+              v-if="audio.length > 0"
+            >
+              <img
+                src="../assets/home3.png"
+                width="115px"
+                class="popular-img"
+              />
+              <div class="data-info">
+                <div class="data-name">{{ audio[0].name }}</div>
+                <div class="price">
+                  <img src="../assets/icons/download-icon2.png" width="32px" />
+                  <span>Downloads: <br />{{ audio[0].downloadTimes }}</span>
+                  <div>
+                    {{ audio[0].estimateSpent }}
+                    tCESS
+                  </div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="popular-data-item"
+              @click="showDetail(video[0])"
+              v-if="video.length > 0"
+            >
+              <img src="../assets/home4.png" width="95px" class="popular-img" />
+              <div class="data-info">
+                <div class="data-name">{{ video[0].name }}</div>
+                <div class="price">
+                  <img src="../assets/icons/download-icon2.png" width="32px" />
+                  <span>Downloads: <br />{{ video[0].downloadTimes }}</span>
+                  <div>{{ video[0].estimateSpent }}tCESS</div>
+                </div>
+              </div>
+            </div>
+            <div
+              class="popular-data-item"
+              @click="showDetail(image[0])"
+              v-if="image.length > 0"
+            >
+              <img src="../assets/home5.png" width="85px" class="popular-img" />
               <div class="data-info">
                 <div class="data-name">{{ image[0].name }}</div>
                 <div class="price">
@@ -50,50 +109,7 @@
                     width="32px"
                   />
                   <span>Downloads: <br />{{ image[0].downloadTimes }}</span>
-                  <div>{{ image[0].estimateSpent }} <br />tCESS</div>
-                </div>
-              </div>
-            </div>
-            <div class="popular-data-item" @click="showDetail(text[0])" v-if="text.length>0">
-              <img
-                src="../assets/home3.png"
-                width="115px"
-                class="popular-img"
-              />
-              <div class="data-info">
-                <div class="data-name">{{ text[0].name }}</div>
-                <div class="price">
-                  <img src="../assets/icons/download-icon2.png" width="32px" />
-                  <span>Downloads: <br />{{ text[0].downloadTimes }}</span>
-                  <div>
-                    {{ text[0].estimateSpent }}<br />
-                    tCESS
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="popular-data-item" @click="showDetail(audio[0])" v-if="audio.length>0" >
-              <img src="../assets/home4.png" width="95px" class="popular-img" />
-              <div class="data-info">
-                <div class="data-name">{{ audio[0].name }}</div>
-                <div class="price">
-                  <img src="../assets/icons/download-icon2.png" width="32px" />
-                  <span>Downloads: <br />{{ audio[0].downloadTimes }}</span>
-                  <div>
-                    {{ audio[0].estimateSpent }}<br />
-                    tCESS
-                  </div>
-                </div>
-              </div>
-            </div>
-            <div class="popular-data-item" @click="showDetail(video[0])" v-if="video.length>0">
-              <img src="../assets/home5.png" width="85px" class="popular-img" />
-              <div class="data-info">
-                <div class="data-name">{{ video[0].name }}</div>
-                <div class="price">
-                  <img src="../assets/icons/download-icon2.png" width="32px" />
-                  <span>Downloads: <br />{{ video[0].downloadTimes }}</span>
-                  <div>{{ video[0].estimateSpent }} <br />tCESS</div>
+                  <div>{{ image[0].estimateSpent }}tCESS</div>
                 </div>
               </div>
             </div>
@@ -201,12 +217,12 @@ export default {
   z-index: 1;
   margin-top: 65px;
   overflow: hidden;
-
 }
 .block1 {
   height: 358px;
   display: flex;
-  width: 1564px;
+  max-width: 1564px;
+  padding: 0 50px;
   margin: 0 auto;
   justify-content: center;
   .block1-left {
@@ -240,7 +256,6 @@ export default {
   position: relative;
   z-index: -1;
   .block2-bg {
-
     position: absolute;
     height: 1017px;
     z-index: 1;
@@ -252,11 +267,11 @@ export default {
     }
   }
   .block2-inner {
-    width: 1564px;
+    max-width: 1564px;
     margin: 0 auto;
     position: relative;
     height: 1016px;
-z-index: 10;
+    z-index: 10;
     .block2-title {
       font-size: 30px;
       font-weight: bold;
@@ -301,8 +316,9 @@ z-index: 10;
       position: absolute;
       display: flex;
       width: 100%;
-      justify-content: center;
+      justify-content: flex-start;
       margin-bottom: 30px;
+              padding: 0px 110px;
       .popular-data-item {
         width: 265px;
         height: 336px;
@@ -312,6 +328,7 @@ z-index: 10;
         box-sizing: border-box;
         text-align: center;
         margin: 0 23px;
+
         overflow: hidden;
         cursor: pointer;
         .popular-img {
@@ -339,7 +356,7 @@ z-index: 10;
           .price {
             display: flex;
             justify-content: flex-start;
-            align-items: center;
+            align-items: flex-start;
             padding: 10px 0px;
             color: #606060;
             border-top: 1px solid #d7d7d7;
@@ -354,6 +371,7 @@ z-index: 10;
             img {
               height: max-content;
               margin-right: 8px;
+              margin-top: 5px;
             }
           }
         }
@@ -379,7 +397,7 @@ z-index: 10;
   .block3-inner {
     display: flex;
     justify-content: space-around;
-    width: 1564px;
+    max-width: 1564px;
     margin: 0 auto;
     margin-top: 35px;
   }

@@ -288,7 +288,7 @@ export default {
 
 <style scoped lang="less">
 .market-container {
-  padding: 40px 0px;
+  padding: 40px 50px;
 
   .img-box {
     height: 118px;
@@ -296,16 +296,16 @@ export default {
     .img1 {
       position: absolute;
       top: 17px;
-      right: 782px;
+      right: 590px;
     }
     .img2 {
       position: absolute;
       top: 0px;
-      right: 205px;
+      right: 0px;
     }
   }
   .market-content {
-    width: 1564px;
+    max-width: 1564px;
     margin: 0 auto;
     position: relative;
     z-index: 1;
@@ -414,7 +414,6 @@ export default {
     padding-top: 130px;
     p {
       font-size: 36px;
-      font-family: "Open Sans";
       line-height: 50px;
       color: #737373;
     }
@@ -473,13 +472,12 @@ export default {
       margin-bottom: 13px;
       padding: 26px 32px 29px 42px;
       box-sizing: border-box;
-      font-family: "Open Sans";
       text-align: left;
       display: flex;
       justify-content: flex-start;
-      width: 1190px;
+      max-width: 1190px;
       .file-info {
-        width: inherit;
+        width: 100%;
       }
       .file-type {
         margin-right: 23px;
@@ -492,12 +490,6 @@ export default {
         justify-content: flex-start;
         align-items: center;
         position: relative;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        display: -webkit-box;
-        -webkit-line-clamp: 2;
-        -webkit-box-orient: vertical;
-        word-break: break-all;
       }
       .file-name {
         font-size: 24px;
@@ -505,6 +497,12 @@ export default {
         height: 33px;
         color: #363636;
         margin-right: 12px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 1;
+        -webkit-box-orient: vertical;
+        word-break: break-all;
       }
       .file-tag {
         padding: 3px 12px;
@@ -557,6 +555,12 @@ export default {
       .file-review {
         line-height: 22px;
         color: #606060;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-line-clamp: 4;
+        -webkit-box-orient: vertical;
+        word-break: break-all;
         .hash {
           color: #363636;
           padding: 15px 0px;
@@ -592,28 +596,29 @@ export default {
         color: #303030;
         margin: 0 10px !important;
       }
-      /deep/.el-pagination.is-background .el-pager li:not(.disabled):hover,
-      /deep/.el-pagination.is-background .btn-next:hover,
-      /deep/.el-pagination.is-background .btn-prev:hover {
+      /deep/.el-pager li:not(.disabled):hover,
+      /deep/ .btn-next:hover,
+      /deep/.btn-prev:hover {
         background-color: #5078fe !important;
       }
-      /deep/.el-pagination.is-background .btn-next,
-      /deep/.el-pagination.is-background .btn-prev,
-      /deep/.el-pagination.is-background .el-pager li {
+      /deep/.btn-next,
+      /deep/ .btn-prev,
+      /deep/.el-pager li {
         min-width: 36px !important;
         border-radius: 50%;
         background: #ffffff;
       }
-      /deep/.el-pagination.is-background .el-pager li:hover{
+      /deep/.el-pager li:hover {
         color: white !important;
       }
-      /deep/.btn-nex:hover,.btn-next:hover {
-        color: white !important;
+      /deep/.btn-prev:hover,
+      /deep/.btn-next:hover {
+        color: white;
       }
       /deep/.el-pagination .is-background {
         display: none;
       }
-      /deep/.el-pagination.is-background .el-pager li:not(.disabled).active,
+      /deep/.el-pager li:not(.disabled).active,
       li:hover {
         width: 36px;
         height: 36px;
@@ -688,6 +693,13 @@ export default {
         }
       }
     }
+  }
+}
+@media screen and (max-width: 1564px) {
+  .market-container .img-box .img1 {
+    position: absolute;
+    top: 17px;
+    left: 0px;
   }
 }
 </style>

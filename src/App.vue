@@ -17,7 +17,6 @@ export default {
 </script>
 
 <style lang="less">
-
 #app {
   font-family: 'Open-Sans',Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -32,5 +31,7 @@ body{
   padding: 0;
 
 }
-
+.el-message--error{
+  font-family: 'Open-Sans'
+}
 </style>

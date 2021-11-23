@@ -1,8 +1,13 @@
 <template>
   <div class="layout-content">
     <div class="bread">
-      <router-link to="market"> Market </router-link> <span> > </span> Data
-      detail
+      <router-link to="market" v-show="fromPath === '/market'">
+        Market >
+      </router-link>
+      <router-link to="myCloud" v-show="fromPath === '/myCloud'">
+        My data >
+      </router-link>
+      <span> </span> Data detail
     </div>
     <div class="datadetail-container">
       <div class="data-info-detail">
@@ -16,7 +21,9 @@
               <span>{{ detailData.estimateSpent }}</span>
               <span class="unit">tCESS</span>
             </div>
-            <div class="buy-btn" @click="open">{{needPay ? 'buy': 'download'}}</div>
+            <div class="buy-btn" @click="handleClick">
+              {{ needPay ? "buy" : "download" }}
+            </div>
           </div>
         </div>
         <div class="file-info">
@@ -99,25 +106,6 @@
         </div>
       </div>
     </div>
-    <el-dialog
-      :visible.sync="dialogVisible"
-      :close-on-click-modal="false"
-      width="460px"
-    >
-      <span class="white">{{ content }}</span>
-      <span slot="footer" class="dialog-footer">
-        <el-button size="medium" @click="dialogVisible = false"
-          >Cancle</el-button
-        >
-        <el-button
-          size="medium"
-          type="primary"
-          @click="handleClick"
-          :loading="isLoading"
-          >Confirm</el-button
-        >
-      </span>
-    </el-dialog>
   </div>
 </template>
 
@@ -166,9 +154,17 @@ export default {
       api: null,
       fid: "",
       needPay: true,
+      fromPath: "",
+      timer: null,
     };
   },
-  components: {},
+  watch: {
+    isLogined() {
+      console.log("isLogined =============");
+      this.queryFileInfo();
+      this.checkNeedPay();
+    },
+  },
   computed: {
     ...mapGetters(["isLogined"]),
   },
@@ -200,7 +196,7 @@ export default {
       return renderSize(value);
     },
     dealWithDate(date) {
-      return moment(date).format("YYYY-MM-DD HH:mm");
+      return moment(date).format("YYYY-MM-DD");
     },
     similarityFilter(value) {
       return similarValue(value);
@@ -208,6 +204,13 @@ export default {
     ToHex(value) {
       return value.toString(16);
     },
+  },
+  beforeRouteEnter: (to, from, next) => {
+    console.log(from.path);
+
+    next((vm) => {
+      vm.fromPath = from.path;
+    });
   },
   methods: {
     viewFileDetail(value) {
@@ -221,16 +224,7 @@ export default {
     authorization() {
       this.$store.dispatch("userInfo/authorization");
     },
-    open() {
-      console.log(this.fileId);
-      if (!this.isLogined) {
-        this.authorization();
-        return;
-      }
-      this.dialogVisible = true;
-      this.txHash = this.detailData.hash;
-      this.content = "Download the file ?";
-    },
+
     queryByShareCode() {
       let _this = this;
       decryptShareCode(this.shareCode).then((res) => {
@@ -271,12 +265,14 @@ export default {
     },
     handleClick() {
       let _this = this;
-      this.dialogVisible = false;
+      if (!this.isLogined) {
+        this.authorization();
+        return;
+      }
       this.isLoading = false;
       if (_this.needPay) {
         this.queryBanlance();
       } else {
-        this.dialogVisible = false;
         this.getFileDownload();
       }
       this.txHash = this.detailData.hash;
@@ -292,7 +288,7 @@ export default {
       let _this = this;
       fileDownload({
         fileId: _this.fileId,
-        txHash: _this.txHash,
+        txHash: _this.fid,
       }).then((res) => {
         console.log("===", res);
         if (res.success) {
@@ -317,6 +313,8 @@ export default {
                   type: "success",
                   message: "Download succeed",
                 });
+                this.queryFileInfo();
+                this.checkNeedPay();
               } else {
                 this.$message({
                   type: "error",
@@ -344,7 +342,7 @@ export default {
       getFileInfo(this.fileId).then((res) => {
         console.log(res);
         _this.detailData = res.fileInformation;
-        _this.fileIDHash = res.fileInformation.fid;
+        _this.fid = res.fileInformation.fid;
         _this.fileTypeImg = fileType(res.fileInformation.suffix);
 
         _this.loading.close();
@@ -407,11 +405,11 @@ export default {
     },
 
     async toBuy() {
-      console.log("tobuy", this.fileIDHash);
+      console.log("tobuy", this.fid);
       let _this = this;
       let ADDR = this.$store.state.userInfo.data.myAddress;
       const transferExtrinsic = _this.api.tx.fileBank.buyfile(
-        this.fileIDHash,
+        this.fid,
         ADDR
       );
       const injector = await web3FromSource(
@@ -456,184 +454,150 @@ export default {
 
 <style scoped lang="less">
 .layout-content {
-  padding: 36px 0px;
+  padding: 36px 50px;
   text-align: left;
-  /deep/.el-dialog {
-    margin-top: 30vh !important;
-    width: 666px !important;
-    height: 273px;
-    background: #ffffff;
-    border: 1px solid #d7d7d7;
-    border-radius: 14px;
-  }
-  /deep/.el-dialog__body {
-    font-size: 30px;
-    line-height: 44px;
-    color: #606060;
-    text-align: center !important;
-  }
-  /deep/.el-dialog__footer {
-    text-align: center !important;
-  }
-  /deep/.el-button--medium {
-    width: 172px;
-    height: 44px;
+  min-height: 800px;
 
-    border-radius: 22px;
-    border: none;
-  }
-  /deep/.el-button--primary {
-    background: linear-gradient(180deg, #4a71fe 0%, #8fbfff 100%);
-  }
-  /deep/.el-button--default {
-    background: linear-gradient(180deg, #fd6b6d 0%, #ed7a5d 100%);
-    color: white;
-  }
-  /deep/.el-button:hover,
-  .el-button:focus {
-    color: white;
-  }
-  /deep/.el-dialog__headerbtn {
-    display: none;
-  }
-}
-.bread {
-  width: 1559px;
-  margin: 0px auto;
-  margin-bottom: 5px;
-  color: #303030;
-  font-size: 18px;
-  a {
+  .bread {
+    max-width: 1559px;
+    margin: 0px auto;
+    margin-bottom: 5px;
     color: #303030;
+    font-size: 18px;
+    a {
+      color: #303030;
+    }
   }
-}
-.datadetail-container {
-  position: relative;
-  width: 1559px;
-  margin: 0px auto;
-  display: flex;
-}
-
-.similar-data {
-  float: right;
-}
-.data-info-detail {
-  flex: 1;
-  min-height: 894px;
-  background: #ffffff;
-  border-radius: 14px;
-  padding: 50px 131px 20px 142px;
-  box-sizing: border-box;
-  .file-header {
+  .datadetail-container {
+    position: relative;
+    max-width: 1559px;
+    margin: 0px auto;
     display: flex;
-    justify-content: space-between;
-    margin-bottom: 40px;
-    .price {
-      font-size: 24px;
-      color: #5078fe;
-      padding-top: 28px;
-      font-family: "Open-Sans-Bold";
-      line-height: 1;
-      .price-top {
-        display: flex;
-        align-items: center;
-        justify-content: center;
-      }
-      img {
-        margin-right: 10px;
-      }
-      .unit {
-        font-size: 18px;
-        color: #303030;
-        font-family: "Open-Sans";
-        margin-left: 8px;
-      }
-      .buy-btn {
-        width: 235px;
-        height: 48px;
-        background: #5078fe;
-        color: white;
-        border-radius: 42px;
-        font-size: 18px;
-        font-weight: bold;
-        line-height: 48px;
-        text-align: center;
-        color: #ffffff;
-        margin-top: 22px;
-        cursor: pointer;
-      }
-    }
   }
-  .file-info {
-    font-size: 14px;
-    color: #363636;
-    .file-name {
-      font-size: 24px;
-      font-weight: bold;
-      line-height: 40px;
-      color: #363636;
-    }
-    .info-detail {
-      border-bottom: 1px solid #d7d7d7;
-      height: 39px;
-      line-height: 39px;
+
+  .similar-data {
+    float: right;
+  }
+  .data-info-detail {
+    flex: 1;
+    min-height: 894px;
+    background: #ffffff;
+    border-radius: 14px;
+    padding: 50px 131px 20px 142px;
+    box-sizing: border-box;
+    .file-header {
       display: flex;
       justify-content: space-between;
+      margin-bottom: 40px;
+      .price {
+        font-size: 24px;
+        color: #5078fe;
+        padding-top: 28px;
+        font-family: "Open-Sans-Bold";
+        line-height: 1;
+        .price-top {
+          display: flex;
+          align-items: center;
+          justify-content: center;
+        }
+        img {
+          margin-right: 10px;
+        }
+        .unit {
+          font-size: 18px;
+          color: #303030;
+          font-family: "Open-Sans";
+          margin-left: 8px;
+        }
+        .buy-btn {
+          width: 235px;
+          height: 48px;
+          background: #5078fe;
+          color: white;
+          border-radius: 42px;
+          font-size: 18px;
+          font-weight: bold;
+          line-height: 48px;
+          text-align: center;
+          color: #ffffff;
+          margin-top: 22px;
+          cursor: pointer;
+        }
+      }
     }
-    .overview {
-      line-height: 22px;
-      margin-top: 28px;
+    .file-info {
+      font-size: 14px;
+      color: #363636;
+      .file-name {
+        font-size: 24px;
+        font-weight: bold;
+        line-height: 40px;
+        color: #363636;
+        word-break: break-all;
+      }
+      .info-detail {
+        border-bottom: 1px solid #d7d7d7;
+        height: 39px;
+        line-height: 39px;
+        display: flex;
+        justify-content: space-between;
+      }
+      .overview {
+        line-height: 22px;
+        margin-top: 28px;
+        word-break: break-all;
+      }
     }
   }
-}
-.similar-data {
-  width: 361px;
-  height: 718px;
-  background: #ffffff;
-  border-radius: 14px;
-  margin-left: 7px;
-  padding: 47px 30px;
-  box-sizing: border-box;
-  p {
-    font-size: 24px;
-    font-weight: bold;
-    color: #363636;
-    margin: 0 0;
-  }
-  img {
-    margin-right: 16px;
-    height: max-content;
-  }
-  .sililar-item {
-    display: flex;
-    justify-content: flex-start;
-    font-size: 14px;
-    color: #606060;
-    line-height: 20px;
-    padding: 24px 0px 33px 0px;
-    border-bottom: 1px solid #d7d7d7;
-    cursor: pointer;
-    .file-name {
-      font-size: 18px;
-      line-height: 24px;
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      word-break: break-all;
-      -webkit-line-clamp: 1;
+  .similar-data {
+    width: 361px;
+    height: 718px;
+    background: #ffffff;
+    border-radius: 14px;
+    margin-left: 7px;
+    padding: 47px 30px;
+    box-sizing: border-box;
+    p {
+      font-size: 24px;
+      font-weight: bold;
+      color: #363636;
+      margin: 0 0;
     }
-    .owner {
-      overflow: hidden;
-      text-overflow: ellipsis;
-      display: -webkit-box;
-      -webkit-box-orient: vertical;
-      word-break: break-all;
-      -webkit-line-clamp: 1;
+    img {
+      margin-right: 16px;
+      height: max-content;
     }
-  }
-  .sililar-item:last-child {
-    border-bottom: none;
+    .sililar-item {
+      display: flex;
+      justify-content: flex-start;
+      font-size: 14px;
+      color: #606060;
+      line-height: 20px;
+      padding: 24px 0px 33px 0px;
+      border-bottom: 1px solid #d7d7d7;
+      cursor: pointer;
+      .file-name {
+        font-size: 18px;
+        line-height: 24px;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        word-break: break-all;
+        -webkit-line-clamp: 1;
+      }
+      .owner {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        word-break: break-all;
+        -webkit-line-clamp: 1;
+      }
+    }
+    .sililar-item:last-child {
+      border-bottom: none;
+    }
   }
 }
 </style>

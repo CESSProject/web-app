@@ -1,7 +1,7 @@
 <template>
   <div class="layout-content">
     <div class="bread">
-      <router-link to="/myCloud"> data </router-link> <span> > </span> Upload
+      <router-link to="/myCloud"> My data </router-link> <span> > </span> Upload
     </div>
     <div class="uploadFile-container">
       <div class="upload-img">
@@ -58,7 +58,7 @@
               type="text"
               v-model="ruleFormFile.fileCreator"
               maxlength="50"
-              placeholder="Please enter an overview"
+              placeholder="Please enter the file creator"
               class="overview"
             ></el-input>
           </el-form-item>
@@ -72,13 +72,13 @@
               class="overview"
             ></el-input>
           </el-form-item>
-          <el-form-item>
+          <el-form-item prop="keywords">
             <span slot="label" class="not-required">Keywords：</span>
             <el-input
               type="text"
               v-model="ruleFormFile.keywords"
               maxlength="200"
-              placeholder="Please enter keywords"
+              placeholder="Enter keywords, separated by commas"
               class="overview"
             ></el-input>
           </el-form-item>
@@ -104,6 +104,16 @@
             <span slot="label" style="line-height: 20px">
               Storage validity period from today to ：</span
             >
+            <!-- <el-date-picker
+              class="w100"
+              v-model="ruleFormFile.expireTime"
+              type="date"
+              :placeholder="'Select Date'"
+              :picker-options="expireTimeOption"
+              :clearable="false"
+              :editable="false"
+            >
+            </el-date-picker> -->
             <el-date-picker
               class="w100"
               v-model="ruleFormFile.expireTime"
@@ -162,11 +172,15 @@
             color="#4A71FE"
             v-if="showProcess"
           ></el-progress>
-          <span class="status" :class="{ success: isSuccess }" v-if="showProcess"
+          <span
+            class="status"
+            :class="{ success: isSuccess }"
+            v-if="showProcess"
             ><span>{{ isSuccess ? "success" : "" }}</span>
           </span>
           <span class="status retry" v-if="isFailed" @click="uploadtoDataBase">
-            <span>Fail！</span> Re-Upload</span>
+            <span>Fail！</span> Re-Upload</span
+          >
         </div>
         <div class="close-icon" @click="onClose"></div>
       </div>
@@ -179,22 +193,9 @@ import axios from "axios";
 import { types } from "@/utils/config";
 import * as SparkMD5 from "spark-md5";
 import { getSHA256 } from "../../utils/docHashFun";
-import {
-  web3Accounts,
-  web3Enable,
-  web3FromAddress,
-  web3ListRpcProviders,
-  web3UseRpcProvider,
-  web3AccountsSubscribe,
-  web3FromSource,
-} from "@polkadot/extension-dapp";
-import { createType } from "@polkadot/types";
-import { Balance } from "@polkadot/types/interfaces";
-// Import
-import { ApiPromise, WsProvider, Keyring } from "@polkadot/api"; // Construct
-import { stringToHex, stringToU8a } from "@polkadot/util";
-import { renderSize, fileType } from "@/utils/valid";
-import { addFileData, getFileInfo, reUploadFile, modifyFile } from "@/api/api";
+import { web3Enable, web3FromSource } from "@polkadot/extension-dapp";
+import { ApiPromise, WsProvider } from "@polkadot/api"; // Construct
+import { addFileData } from "@/api/api";
 export default {
   data() {
     return {
@@ -236,9 +237,10 @@ export default {
         overview: "",
         fileName: "",
       },
+      defaultDate: null,
       reloadInfo: {
         parentId: 0,
-        filePath: "My cloud disk",
+        filePath: "",
         fileName: "",
         md5: "",
       },
@@ -274,6 +276,14 @@ export default {
             trigger: "change",
           },
         ],
+        keywords: [
+          {
+            required: false,
+            // validator: validateKeywords,
+            message: "Please select file classification",
+            trigger: "change",
+          },
+        ],
         email: [
           {
             required: false,
@@ -291,7 +301,6 @@ export default {
           date2.setDate(date1.getDate() + 179);
           date2.setHours(0, 0, 0, 0);
           let minYear = date2.getFullYear() + 1;
-          // console.log("", minYear);
           return (
             date.getTime() < date2.getTime() ||
             date.getTime() > new Date(JSON.stringify(minYear))
@@ -308,47 +317,12 @@ export default {
       return 0;
     },
   },
-  components: {},
   async mounted() {
-    // var str =
-    //   "0x5d42a51e4070f27df119ffe135668098f392f9b2b9a1bb80be7a2008c1a18829";
-    // let arr = [];
-    // for (let i = 0; i < str.length; i++) {
-    //   arr[i] = str.charCodeAt(i);
-    // }
-    // console.log(arr);
-    // let www = stringToU8a(str);
-    // console.log("wwww", www);
-    // let _this = this;
-    // //   let u8 = "0x7465737466696c6531eae4e97377b94dee545f64cdf87692b44f52f721aee69d181b7bedde63c16071";
-    // //  let aaa = this.toUint8Arr(u8);
-    // //   console.log("u8", aaa);
-    // Create the instance
-    // const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
-    // this.api = await ApiPromise.create({
-    //   provider: wsProvider,
-    //   types: {
-    //     FileInfo: {
-    //       owner: "AccountId",
-    //       filehash: "Vec<u8>",
-    //       similarityhash: "Vec<u8>",
-    //       ispublic: "u8",
-    //       backups: "u8",
-    //       creator: "Vec<u8>",
-    //       filesize: "u128",
-    //       keywords: "Vec<u8>",
-    //       email: "Vec<u8>",
-    //       uploadfee: "Balance",
-    //       downloadfee: "Balance",
-    //       deadline: "BlockNumber",
-    //     },
-    //   },
-    // });
-    // console.log(
-    //   ' "0x5d42a51e4070f27df119ffe135668098f392f9b2b9a1bb80be7a2008c1a18829"'
-    // );
-    // const testInfo = await this.api.query.fileBank.file('0x5d42a51e4070f27df119ffe135668098f392f9b2b9a1bb80be7a2008c1a18829"');
-    // console.log("testInfo=========", testInfo);
+    let date1 = new Date();
+    this.defaultDate = new Date(date1);
+    this.defaultDate.setDate(this.defaultDate.getDate() + 179);
+    this.defaultDate.setHours(0, 0, 0, 0);
+    this.ruleFormFile.expireTime = this.defaultDate;
   },
   methods: {
     onClose() {
@@ -483,8 +457,8 @@ export default {
       console.log("ADDR============", ADDR);
       const acct = await this.api.query.system.account(ADDR);
       let free = acct.data.free.toString(10);
-      let freeBalance = (Number(free)/1000000000000).toFixed(4)
-      console.log("freeBalance", freeBalance,typeof(freeBalance));
+      let freeBalance = (Number(free) / 1000000000000).toFixed(4);
+      console.log("freeBalance", freeBalance, typeof freeBalance);
       if (freeBalance > 0) {
         this.uploadPay();
       } else {
@@ -512,7 +486,8 @@ export default {
       let isPublic = _this.ruleFormFile.visibility;
       console.log("_isPublic ", isPublic);
       let uploadCost = Number(_this.storageCost);
-      let downloadFee = Number(_this.ruleFormFile.estimateSpent) * 1000000000000;
+      let downloadFee =
+        Number(_this.ruleFormFile.estimateSpent) * 1000000000000;
       console.log("fileSize", _this.size);
       let fileSize = Number(_this.size);
       console.log("uploadCost", uploadCost);
@@ -567,8 +542,7 @@ export default {
         )
         .catch((error) => {
           console.log(":( transaction failed", error);
-        _this.loading.close();
-
+          _this.loading.close();
         });
     },
     uploadFile() {
@@ -604,7 +578,7 @@ export default {
         console.log("===", res);
         if (res.success) {
           _this.uploadUrl = res.uploadUrl;
-            _this.loading.close();
+          _this.loading.close();
           _this.uploadtoDataBase();
         } else {
           _this.loading.close();
@@ -685,19 +659,22 @@ body {
   }
 }
 .layout-content {
-  padding: 36px 0px;
+  padding: 36px 50px;
   text-align: left;
   position: relative;
 }
 .bread {
-  width: 1559px;
+  max-width: 1559px;
   margin: 0px auto;
   margin-bottom: 5px;
   color: #303030;
   font-size: 18px;
+  a {
+    color: #303030;
+  }
 }
 .uploadFile-container {
-  width: 1559px;
+  max-width: 1559px;
   height: 1400px;
   background: #ffffff;
   border-radius: 14px;
@@ -741,7 +718,7 @@ body {
         border: 1px solid #858585 !important;
         border-radius: 8px;
         font-size: 18px !important;
-        font-family: 'Open-Sans';
+        font-family: "Open-Sans";
       }
       /deep/.el-textarea__inner {
         width: 444px !important;
@@ -750,7 +727,7 @@ body {
         border: 1px solid #858585 !important;
         border-radius: 8px;
         font-size: 18px !important;
-        font-family: 'Open-Sans';
+        font-family: "Open-Sans";
       }
       /deep/.el-textarea__inner::-webkit-scrollbar {
         width: 5px;
@@ -812,6 +789,12 @@ body {
           outline: none;
         }
       }
+      .pt .unit {
+        position: absolute;
+        left: 450px;
+        font-size: 18px;
+        color: #606060;
+      }
     }
     .bottom-btns {
       display: flex;
@@ -840,9 +823,9 @@ body {
 }
 .drawer-dialog {
   position: absolute;
-left: 50%;
+  left: 50%;
   top: 0;
-  transform: translate(-50%,0);
+  transform: translate(-50%, 0);
   padding: 12px 0;
   border-radius: 4px;
   z-index: 2999;
@@ -893,6 +876,11 @@ left: 50%;
       background-position: center;
       background-size: contain;
     }
+  }
+}
+@media screen and (max-width: 1367px) {
+  .uploadFile-container {
+    padding: 31px 50px;
   }
 }
 </style>

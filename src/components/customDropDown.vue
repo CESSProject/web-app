@@ -1,9 +1,15 @@
 <template>
   <div class="menu" ref="menu">
-    <ul class="customDropDown" ref="ul">
-      <div v-if="kind == 'accounts'" class="accounts-title">
-        <img src="../assets/icons/logo-icon.png" width="15px" />Select Account
-      </div>
+    <div v-if="kind == 'accounts'" class="accounts-title">
+      <img src="../assets/icons/logo-icon.png" width="15px" />Select Account
+      <img
+        src="../assets/icons/close-icon2.png"
+        width="22px"
+        class="close-icon"
+        @click="closeMenu"
+      />
+    </div>
+    <ul class="customDropDown" ref="ul" :style="kind == 'normal'? '': 'padding-bottom:40px'">
       <li
         v-for="(item, index) in items"
         :key="index"
@@ -113,7 +119,22 @@ export default {
   position: absolute;
   top: 65px;
   right: 0;
-
+  .accounts-title {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #303030;
+    position: relative;
+    cursor: pointer;
+    padding: 0 20px 16px;
+    img {
+      margin-right: 15px;
+    }
+    .close-icon {
+      position: absolute;
+      right: 0px;
+    }
+  }
   &.visible {
     display: block;
   }
@@ -125,17 +146,9 @@ export default {
     margin: 0;
     padding-left: 10px;
     height: 100%;
-    .accounts-title {
-      display: flex;
-      align-items: center;
-      border-bottom: 1px solid #d7d7d7;
-      padding-bottom: 16px;
-      font-size: 14px;
-      color: #303030;
-      img {
-        margin-right: 15px;
-      }
-    }
+    overflow-y: auto;
+
+
     li {
       position: relative;
       transition: 0.2s linear color;
@@ -151,7 +164,7 @@ export default {
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;
-        border-bottom: 1px solid #d7d7d7;
+        border-top: 1px solid #d7d7d7;
         text-align: left;
         display: flex;
         align-items: center;
@@ -166,7 +179,7 @@ export default {
         justify-content: flex-start;
         align-items: center;
         line-height: 1;
-        border-bottom: 1px solid #d7d7d7;
+        border-top: 1px solid #d7d7d7;
         color: #303030;
         padding: 16px 20px;
         text-align: left;
@@ -176,21 +189,23 @@ export default {
         }
         .accounts-name {
           font-size: 14px;
+          word-break: break-word;
         }
         .accounts-add {
           font-size: 10px;
           white-space: nowrap;
           overflow: hidden;
           text-overflow: ellipsis;
+          margin-top: 5px;
         }
       }
-    }
-    li:last-child {
-      p {
-        border-bottom: none;
+      .accounts-item:hover {
+        background: #f6f7fb;
       }
-      .accounts-item {
-        border-bottom: none;
+    }
+    li:first-child {
+      p {
+        border-top: none;
       }
     }
   }
@@ -207,7 +222,7 @@ export default {
 
   /* 滑块 */
   &::-webkit-scrollbar-thumb {
-    border-left: 3px solid rgba(0, 0, 0, 0.3);
+    border-left: 5px solid rgba(0, 0, 0, 0.3);
     border-radius: 0px;
     width: 10px;
     position: absolute;

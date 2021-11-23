@@ -45,14 +45,13 @@ export default {
 <style scoped lang="less">
 .footer-container {
   height: 273px;
-
   background: white;
 }
 .footer-top {
   display: flex;
   justify-content: space-around;
   color: #363636;
-    width: 1564px;
+    max-width: 1564px;
   margin: 0 auto;
   .footer-info{
     width: 372px;

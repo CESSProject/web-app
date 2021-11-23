@@ -124,7 +124,7 @@ export default {
   watch: {},
   components: {
     CustomDropDown,
-    Identicon
+    Identicon,
   },
   mounted() {
     this.currentPath = this.$route.path;
@@ -146,14 +146,12 @@ export default {
       this.searchKey = "";
     },
     searchFiles() {
-      if (this.searchKey !== "") {
-        this.$router.push({
-          path: "/market",
-          query: {
-            keyword: this.searchKey,
-          },
-        });
-      }
+      this.$router.push({
+        path: "/market",
+        query: {
+          keyword: this.searchKey,
+        },
+      });
     },
     ...mapActions("userInfo", ["logout"]),
   },
@@ -166,7 +164,6 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  cursor: pointer;
   border-bottom: 2px solid #d7d7d7;
   padding: 0 20px;
   position: fixed;
@@ -224,6 +221,7 @@ export default {
       position: absolute;
       right: 20px;
       top: 25%;
+      cursor: pointer;
     }
     /deep/.el-input__inner {
       font-size: 16px;
@@ -250,6 +248,7 @@ export default {
       display: flex;
       align-items: center;
       justify-content: center;
+      cursor: pointer;
     }
     .login-btn img {
       margin-right: 17px;
@@ -266,6 +265,7 @@ export default {
     border-radius: 25px;
     padding: 0px 7px;
     box-sizing: border-box;
+    cursor: pointer;
   }
   .language-selector {
     display: flex;

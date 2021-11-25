@@ -1,5 +1,5 @@
 <template>
-  <div class="menu" ref="menu">
+  <div class="menu" ref="menu" >
     <div v-if="kind == 'accounts'" class="accounts-title">
       <img src="../assets/icons/logo-icon.png" width="15px" />Select Account
       <img
@@ -9,7 +9,7 @@
         @click="closeMenu"
       />
     </div>
-    <ul class="customDropDown" ref="ul" :style="kind == 'normal'? '': 'padding-bottom:40px'">
+    <ul class="customDropDown" ref="ul" :style="kind == 'normal'? '': 'padding-bottom:40px'" @touchmove.stop>
       <li
         v-for="(item, index) in items"
         :key="index"
@@ -100,6 +100,7 @@ export default {
       }
       if (!isParent(e.target, this.$refs.menu.parentNode)) {
         this.closeMenu();
+        this.$refs.ul.scrollTop = 0;
       }
     },
   },
@@ -189,7 +190,7 @@ export default {
         }
         .accounts-name {
           font-size: 14px;
-          word-break: break-word;
+          word-break: break-all;
         }
         .accounts-add {
           font-size: 10px;

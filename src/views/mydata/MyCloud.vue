@@ -14,7 +14,7 @@
           <template slot-scope="scope">
             <div class="file-name-column">
               <img :src="scope.row.imageUrl" class="image" />
-              <div class="file-name">{{ scope.row.name | ellipsis }}</div>
+              <div class="file-name">{{ scope.row.name | ellipsisFilter }}</div>
             </div>
           </template>
         </el-table-column>
@@ -23,7 +23,9 @@
             <div class="action-btns">
               <span
                 class="share-icon"
-                @click.stop="open(3, scope.row)"
+                @click.stop="
+                  handleShareCode(scope.row.fileId, scope.row.uploadId)
+                "
                 v-if="scope.row.visibility !== 11"
               ></span>
               <span
@@ -33,7 +35,7 @@
                 "
                 v-if="scope.row.visibility !== 11"
               ></span>
-              <span class="delete-icon" @click.stop="open(2, scope.row)"></span>
+              <span class="delete-icon" @click.stop="open(scope.row)"></span>
             </div>
           </template>
         </el-table-column>
@@ -110,6 +112,38 @@
         </div>
       </div>
     </div>
+    <!--shareCode dialog -->
+    <el-dialog
+      title="Share data"
+      :visible.sync="dialogShareVisible"
+      :close-on-click-modal="false"
+      class="share"
+      width="460px"
+    >
+      <el-form :model="ruleForm" ref="ruleForm" class="share-ruleForm">
+        <el-form-item>
+          <el-input
+            type="textarea"
+            resize="none"
+            :placeholder="'Share the link'"
+            :rows="6"
+            readonly
+            v-model="ruleForm.linkUrl"
+          ></el-input>
+        </el-form-item>
+      </el-form>
+      <span slot="footer" class="dialog-footer">
+        <el-button
+          size="medium"
+          type="primary"
+          v-clipboard:copy="shareCode"
+          v-clipboard:success="onCopy"
+          v-clipboard:error="onError"
+          :disabled="isCopyLoading"
+          >Copy</el-button
+        >
+      </span>
+    </el-dialog>
     <el-dialog
       :visible.sync="dialogVisible"
       :close-on-click-modal="false"
@@ -123,7 +157,7 @@
         <el-button
           size="medium"
           type="primary"
-          @click="handleClick"
+          @click="handleDeleteClick"
           :loading="isLoading"
           >Confirm</el-button
         >
@@ -135,17 +169,21 @@
 <script>
 import axios from "axios";
 import moment from "moment";
-import { parseTime, renderSize, fileType } from "@/utils/valid";
+import { renderSize, fileType } from "@/utils/valid";
 import { filesList, getShareCode, deleteFiles, fileDownload } from "@/api/api";
 export default {
   data() {
     return {
       isLoading: false,
+      isCopyLoading: true,
       tableData: [],
       listQuery: {
         pageNum: 1,
         pageSize: 10,
         parentId: 0,
+      },
+      ruleForm: {
+        linkUrl: "",
       },
       orderType: "",
       sizeDesc: true,
@@ -157,8 +195,8 @@ export default {
       fileId: null,
       uploadId: null,
       txHash: "",
-      type: 1,
       dialogVisible: false,
+      dialogShareVisible: false,
       content: "",
     };
   },
@@ -178,7 +216,7 @@ export default {
     dealWithDate(date) {
       return moment(date).format("YYYY-MM-DD HH:mm");
     },
-    ellipsis(value) {
+    ellipsisFilter(value) {
       if (!value) return "";
       if (value.length > 85) {
         return value.slice(0, 85) + "...";
@@ -202,36 +240,34 @@ export default {
         },
       });
     },
-    handleClick() {
-      if (this.type === 2) {
-        this.isLoading = true;
-        deleteFiles(this.fileId)
-          .then((res) => {
-            console.log("===", res);
-            this.isLoading = false;
-            if (res.success) {
-              this.$message({
-                type: "success",
-                message: "Delete success",
-              });
-              this.dialogVisible = false;
-              this.listQuery.pageNum = 1;
-              this.getFileUploadList(this.listQuery);
-            } else {
-              this.$message({
-                type: "error",
-                message: "Delete failed",
-              });
-            }
-          })
-          .catch(() => {
-            this.isLoading = false;
-          });
-      } else if (this.type === 3) {
-        this.dialogVisible = false;
-        this.isLoading = false;
-        this.handleShareCode(this.fileId, this.uploadId);
-      }
+    open(row){
+      this.dialogVisible = true;
+      this.fileId = row.fileId;
+      this.content = "Delete the file ?";
+    },
+    handleDeleteClick() {
+      deleteFiles(this.fileId)
+        .then((res) => {
+          console.log("===", res);
+          this.isLoading = false;
+          if (res.success) {
+            this.$message({
+              type: "success",
+              message: "Delete success",
+            });
+            this.dialogVisible = false;
+            this.listQuery.pageNum = 1;
+            this.getFileUploadList(this.listQuery);
+          } else {
+            this.$message({
+              type: "error",
+              message: "Delete failed",
+            });
+          }
+        })
+        .catch(() => {
+          this.isLoading = false;
+        });
     },
     getFileDownload(fileId, txHash) {
       fileDownload({
@@ -275,20 +311,6 @@ export default {
           });
         }
       });
-    },
-
-    open(type, row) {
-      this.type = type;
-      this.dialogVisible = true;
-      console.log("ID===", row);
-      if (type === 2) {
-        this.fileId = row.fileId;
-        this.content = "Delete the file ?";
-      } else if (type === 3) {
-        this.fileId = row.fileId;
-        this.uploadId = row.uploadId;
-        this.content = "Share the file ?";
-      }
     },
     JumpTo() {
       this.handleCurrentChange(Number(this.jumpPage));
@@ -372,17 +394,38 @@ export default {
         this.sortBySize();
       }
     },
+
+    onCopy(e) {
+      // console.log(e.text);
+      this.dialogShareVisible = false;
+      this.$message({
+        type: "success",
+        message: "Copy success",
+        duration: 1000,
+      });
+    },
+    onError(e) {
+      this.$message({
+        type: "error",
+        message: "Copy fail",
+      });
+    },
     handleShareCode(fileId, uploadId) {
+      this.isCopyLoading = true;
+      this.dialogShareVisible = true;
+      this.ruleForm.linkUrl = "";
       getShareCode({
         fileId: fileId,
         uploadId: uploadId,
       })
         .then((res) => {
-          console.log("===========", res);
+          console.log("获取分享码===", res, window.host);
+          this.isCopyLoading = false;
           if (res.success) {
-            this.shareCode = res.shareCode;
-            console.log("===", res);
-            window.open(`/fileDetail?shareCode=${this.shareCode}`);
+            this.ruleForm.linkUrl = 'http://' +
+              window.location.host + "/fileDetail?shareCode=" + res.shareCode;
+            this.shareCode = 'http://' +
+              window.location.host + "/fileDetail?shareCode=" + res.shareCode;
           } else {
             this.$message({
               type: "error",
@@ -404,7 +447,7 @@ export default {
   /deep/.el-dialog {
     margin-top: 30vh !important;
     width: 666px !important;
-    height: 273px;
+    min-height: 273px;
     background: #ffffff;
     border: 1px solid #d7d7d7;
     border-radius: 14px;
@@ -450,6 +493,9 @@ export default {
   padding: 0px 12px 73px 12px;
   color: #303030;
   text-align: left;
+  /deep/.el-table th{
+    background: #F6F7FB !important;
+  }
   /deep/.el-table tr {
     cursor: pointer;
   }
@@ -591,6 +637,32 @@ export default {
   }
   img {
     margin-right: 5px;
+  }
+}
+.share-ruleForm {
+  /deep/.el-textarea {
+    width: 595px;
+    height: 162px;
+    background: #f6f7fb;
+    border: none;
+    border-radius: 8px;
+  }
+  /deep/.el-textarea__inner {
+    background: #f6f7fb;
+    border: none;
+    border-radius: 8px;
+    height: 100%;
+    font-size: 18px;
+    line-height: 40px;
+    color: #606060;
+    font-family: "Open-Sans";
+  }
+  .el-dialog__header {
+    font-size: 24px;
+    font-family: "Open Sans";
+    font-weight: bold;
+    line-height: 44px;
+    color: #5078fe;
   }
 }
 .action-bar {

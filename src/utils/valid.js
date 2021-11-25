@@ -23,7 +23,7 @@ export function fileType(type) {
     return require('../assets/files/ppt.png');
   } else if (typeTxt === '.pdf') {
     return require('../assets/files/pdf.png');
-  } else if (typeTxt === '.xlsx' || typeTxt === '.csv'|| typeTxt === '.xls') {
+  } else if (typeTxt === '.xlsx' || typeTxt === '.csv' || typeTxt === '.xls') {
     return require('../assets/files/xls.png');
   } else if (typeTxt === '.doc' || typeTxt === '.docx') {
     return require('../assets/files/doc.png');
@@ -85,13 +85,13 @@ export function parseTime(time, pattern) {
   return timeStr;
 }
 export function similarValue(key) {
-  let similarValue
-  if (15 < key && key < 25) {
-    similarValue = 48 + (16 - key) * 5 + '%'
-  } else {
-    return '0%'
-  }
-  return similarValue;
+  if(key < 4) return 100 - key +'%';
+  if(key === 4) return '95.5%';
+  if(4 < key < 7) return  93 - (key-5) * 3 + '%';
+  if(6 < key < 14) return  86.5 - (key-7) * 4 + '%';
+  if(13 < key) return  58 - (key-14 )* 5 + '%';
+  return '0%'
+
 }
 
 export default {

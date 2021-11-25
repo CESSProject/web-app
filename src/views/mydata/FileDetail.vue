@@ -21,9 +21,9 @@
               <span>{{ detailData.estimateSpent }}</span>
               <span class="unit">tCESS</span>
             </div>
-            <div class="buy-btn" @click="handleClick">
-              {{ needPay ? "buy" : "download" }}
-            </div>
+            <el-button type="primary" class="buy-btn" @click="handleClick">
+              {{ needPay ? "buy" : "download" }}</el-button
+            >
           </div>
         </div>
         <div class="file-info">
@@ -66,10 +66,10 @@
             <div class="info-label">Proof of existence:</div>
             <div class="info-content">0x{{ detailData.hash }}</div>
           </div>
-          <div class="info-detail">
+          <div class="info-detail" v-if="detailData.simhash !== '-1'">
             <div class="info-label">Characteristic:</div>
             <div class="info-content">
-              {{ detailData.simhash.toString(16) }}
+              {{ detailData.simhash | ToHex }}
             </div>
           </div>
           <div class="info-detail" v-if="detailData.creator !== ''">
@@ -151,11 +151,13 @@ export default {
       dialogVisible: false,
       content: "",
       txHash: "",
+      downloadBlockHash: "",
       api: null,
       fid: "",
       needPay: true,
       fromPath: "",
       timer: null,
+      downloading: false,
     };
   },
   watch: {
@@ -201,8 +203,15 @@ export default {
     similarityFilter(value) {
       return similarValue(value);
     },
-    ToHex(value) {
-      return value.toString(16);
+    ToHex(str) {
+      if (str === "") return "";
+      if (str === "0") return "Checking";
+      let hexCharCode = [];
+      hexCharCode.push("0x");
+      for (let i = 0; i < str.length; i++) {
+        hexCharCode.push(str.charCodeAt(i).toString(16));
+      }
+      return hexCharCode.join("");
     },
   },
   beforeRouteEnter: (to, from, next) => {
@@ -269,10 +278,15 @@ export default {
         this.authorization();
         return;
       }
-      this.isLoading = false;
       if (_this.needPay) {
         this.queryBanlance();
       } else {
+        _this.loading = _this.$loading({
+          lock: true,
+          text: "Loading",
+          spinner: "el-icon-loading",
+          background: "rgba(0, 0, 0, 0.7)",
+        });
         this.getFileDownload();
       }
       this.txHash = this.detailData.hash;
@@ -288,7 +302,7 @@ export default {
       let _this = this;
       fileDownload({
         fileId: _this.fileId,
-        txHash: _this.fid,
+        txHash: _this.downloadBlockHash,
       }).then((res) => {
         console.log("===", res);
         if (res.success) {
@@ -309,6 +323,7 @@ export default {
                 link.href = linkUrl;
                 link.click();
                 link.remove();
+                _this.loading.close();
                 this.$message({
                   type: "success",
                   message: "Download succeed",
@@ -408,10 +423,7 @@ export default {
       console.log("tobuy", this.fid);
       let _this = this;
       let ADDR = this.$store.state.userInfo.data.myAddress;
-      const transferExtrinsic = _this.api.tx.fileBank.buyfile(
-        this.fid,
-        ADDR
-      );
+      const transferExtrinsic = _this.api.tx.fileBank.buyfile(this.fid, ADDR);
       const injector = await web3FromSource(
         _this.$store.state.userInfo.data.account.meta.source
       );
@@ -427,13 +439,7 @@ export default {
               console.log(
                 `Completed at block hash #${status.asInBlock.toString()}`
               );
-              console.log(
-                "===================",
-                txhash,
-                "txhash ???",
-                transferExtrinsic
-              );
-              _this.loading.close();
+              _this.downloadBlockHash = status.asInBlock.toString();
               _this.getFileDownload();
             } else {
               console.log(`Current status: ${status.type}`);
@@ -517,7 +523,7 @@ export default {
           border-radius: 42px;
           font-size: 18px;
           font-weight: bold;
-          line-height: 48px;
+          border: none;
           text-align: center;
           color: #ffffff;
           margin-top: 22px;

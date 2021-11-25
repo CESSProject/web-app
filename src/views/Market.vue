@@ -183,7 +183,7 @@ export default {
       return renderSize(value);
     },
     dealWithDate(date) {
-      return moment(date).format("YYYY-MM-DD HH:mm");
+      return moment(date).format("YYYY-MM-DD");
     },
   },
   mounted() {

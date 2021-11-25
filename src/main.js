@@ -7,10 +7,10 @@ import 'element-ui/lib/theme-chalk/index.css'
 import locale from 'element-ui/lib/locale/lang/en'
 import './style/common.less'
 import "./style/font/fonts.css";
-
+import VueClipboard from 'vue-clipboard2'
 Vue.config.productionTip = false
 Vue.use(Element,{ locale })
-
+Vue.use(VueClipboard)
 new Vue({
   router,
   store,

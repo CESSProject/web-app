@@ -35,6 +35,11 @@
                   ref="fileInput"
                 />
               </div>
+              <span
+                v-show="confirmDisabled && ruleFormFile.name !== ''"
+                class="caculate-tips"
+                >Reading data...</span
+              >
             </div>
           </el-form-item>
           <el-form-item prop="classification">
@@ -104,16 +109,6 @@
             <span slot="label" style="line-height: 20px">
               Storage validity period from today to ：</span
             >
-            <!-- <el-date-picker
-              class="w100"
-              v-model="ruleFormFile.expireTime"
-              type="date"
-              :placeholder="'Select Date'"
-              :picker-options="expireTimeOption"
-              :clearable="false"
-              :editable="false"
-            >
-            </el-date-picker> -->
             <el-date-picker
               class="w100"
               v-model="ruleFormFile.expireTime"
@@ -129,7 +124,7 @@
             <span slot="label"> Download price/MB ：</span>
             <el-input
               v-model="ruleFormFile.estimateSpent"
-              placeholder="'Please enter download price'"
+              placeholder="Please enter download price"
               :maxlength="15"
               @input="oninput"
             ></el-input>
@@ -153,7 +148,8 @@
             >Cancle</el-button
           >
           <el-button
-            class="confirm-btn"
+            class="cancle-btn"
+            :class="confirmDisabled ? '' : 'confirm-btn'"
             size="medium"
             type="primary"
             :disabled="confirmDisabled"
@@ -214,6 +210,7 @@ export default {
       progress: 0,
       fileHash: "",
       fileIDHash: "",
+      fileBlockHash:'',
       fileInfo: {},
       getFileInfo: {},
       ruleFormFile: {
@@ -279,8 +276,7 @@ export default {
         keywords: [
           {
             required: false,
-            // validator: validateKeywords,
-            message: "Please select file classification",
+            validator: this.validateKeywords,
             trigger: "change",
           },
         ],
@@ -325,6 +321,23 @@ export default {
     this.ruleFormFile.expireTime = this.defaultDate;
   },
   methods: {
+    validateKeywords(rule, value, callback) {
+      let count = 0;
+      let tmp = value;
+      while (tmp.indexOf(",") != -1) {
+        tmp = tmp.replace(",", "");
+        count++;
+      }
+      console.log("++++++++++++++++", count);
+      if (count > 4) {
+        callback(
+          new Error("Enter keywords, separated by commas, up to 5 keywords")
+        );
+      } else {
+        callback();
+      }
+      return;
+    },
     onClose() {
       this.source.cancel("");
       this.isDrawer = false;
@@ -344,12 +357,7 @@ export default {
         console.log("hash", res);
         this.fileHash = "0x" + res;
       });
-      // const isLt100M = data.size / 1024 / 1024 < 100;
       const isAbove0 = data.size > 0;
-      // if (!isLt100M) {
-      //   this.$message.error('File storage larger than 100MB is not supported');
-      //   return false;
-      // }
       if (!isAbove0) {
         this.$message.error(
           "You have selected an empty file, please select again!"
@@ -443,6 +451,8 @@ export default {
       const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
 
       this.api = await ApiPromise.create({ provider: wsProvider });
+//        let getHeader =  await this.api.rpc.chain.getBlock('0xe38ff4e60b7b352ffd8daa3c12544b2e3fcf93b9bef904f92b689337b6480cd4')
+// console.log("getHeader",getHeader)
       console.log(_this.$store.state.userInfo.data.account);
       // this call fires up the authorization popup
       const extensions = await web3Enable("my cool dapp");
@@ -520,22 +530,23 @@ export default {
         .signAndSend(
           ADDR,
           { signer: injector.signer },
-          ({ events = [], status }) => {
+         async ({ events = [], status }) => {
             console.log("status==========", status);
             console.log("events", events);
             if (status.isInBlock) {
               console.log(
                 `Completed at block hash #${status.asInBlock.toString()}`
               );
-              console.log(
-                "===================",
-                txhash,
-                "txhash toU8a()",
-                transferExtrinsic
-              );
+              _this.fileBlockHash = status.asInBlock.toString()
               _this.loading.close();
               _this.uploadFile();
-            } else {
+            } else if (status.isFinalized) {
+              console.log(
+                `status.isFinalized #${status.asFinalized.toString()}`,
+              );
+        //   let getBlock  = await _this.api.rpc.chain.getBlock('0xe38ff4e60b7b352ffd8daa3c12544b2e3fcf93b9bef904f92b689337b6480cd4')
+        //   console.log("getBlock", getBlock,getBlock.toHuman())
+            }else {
               console.log(`Current status: ${status.type}`);
             }
           }
@@ -562,7 +573,7 @@ export default {
         name: _this.ruleFormFile.name,
         size: _this.size,
         suffix: _this.suffix,
-        txHash: _this.fileIDHash,
+        txHash: _this.fileBlockHash,
         hash: _this.fileHash,
         fid: _this.fileIDHash,
         parentId: 0,
@@ -788,6 +799,15 @@ body {
           border: none;
           outline: none;
         }
+      }
+      .caculate-tips {
+        font-size: 12px;
+        line-height: 1;
+        padding-top: 4px;
+        position: absolute;
+        top: 100%;
+        left: 0;
+        color: #f56c6c;
       }
       .pt .unit {
         position: absolute;

@@ -48,7 +48,8 @@ const userInfo = {
       commit,
       state
     }) {
-      const extensions = await web3Enable("my cool dapp");
+
+      const extensions = await web3Enable("Data tranding market");
       if (extensions.length === 0) {
         Message.error('No Polkawallet was found.');
         return;
@@ -75,11 +76,6 @@ const userInfo = {
               const signRaw = injector?.signer?.signRaw;
               console.log("signRaw=============", signRaw);
               if (signRaw) {
-                // console.log(
-                //   "!!!!!!!!!!",
-                //   item.address,
-                //   stringToHex(item.address)
-                // );
                 await signRaw({
                   address: item.address,
                   data: stringToHex(item.address),

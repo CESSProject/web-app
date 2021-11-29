@@ -50,10 +50,15 @@
                 <div class="data-name">{{ text[0].name }}</div>
                 <div class="price">
                   <img src="../assets/icons/download-icon2.png" width="32px" />
-                  <span>Downloads: <br />{{ text[0].downloadTimes }}</span>
-                  <div>
-                    {{ text[0].estimateSpent }}
-                    tCESS
+                  <div class="price-inner">
+                    <div class="price-info">
+                      <div>Downloads:</div>
+                      <div>{{ text[0].downloadTimes }}</div>
+                    </div>
+                    <div class="price-info">
+                      <div>Price:</div>
+                      <div>{{ text[0].estimateSpent }} tCESS</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -72,10 +77,15 @@
                 <div class="data-name">{{ audio[0].name }}</div>
                 <div class="price">
                   <img src="../assets/icons/download-icon2.png" width="32px" />
-                  <span>Downloads: <br />{{ audio[0].downloadTimes }}</span>
-                  <div>
-                    {{ audio[0].estimateSpent }}
-                    tCESS
+                  <div class="price-inner">
+                    <div class="price-info">
+                      <div>Downloads:</div>
+                      <div>{{ audio[0].downloadTimes }}</div>
+                    </div>
+                    <div class="price-info">
+                      <div>Price:</div>
+                      <div>{{ audio[0].estimateSpent }} tCESS</div>
+                    </div>
                   </div>
                 </div>
               </div>
@@ -90,8 +100,16 @@
                 <div class="data-name">{{ video[0].name }}</div>
                 <div class="price">
                   <img src="../assets/icons/download-icon2.png" width="32px" />
-                  <span>Downloads: <br />{{ video[0].downloadTimes }}</span>
-                  <div>{{ video[0].estimateSpent }}tCESS</div>
+                  <div class="price-inner">
+                    <div class="price-info">
+                      <div>Downloads:</div>
+                      <div>{{ video[0].downloadTimes }}</div>
+                    </div>
+                    <div class="price-info">
+                      <div>Price:</div>
+                      <div>{{ video[0].estimateSpent }} tCESS</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -104,12 +122,17 @@
               <div class="data-info">
                 <div class="data-name">{{ image[0].name }}</div>
                 <div class="price">
-                  <img
-                    :src="require('../assets/icons/download-icon2.png')"
-                    width="32px"
-                  />
-                  <span>Downloads: <br />{{ image[0].downloadTimes }}</span>
-                  <div>{{ image[0].estimateSpent }}tCESS</div>
+                  <img src="../assets/icons/download-icon2.png" width="32px" />
+                  <div class="price-inner">
+                    <div class="price-info">
+                      <div>Downloads:</div>
+                      <div>{{ image[0].downloadTimes }}</div>
+                    </div>
+                    <div class="price-info">
+                      <div>Price:</div>
+                      <div>{{ image[0].estimateSpent }} tCESS</div>
+                    </div>
+                  </div>
                 </div>
               </div>
             </div>
@@ -318,7 +341,7 @@ export default {
       width: 100%;
       justify-content: flex-start;
       margin-bottom: 30px;
-              padding: 0px 110px;
+      padding: 0px 110px;
       .popular-data-item {
         width: 265px;
         height: 336px;
@@ -352,21 +375,27 @@ export default {
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             word-break: break-all;
+            white-space: pre;
+
           }
           .price {
-            display: flex;
-            justify-content: flex-start;
-            align-items: flex-start;
             padding: 10px 0px;
             color: #606060;
             border-top: 1px solid #d7d7d7;
             margin-top: 15px;
-            span {
-              width: 40%;
+            display: flex;
+            justify-content: flex-start;
+            .price-inner {
+              text-align: left;
+              flex: 1;
             }
-            div {
-              width: 40%;
+            .price-info {
+              display: flex;
+              justify-content: space-between;
               text-align: right;
+              div:last-child {
+                text-align: right;
+              }
             }
             img {
               height: max-content;

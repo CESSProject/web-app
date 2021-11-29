@@ -1,6 +1,6 @@
 <template>
   <div class="layout-content">
-    <div class="bread">
+    <div class="bread" v-if="!expiredFlag">
       <router-link to="market" v-show="fromPath === '/market'">
         Market >
       </router-link>
@@ -10,7 +10,7 @@
       <span> </span> Data detail
     </div>
     <div class="datadetail-container">
-      <div class="data-info-detail">
+      <div class="data-info-detail" v-if="!expiredFlag">
         <div class="file-header">
           <img :src="fileTypeImg" width="122px" />
           <div class="price">
@@ -82,14 +82,14 @@
           </div>
           <div class="info-detail" v-if="detailData.keywords !== ''">
             <div class="info-label">keyword:</div>
-            <div class="info-content">{{ detailData.keywords }}</div>
+            <div class="info-content keywords">{{ detailData.keywords }}</div>
           </div>
           <div class="overview" v-if="detailData.overview !== ''">
             Overview: {{ detailData.overview }}
           </div>
         </div>
       </div>
-      <div class="similar-data" v-if="sililar.length > 0">
+      <div class="similar-data" v-if="sililar.length > 0 && !expiredFlag">
         <p>Similar data</p>
         <div
           class="sililar-item"
@@ -104,6 +104,10 @@
             <div class="owner">Date owner: {{ i.chainAccount }}</div>
           </div>
         </div>
+      </div>
+      <div class="datadetail-empty" v-if="expiredFlag">
+        <img src="../../assets/empty.png" width="208px" />
+        <p>The sharing code has expired or the file does not exist</p>
       </div>
     </div>
   </div>
@@ -129,6 +133,7 @@ export default {
     return {
       isLoading: false,
       loading: null,
+      loading2: null,
       detailData: {
         name: "",
         type: "",
@@ -158,13 +163,36 @@ export default {
       fromPath: "",
       timer: null,
       downloading: false,
+      buyFlag: false,
+      expiredFlag: false,
     };
   },
   watch: {
-    isLogined() {
+    async isLogined() {
+      let _this = this;
       console.log("isLogined =============");
-      this.queryFileInfo();
-      this.checkNeedPay();
+      console.log("是否登录", _this.isLogined);
+      await _this.queryFileInfo();
+      await _this.checkNeedPay();
+      if (_this.buyFlag) {
+        if (_this.needPay) {
+          _this.loading2 = _this.$loading({
+            lock: true,
+            text: "Loading",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)",
+          });
+          _this.queryBanlance();
+        } else {
+          _this.loading2 = _this.$loading({
+            lock: true,
+            text: "Loading",
+            spinner: "el-icon-loading",
+            background: "rgba(0, 0, 0, 0.7)",
+          });
+          _this.getFileDownload();
+        }
+      }
     },
   },
   computed: {
@@ -204,14 +232,16 @@ export default {
       return similarValue(value);
     },
     ToHex(str) {
-      if (str === "") return "";
-      if (str === "0") return "Checking";
-      let hexCharCode = [];
-      hexCharCode.push("0x");
-      for (let i = 0; i < str.length; i++) {
-        hexCharCode.push(str.charCodeAt(i).toString(16));
+      if (str) {
+        if (str === "") return "";
+        if (str === "0") return "Checking";
+        let hexCharCode = [];
+        hexCharCode.push("0x");
+        for (let i = 0; i < str.length; i++) {
+          hexCharCode.push(str.charCodeAt(i).toString(16));
+        }
+        return hexCharCode.join("");
       }
-      return hexCharCode.join("");
     },
   },
   beforeRouteEnter: (to, from, next) => {
@@ -220,6 +250,9 @@ export default {
     next((vm) => {
       vm.fromPath = from.path;
     });
+  },
+  beforeDestroy() {
+    clearInterval(this.timer);
   },
   methods: {
     viewFileDetail(value) {
@@ -246,11 +279,8 @@ export default {
           _this.querySimilarFiles();
           _this.checkNeedPay();
         } else {
+          _this.expiredFlag = true;
           _this.loading.close();
-          _this.$message({
-            type: "error",
-            message: "",
-          });
         }
       });
     },
@@ -274,6 +304,7 @@ export default {
     },
     handleClick() {
       let _this = this;
+      this.buyFlag = true;
       if (!this.isLogined) {
         this.authorization();
         return;
@@ -289,7 +320,6 @@ export default {
         });
         this.getFileDownload();
       }
-      this.txHash = this.detailData.hash;
     },
     checkNeedPay() {
       queryFileNeedPay(this.fileId).then((res) => {
@@ -324,13 +354,17 @@ export default {
                 link.click();
                 link.remove();
                 _this.loading.close();
+                if (_this.loading2) _this.loading2.close();
                 this.$message({
                   type: "success",
                   message: "Download succeed",
                 });
                 this.queryFileInfo();
                 this.checkNeedPay();
+                this.buyFlag = false;
               } else {
+                _this.loading.close();
+                if (_this.loading2) _this.loading2.close();
                 this.$message({
                   type: "error",
                   message: "Download failed",
@@ -338,6 +372,8 @@ export default {
               }
             })
             .catch((error) => {
+              _this.loading.close();
+                if (_this.loading2) _this.loading2.close();
               console.log("===", error);
               this.$message({
                 type: "error",
@@ -345,6 +381,8 @@ export default {
               });
             });
         } else {
+          _this.loading.close();
+          if (_this.loading2) _this.loading2.close();
           this.$message({
             type: "error",
             message: "The file resource is expired!",
@@ -359,7 +397,6 @@ export default {
         _this.detailData = res.fileInformation;
         _this.fid = res.fileInformation.fid;
         _this.fileTypeImg = fileType(res.fileInformation.suffix);
-
         _this.loading.close();
       });
     },
@@ -399,7 +436,7 @@ export default {
         // in this case we should inform the use and give a link to the extension
         return;
       }
-      console.log("", extensions);
+      console.log("extensions", extensions);
 
       // The actual address that we use
       const ADDR = this.$store.state.userInfo.data.myAddress;
@@ -484,6 +521,20 @@ export default {
   .similar-data {
     float: right;
   }
+  .datadetail-empty {
+    background: #ffffff;
+    border-radius: 14px;
+    text-align: center;
+    height: 800px !important;
+    box-sizing: border-box;
+    padding-top: 130px;
+    width: 100%;
+    p {
+      font-size: 28px;
+      line-height: 50px;
+      color: #737373;
+    }
+  }
   .data-info-detail {
     flex: 1;
     min-height: 894px;
@@ -491,6 +542,7 @@ export default {
     border-radius: 14px;
     padding: 50px 131px 20px 142px;
     box-sizing: border-box;
+    width: 1191px;
     .file-header {
       display: flex;
       justify-content: space-between;
@@ -540,13 +592,24 @@ export default {
         line-height: 40px;
         color: #363636;
         word-break: break-all;
+            white-space: pre;
+
+      }
+      .info-label {
+        min-width: 150px;
       }
       .info-detail {
         border-bottom: 1px solid #d7d7d7;
-        height: 39px;
         line-height: 39px;
         display: flex;
         justify-content: space-between;
+        .info-content{
+          word-break: break-word;
+        
+        }
+        .keywords{
+            line-height: 22px;
+        }
       }
       .overview {
         line-height: 22px;

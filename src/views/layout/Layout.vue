@@ -1,7 +1,7 @@
 <template>
   <div class="container">
     <Header></Header>
-    <router-view />
+    <router-view/>
     <Footer></Footer>
   </div>
 </template>
@@ -23,6 +23,7 @@ export default {
 <style lang="less">
 .container {
   padding-top: 68px;
+
 }
 
 </style>

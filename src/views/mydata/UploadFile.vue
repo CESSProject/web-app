@@ -210,7 +210,7 @@ export default {
       progress: 0,
       fileHash: "",
       fileIDHash: "",
-      fileBlockHash:'',
+      fileBlockHash: "",
       fileInfo: {},
       getFileInfo: {},
       ruleFormFile: {
@@ -451,8 +451,8 @@ export default {
       const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
 
       this.api = await ApiPromise.create({ provider: wsProvider });
-//        let getHeader =  await this.api.rpc.chain.getBlock('0xe38ff4e60b7b352ffd8daa3c12544b2e3fcf93b9bef904f92b689337b6480cd4')
-// console.log("getHeader",getHeader)
+      //        let getHeader =  await this.api.rpc.chain.getBlock('0xe38ff4e60b7b352ffd8daa3c12544b2e3fcf93b9bef904f92b689337b6480cd4')
+      // console.log("getHeader",getHeader)
       console.log(_this.$store.state.userInfo.data.account);
       // this call fires up the authorization popup
       const extensions = await web3Enable("my cool dapp");
@@ -508,6 +508,7 @@ export default {
       expireTime = Number(expireTime);
       console.log("deadline", expireTime);
       const transferExtrinsic = _this.api.tx.fileBank.upload(
+        _this.ruleFormFile.name,
         ADDR,
         this.fileIDHash,
         this.fileHash,
@@ -530,23 +531,23 @@ export default {
         .signAndSend(
           ADDR,
           { signer: injector.signer },
-         async ({ events = [], status }) => {
+          async ({ events = [], status }) => {
             console.log("status==========", status);
             console.log("events", events);
             if (status.isInBlock) {
               console.log(
                 `Completed at block hash #${status.asInBlock.toString()}`
               );
-              _this.fileBlockHash = status.asInBlock.toString()
+              _this.fileBlockHash = status.asInBlock.toString();
               _this.loading.close();
               _this.uploadFile();
             } else if (status.isFinalized) {
               console.log(
-                `status.isFinalized #${status.asFinalized.toString()}`,
+                `status.isFinalized #${status.asFinalized.toString()}`
               );
-        //   let getBlock  = await _this.api.rpc.chain.getBlock('0xe38ff4e60b7b352ffd8daa3c12544b2e3fcf93b9bef904f92b689337b6480cd4')
-        //   console.log("getBlock", getBlock,getBlock.toHuman())
-            }else {
+              //   let getBlock  = await _this.api.rpc.chain.getBlock('0xe38ff4e60b7b352ffd8daa3c12544b2e3fcf93b9bef904f92b689337b6480cd4')
+              //   console.log("getBlock", getBlock,getBlock.toHuman())
+            } else {
               console.log(`Current status: ${status.type}`);
             }
           }
@@ -585,27 +586,28 @@ export default {
         copy: 3,
         priceMb: 1,
       };
-      addFileData(data).then((res) => {
-        console.log("===", res);
-        if (res.success) {
-          _this.uploadUrl = res.uploadUrl;
-          _this.loading.close();
-          _this.uploadtoDataBase();
-        } else {
-          _this.loading.close();
-          if (_this.isEn) {
+      addFileData(data)
+        .then((res) => {
+          console.log("===", res);
+          if (res.success) {
+            _this.uploadUrl = res.uploadUrl;
+            _this.loading.close();
+            _this.uploadtoDataBase();
+          } else {
+            _this.loading.close();
             _this.$message({
               type: "error",
               message: "File upload failed",
             });
-          } else {
-            _this.$message({
-              type: "error",
-              message: res.errorMsg,
-            });
           }
-        }
-      });
+        })
+        .catch(() => {
+          _this.loading.close();
+          _this.$message({
+              type: "error",
+              message: "File upload failed",
+            });
+        });
     },
     uploadtoDataBase() {
       let _this = this;

@@ -57,7 +57,7 @@
           "
         >
           <img :src="imgUrl" alt="" class="user-avatar" :onerror="errorImg" />
-          <Identicon :size="128" :theme="'polkadot'" :value="account" />
+          <!-- <Identicon :size="128" :theme="'polkadot'" :value="account" />Z -->
           <span class="username">{{
             $store.state.userInfo.account.address
           }}</span>
@@ -81,6 +81,49 @@
         :height="268"
       />
     </div>
+    <el-dialog
+      :visible.sync="$store.state.userInfo.noExtension"
+      :close-on-click-modal="false"
+      :show-close="false"
+      width="830px"
+    >
+      <div slot="title" class="header">
+        <div class="header-inner">
+          <img src="../../assets/icons/sad.png" width="40px" /> Connection
+          failed
+        </div>
+        <div>
+          <img
+            src="../../assets/icons/close-icon2.png"
+            width="40px"
+            @click="$store.state.userInfo.noExtension = false"
+          />
+        </div>
+      </div>
+
+      <div>
+        <p>
+          1. If you don't install Polkadot{js} Extension, install it from
+          <a href="https://polkadot.js.org/extension/" target="_blank">
+            here.</a
+          >
+        </p>
+        <p>
+          2. New to Data trading market? Follow
+          <a href="https://polkadot.js.org/extension/" target="_blank"
+            >this guide</a
+          >
+          to create your cess-hacknet chain wallet.
+        </p>
+        <p>
+          3. If you have denied to connect to the cess-hacknet chain, please go
+          to Manage Website Access in Polkadot{js} Extension to re-grant.
+        </p>
+      </div>
+      <span slot="footer" class="dialog-footer"
+        >Please re-login after troubleshooting the failure
+      </span>
+    </el-dialog>
   </div>
 </template>
 
@@ -116,6 +159,7 @@ export default {
       showSearchIcon: true,
       accountList: [],
       currentPath: "",
+      isLoading: false,
     };
   },
   computed: {
@@ -124,18 +168,14 @@ export default {
   watch: {},
   components: {
     CustomDropDown,
-    Identicon,
+    // Identicon,
   },
   mounted() {
     this.currentPath = this.$route.path;
   },
   methods: {
     authorization() {
-      if (this.$store.state.userInfo.accountOperator.length === 0) {
-        this.$store.dispatch("userInfo/authorization");
-      } else {
-        this.$store.state.userInfo.accountsVisible = true;
-      }
+      this.$store.dispatch("userInfo/authorization");
     },
     focusSearch() {
       this.$refs.searchInput.focus();
@@ -146,13 +186,14 @@ export default {
       this.searchKey = "";
     },
     searchFiles() {
-      this.$router.push({
-        path: "/market",
-        query: {
-          keyword: this.searchKey,
-        },
-      });
+         this.$router.push({
+          path: "/market",
+          query: {
+            keyword: this.searchKey,
+          },
+        });
     },
+    handleDeleteClick() {},
     ...mapActions("userInfo", ["logout"]),
   },
 };
@@ -167,7 +208,7 @@ export default {
   border-bottom: 2px solid #d7d7d7;
   padding: 0 20px;
   position: fixed;
-  z-index: 99;
+  z-index: 200;
   width: 100%;
   box-sizing: border-box;
   background: white;
@@ -292,6 +333,51 @@ export default {
       position: absolute;
       right: 18px;
     }
+  }
+  /deep/.el-dialog {
+    padding: 40px 48px 53px 48px;
+    border-radius: 14px;
+    margin-top: 25vh !important;
+    .header,
+    .header-inner {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      img {
+        margin-right: 6px;
+        cursor: pointer;
+      }
+    }
+  }
+  /deep/.el-dialog__header {
+    font-size: 30px;
+    line-height: 44px;
+    color: #606060;
+    padding: 0 0;
+  }
+  /deep/.el-dialog__body {
+    font-size: 18px;
+    line-height: 26px;
+    color: #606060;
+    text-align: left;
+    padding: 0 0;
+    word-break: break-word;
+    p {
+      margin: 30px 0;
+    }
+    a {
+      color: #5078fe;
+      text-decoration: underline;
+      cursor: pointer;
+    }
+  }
+  /deep/.el-dialog__footer {
+    font-size: 18px;
+    font-weight: bold;
+    line-height: 26px;
+    color: #fd6b6d;
+    text-align: left !important;
+    padding: 0 0;
   }
 }
 </style>

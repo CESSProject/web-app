@@ -1,6 +1,8 @@
 <template>
   <div id="app">
-    <router-view :key="key" v-if="$route.meta.keepAlive"></router-view>
+    <router-view :key="key" v-if="$route.meta.keepAlive">
+
+    </router-view>
   </div>
 </template>
 
@@ -33,5 +35,8 @@ body{
 }
 .el-message--error{
   font-family: 'Open-Sans'
+}
+.v-modal{
+  z-index: 200 !important;
 }
 </style>

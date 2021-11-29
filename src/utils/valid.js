@@ -17,7 +17,7 @@ export function renderSize(size) {
 export function fileType(type) {
   let typeTxt = type.toLowerCase();
   let audioList = ['.cd', '.wave', '.aiff', '.mpeg', '.mpeg-4', '.mp3', '.midi', '.wma', '.realaudio', '.vqf', '.offvorbis', '.amr', '.ape', '.flac', '.aac'];
-  let imageList = ['.jpg', '.jpeg', '.png', '.gif', '.psd', '.psb', '.ai', '.svg'];
+  let imageList = ['.jpeg','.bmp','.gif','.psd','.ai','.png','.jpg','.dxf','.cdr','.svg'];
   let videoList = ['.avi', '.wmv', '.mpeg', '.mp4', '.mov', '.mkv', '.flv', '.f4v', '.m4v', '.rmvb', '.rm', '.3gp', '.dat', '.ts', '.mts', '.vob']
   if (typeTxt === '.pptx' || typeTxt === '.ppt') {
     return require('../assets/files/ppt.png');
@@ -85,12 +85,20 @@ export function parseTime(time, pattern) {
   return timeStr;
 }
 export function similarValue(key) {
-  if(key < 4) return 100 - key +'%';
-  if(key === 4) return '95.5%';
-  if(4 < key < 7) return  93 - (key-5) * 3 + '%';
-  if(6 < key < 14) return  86.5 - (key-7) * 4 + '%';
-  if(13 < key) return  58 - (key-14 )* 5 + '%';
-  return '0%'
+  if(key < 4) {
+    return 100 - key +'%';
+  }else if(key === 4) {
+    return '95.5%';
+  }else if(4 < key && key < 7) {
+    return  93 - (key-5) * 3 + '%';
+  }else if(6 < key&& key< 14) {
+    return  86.5 - (key-7) * 4 + '%';
+  } else if(13 < key) {
+    return  58 - (key-14 )* 5 + '%';
+  } else {
+    return '0%'
+
+  }
 
 }
 

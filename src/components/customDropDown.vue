@@ -120,6 +120,7 @@ export default {
   position: absolute;
   top: 65px;
   right: 0;
+  z-index: 10;
   .accounts-title {
     display: flex;
     align-items: center;

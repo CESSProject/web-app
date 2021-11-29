@@ -94,7 +94,7 @@
                   </div>
                 </div>
                 <div class="file-review">
-                  <div class="hash">Hash:{{ item.fid }}</div>
+                  <div class="hash">Data ID:{{ item.fid }}</div>
                   <div>Overview: {{ item.overview }}</div>
                 </div>
               </div>
@@ -186,12 +186,35 @@ export default {
       return moment(date).format("YYYY-MM-DD");
     },
   },
+  // watch:{
+  //   $route:{
+  //        handler:function(val, oldVal) {
+  //            this.queryParams.keyword = this.$route.query.keyword
+  //            console.log("this.$route.query.keyword",val,this.$route.query.keyword)
+  //             // this.getDetail();
+  //             //深度监听，同时也可监听到param参数变化
+  //       },
+  //       deep: true,
+  //   }
+
+  // },
+  //     beforeRouteEnter (to, from, next) {
+  //            console.log("beforeRouteEnter",to,)
+  //            next()
+
+  //   },
   mounted() {
-    if (this.$route.query.keyword) {
+    if (this.$route.query.keyword && this.$route.query.keyword !== "") {
       this.isSearchResult = true;
       this.queryParams.keyword = this.$route.query.keyword;
+      this.checkedCities = ["All"];
+      this.queryParams.formatList = [];
+    } else {
+      this.isSearchResult = false;
+      this.checkedCities = ["All"];
+      this.queryParams.keyword = "";
+      this.queryParams.formatList = [];
     }
-
     this.getData(this.queryParams);
   },
   methods: {
@@ -503,6 +526,7 @@ export default {
         -webkit-line-clamp: 1;
         -webkit-box-orient: vertical;
         word-break: break-all;
+        white-space: pre-wrap;
       }
       .file-tag {
         padding: 3px 12px;

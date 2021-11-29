@@ -284,7 +284,20 @@ export default {
               responseType: "blob",
             })
             .then((result) => {
-              console.log("===", result);
+              console.log("===2222222222", result);
+              // if(result.data.code===0) {
+              // const link = document.createElement("a");
+              //   link.download = res.downloadInfomationDO.name;
+              //   link.href = result.data.data;
+              //   link.click();
+              //   link.remove();
+              // } else {
+              //   this.$message({
+              //     type: "error",
+              //     message: "",
+              //   });
+              // }
+              // debugger
               if (result.status === 200) {
                 let blob = new Blob([result.data]);
                 let linkUrl = URL.createObjectURL(blob);
@@ -294,7 +307,6 @@ export default {
                 link.click();
                 link.remove();
               } else {
-                this.status = 2;
                 this.$message({
                   type: "error",
                   message: "",
@@ -726,6 +738,8 @@ export default {
   line-height: 40px;
   color: #363636;
   margin-left: 30px;
+            white-space: pre;
+  
 }
 .custom-cell {
   font-size: 14px;

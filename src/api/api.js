@@ -35,9 +35,9 @@ export function getFileInfo(fileId) {
   })
 }
 
-export function getSimilarFiles(fileId) {
+export function getSimilarFiles(fileId,fid) {
   return network({
-    url: `/cess-hacknet/files/similarFiles?fileId=` + fileId,
+    url: `/cess-hacknet/files/similarFiles?fileId=` + fileId + '&fid=' + fid,
     method: "get"
   })
 }

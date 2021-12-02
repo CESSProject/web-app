@@ -1,5 +1,5 @@
 <template>
-  <div class="layout-content">
+  <div class="layout-content" v-loading.fullscreen.lock="fullscreenLoading">
     <div class="bread" v-if="!expiredFlag">
       <router-link to="market" v-show="fromPath === '/market'">
         Market >
@@ -19,7 +19,7 @@
                 <img src="../../assets/icons/download-icon.png" width="24px"
               /></span>
               <span>{{ detailData.estimateSpent }}</span>
-              <span class="unit">tCESS</span>
+              <span class="unit">TCESS</span>
             </div>
             <el-button type="primary" class="buy-btn" @click="handleClick">
               {{ needPay ? "buy" : "download" }}</el-button
@@ -69,7 +69,7 @@
           <div class="info-detail" v-if="detailData.simhash !== '-1'">
             <div class="info-label">Characteristic:</div>
             <div class="info-content">
-              {{ detailData.simhash | ToHex }}
+              {{ detailData.simhash }}
             </div>
           </div>
           <div class="info-detail" v-if="detailData.creator !== ''">
@@ -134,6 +134,7 @@ export default {
       isLoading: false,
       loading: null,
       loading2: null,
+      fullscreenLoading:false,
       detailData: {
         name: "",
         type: "",
@@ -148,6 +149,7 @@ export default {
         creator: "",
         classification: "1",
         time: "",
+        fid:''
       },
       fileTypeImg: "",
       fileId: "",
@@ -163,7 +165,7 @@ export default {
       fromPath: "",
       timer: null,
       downloading: false,
-      buyFlag: false,
+      buyFlag: null,
       expiredFlag: false,
     };
   },
@@ -171,49 +173,36 @@ export default {
     async isLogined() {
       let _this = this;
       console.log("isLogined =============");
-      console.log("是否登录", _this.isLogined);
-      await _this.queryFileInfo();
-      await _this.checkNeedPay();
+      this.fullscreenLoading = true
+      await _this.queryFileInfo(this.fileId,this.fid);
       if (_this.buyFlag) {
         if (_this.needPay) {
-          _this.loading2 = _this.$loading({
-            lock: true,
-            text: "Loading",
-            spinner: "el-icon-loading",
-            background: "rgba(0, 0, 0, 0.7)",
-          });
-          _this.queryBanlance();
+         await _this.queryBanlance();
         } else {
-          _this.loading2 = _this.$loading({
-            lock: true,
-            text: "Loading",
-            spinner: "el-icon-loading",
-            background: "rgba(0, 0, 0, 0.7)",
-          });
-          _this.getFileDownload();
+          this.fullscreenLoading = true
+         await _this.getFileDownload();
         }
       }
+
+      await _this.checkNeedPay();
     },
   },
   computed: {
     ...mapGetters(["isLogined"]),
   },
-  mounted() {
-    this.loading = this.$loading({
-      lock: true,
-      text: "Loading",
-      spinner: "el-icon-loading",
-      background: "rgba(0, 0, 0, 0.7)",
-    });
+ async mounted() {
     if (this.$route.query.shareCode) {
       this.shareCode = this.$route.query.shareCode;
       this.queryByShareCode();
     }
-    if (this.$route.query.fileId) {
-      this.fileId = this.$route.query.fileId;
-      this.queryFileInfo();
-      this.querySimilarFiles();
-      this.checkNeedPay();
+    if (this.$route.query.fileId || this.$route.query.fid) {
+      if(this.$route.query.fileId) this.fileId = this.$route.query.fileId
+      if(this.$route.query.fid) this.fid = this.$route.query.fid
+      await this.queryFileInfo(this.fileId,this.fid);
+      await this.querySimilarFiles();
+      await this.checkNeedPay();
+      this.fullscreenLoading = false
+
     }
   },
   filters: {
@@ -266,13 +255,13 @@ export default {
     authorization() {
       this.$store.dispatch("userInfo/authorization");
     },
-
     queryByShareCode() {
       let _this = this;
+      this.fullscreenLoading = true
       decryptShareCode(this.shareCode).then((res) => {
         console.log("===", res);
         if (res.success) {
-          _this.loading.close();
+          this.fullscreenLoading = false;
           _this.detailData = res.fileInformation;
           _this.fileId = res.fileInformation.fileId;
           _this.fileTypeImg = fileType(res.fileInformation.suffix);
@@ -280,31 +269,15 @@ export default {
           _this.checkNeedPay();
         } else {
           _this.expiredFlag = true;
-          _this.loading.close();
+          this.fullscreenLoading = false;
+
         }
       });
-    },
-    getDetail() {
-      const data = this.$route.query;
-      console.log("data======", data);
-      this.detailData = {
-        name: data.name,
-        type: fileType(data.name.substr(data.name.lastIndexOf("."))),
-        size: renderSize(data.size),
-        t: parseTime(data.t, "{y}-{m}-{d}"),
-        cost: data.cost,
-        hash: data.hash,
-        fileId: Number(data.fileId),
-        shareCode: data.code,
-        chainAccount: data.chainAccount,
-        overview: data.overview,
-        classification: data.classification,
-      };
-      this.fileId = this.detailData.fileId;
     },
     handleClick() {
       let _this = this;
       this.buyFlag = true;
+      this.fullscreenLoading = true;
       if (!this.isLogined) {
         this.authorization();
         return;
@@ -312,12 +285,7 @@ export default {
       if (_this.needPay) {
         this.queryBanlance();
       } else {
-        _this.loading = _this.$loading({
-          lock: true,
-          text: "Loading",
-          spinner: "el-icon-loading",
-          background: "rgba(0, 0, 0, 0.7)",
-        });
+ 
         this.getFileDownload();
       }
     },
@@ -341,30 +309,51 @@ export default {
               headers: {
                 token: this.$store.state.userInfo.data.token,
               },
-              responseType: "blob",
+              // responseType: "blob",
             })
-            .then((result) => {
+            .then(async (result) => {
               console.log("===", result);
-              if (result.status === 200) {
-                let blob = new Blob([result.data]);
-                let linkUrl = URL.createObjectURL(blob);
+              // if (result.status === 200) {
+              //   let blob = new Blob([result.data]);
+              //   let linkUrl = URL.createObjectURL(blob);
+              //   const link = document.createElement("a");
+              //   link.download = res.downloadInfomationDO.name;
+              //   link.href = linkUrl;
+              //   link.click();
+              //   link.remove();
+              //   _this.$message({
+              //     type: "success",
+              //     message: "Download succeed",
+              //   });
+              //   _this.buyFlag = false;
+              //  await _this.queryFileInfo(this.fileId,this.fid);
+              //  await _this.checkNeedPay();
+              //   _this.fullscreenLoading = false;
+              // } else {
+              //   this.fullscreenLoading = false;
+              //   this.$message({
+              //     type: "error",
+              //     message: "Download failed",
+              //   });
+              // }
+
+
+              if (result.data.code===0) {
                 const link = document.createElement("a");
                 link.download = res.downloadInfomationDO.name;
-                link.href = linkUrl;
+                link.href = result.data.data;
                 link.click();
                 link.remove();
-                _this.loading.close();
-                if (_this.loading2) _this.loading2.close();
-                this.$message({
+                _this.$message({
                   type: "success",
                   message: "Download succeed",
                 });
-                this.queryFileInfo();
-                this.checkNeedPay();
-                this.buyFlag = false;
+                _this.buyFlag = false;
+               await _this.queryFileInfo(this.fileId,this.fid);
+               await _this.checkNeedPay();
+                _this.fullscreenLoading = false;
               } else {
-                _this.loading.close();
-                if (_this.loading2) _this.loading2.close();
+                this.fullscreenLoading = false;
                 this.$message({
                   type: "error",
                   message: "Download failed",
@@ -372,8 +361,7 @@ export default {
               }
             })
             .catch((error) => {
-              _this.loading.close();
-                if (_this.loading2) _this.loading2.close();
+              this.fullscreenLoading = false;
               console.log("===", error);
               this.$message({
                 type: "error",
@@ -381,8 +369,7 @@ export default {
               });
             });
         } else {
-          _this.loading.close();
-          if (_this.loading2) _this.loading2.close();
+          this.fullscreenLoading = false;
           this.$message({
             type: "error",
             message: "The file resource is expired!",
@@ -390,14 +377,14 @@ export default {
         }
       });
     },
-    queryFileInfo() {
+    queryFileInfo(fileId,fid) {
       let _this = this;
-      getFileInfo(this.fileId).then((res) => {
+      this.fullscreenLoading = true;
+      getFileInfo(fileId,fid).then((res) => {
         console.log(res);
         _this.detailData = res.fileInformation;
         _this.fid = res.fileInformation.fid;
         _this.fileTypeImg = fileType(res.fileInformation.suffix);
-        _this.loading.close();
       });
     },
     querySimilarFiles() {
@@ -407,36 +394,22 @@ export default {
         this.sililar.forEach((item) => {
           item.fileImg = fileType(item.suffix);
         });
-        // if (res.success) {
-        // } else {
-        //   this.$message({
-        //     type: "error",
-        //     message: res.errorMsg,
-        //   });
-        // }
       });
     },
     async queryBanlance() {
       let _this = this;
-      _this.loading = _this.$loading({
-        lock: true,
-        text: "Loading",
-        spinner: "el-icon-loading",
-        background: "rgba(0, 0, 0, 0.7)",
-      });
       // Create the instance
-      const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
-
+      const wsProvider = new WsProvider("ws://106.15.44.155:9947/");
       this.api = await ApiPromise.create({ provider: wsProvider });
       console.log(_this.$store.state.userInfo.data.account);
       // this call fires up the authorization popup
-      const extensions = await web3Enable("my cool dapp");
+      const extensions = await web3Enable("Data trading market");
       if (extensions.length === 0) {
         // no extension installed, or the user did not accept the authorization
         // in this case we should inform the use and give a link to the extension
         return;
       }
-      console.log("extensions", extensions);
+      // console.log("extensions", extensions);
 
       // The actual address that we use
       const ADDR = this.$store.state.userInfo.data.myAddress;
@@ -448,7 +421,7 @@ export default {
       if (freeBalance > _this.detailData.estimateSpent) {
         _this.toBuy();
       } else {
-        _this.loading.close();
+        this.fullscreenLoading = false;
         _this.$message({
           type: "error",
           message: "Insufficient tokens",
@@ -480,12 +453,19 @@ export default {
               _this.getFileDownload();
             } else {
               console.log(`Current status: ${status.type}`);
+              if(status.type ==='Invalid'){
+               _this.fullscreenLoading = false;
+               _this.$message({
+                  type: "error",
+                  message: "Network connection failed. Please try again later",
+                });
+              }
             }
           }
         )
         .catch((error) => {
           console.log(":( transaction failed", error);
-          _this.loading.close();
+          this.fullscreenLoading = false;
         });
     },
     goBack() {

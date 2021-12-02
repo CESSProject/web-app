@@ -39,4 +39,7 @@ body{
 .v-modal{
   z-index: 200 !important;
 }
+.el-loading-mask{
+  background-color: rgba(0, 0, 0, 0.8) !important;
+}
 </style>

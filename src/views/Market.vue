@@ -90,7 +90,7 @@
                   <div class="price-info">
                     <img src="../assets/icons/download-icon.png" width="24px" />
                     <span>{{ item.estimateSpent }} </span>
-                    tCESS
+                    TCESS
                   </div>
                 </div>
                 <div class="file-review">
@@ -104,9 +104,9 @@
             <el-pagination
               @current-change="handleCurrentChange"
               background
-              :current-page.sync="page"
+              :current-page.sync="queryParams.pageNum"
               :pager-count="5"
-              :page-size="pageSize"
+              :page-size="queryParams.pageSize"
               :layout="'prev,pager,next'"
               :total="total"
             ></el-pagination>
@@ -144,6 +144,8 @@ import { types } from "@/utils/config";
 const cityOptions = ["All", "Text", "Audio", "Video", "Image", "Others"];
 import { queryFilesList } from "@/api/api";
 import { renderSize, fileType } from "@/utils/valid";
+import { mapMutations } from "vuex";
+
 export default {
   data() {
     return {
@@ -186,36 +188,40 @@ export default {
       return moment(date).format("YYYY-MM-DD");
     },
   },
-  // watch:{
-  //   $route:{
-  //        handler:function(val, oldVal) {
-  //            this.queryParams.keyword = this.$route.query.keyword
-  //            console.log("this.$route.query.keyword",val,this.$route.query.keyword)
-  //             // this.getDetail();
-  //             //深度监听，同时也可监听到param参数变化
-  //       },
-  //       deep: true,
-  //   }
-
-  // },
-  //     beforeRouteEnter (to, from, next) {
-  //            console.log("beforeRouteEnter",to,)
-  //            next()
-
-  //   },
-  mounted() {
-    if (this.$route.query.keyword && this.$route.query.keyword !== "") {
+  computed: {
+    keyword() {
+      console.log("-------------------",this.$store.state.userInfo.searchKey)
+         return this.$store.state.userInfo.searchKey;
+    }
+  },
+  watch: {
+    keyword(val) {
+      console.log("keyword change", val)
+      if(val ==null) return
+     if (val !== "") {
       this.isSearchResult = true;
-      this.queryParams.keyword = this.$route.query.keyword;
+      this.queryParams.keyword = this.$store.state.userInfo.searchKey;
       this.checkedCities = ["All"];
       this.queryParams.formatList = [];
+      this.queryParams.pageNum = 1
     } else {
       this.isSearchResult = false;
       this.checkedCities = ["All"];
       this.queryParams.keyword = "";
       this.queryParams.formatList = [];
+      this.queryParams.pageNum = 1
+
     }
     this.getData(this.queryParams);
+    },
+  },
+  mounted() {
+      this.isSearchResult = true;
+      this.queryParams.keyword = this.$route.query.keyword || this.$store.state.userInfo.searchKey;
+      this.checkedCities = ["All"];
+      this.queryParams.formatList = [];
+      this.queryParams.pageNum = 1
+      this.getData(this.queryParams);
   },
   methods: {
     clearFilter() {
@@ -223,6 +229,7 @@ export default {
       this.checkedCities = ["All"];
       this.isSearchResult = false;
       this.queryParams.formatList = [];
+      this.queryParams.pageNum = 1
       this.getData(this.queryParams);
     },
     sortChange(val) {
@@ -244,6 +251,7 @@ export default {
             });
             this.total = res.totalPages;
             this.maxlengthPage = Math.ceil(this.total / this.pageSize);
+             this.setSearchKey(null)
           } else {
             _this.$message({
               type: "error",
@@ -268,7 +276,7 @@ export default {
       console.log(value, this.formatList);
       this.formatList = [];
       this.queryParams.formatList = this.formatList;
-
+      this.queryParams.pageNum = 1
       if (value.length === 0) {
         this.checkedCities.push("All");
         this.selectLabel = "Format: ";
@@ -303,8 +311,17 @@ export default {
       this.getData(this.queryParams);
     },
     JumpTo() {
-      this.handleCurrentChange(Number(this.jumpPage));
+      let page = Number(this.jumpPage)
+      if(page<0){
+         page = 1
+      }else if(page > this.maxlengthPage){
+        page = this.maxlengthPage
+      }
+      this.handleCurrentChange(page);
+      this.jumpPage = 'Jump to page'
     },
+    ...mapMutations("userInfo", ["setSearchKey"])
+
   },
 };
 </script>

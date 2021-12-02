@@ -128,19 +128,19 @@
               :maxlength="15"
               @input="oninput"
             ></el-input>
-            <span class="unit">tCESS</span>
+            <span class="unit">TCESS</span>
           </el-form-item>
           <el-form-item>
             <span slot="label" class="not-required">
               Revenue per download：</span
             >
             <span class="cost"
-              >{{ (ruleFormFile.estimateSpent * 0.8).toFixed(4) }} tCESS</span
+              >{{ ruleFormFile.estimateSpent }} TCESS</span
             >
           </el-form-item>
           <el-form-item>
             <span slot="label" class="not-required"> Storage cost：</span>
-            <span class="cost">{{ storageCost }} tCESS </span>
+            <span class="cost">{{ storageCost }} TCESS </span>
           </el-form-item>
         </el-form>
         <div class="bottom-btns">
@@ -448,14 +448,14 @@ export default {
     async queryBanlance() {
       let _this = this;
       // Create the instance
-      const wsProvider = new WsProvider("wss://cess.today/rpc2-hacknet/ws/");
+      const wsProvider = new WsProvider("ws://106.15.44.155:9947/");
 
       this.api = await ApiPromise.create({ provider: wsProvider });
       //        let getHeader =  await this.api.rpc.chain.getBlock('0xe38ff4e60b7b352ffd8daa3c12544b2e3fcf93b9bef904f92b689337b6480cd4')
       // console.log("getHeader",getHeader)
       console.log(_this.$store.state.userInfo.data.account);
       // this call fires up the authorization popup
-      const extensions = await web3Enable("my cool dapp");
+      const extensions = await web3Enable("Data trading market");
       if (extensions.length === 0) {
         // no extension installed, or the user did not accept the authorization
         // in this case we should inform the use and give a link to the extension
@@ -486,7 +486,9 @@ export default {
       // console.log("timestamp", timestamp);
       let fileID = _this.fileHash + ADDR + timestamp;
       let sha256 = require("js-sha256").sha256;
-      this.fileIDHash = "0x" + sha256(fileID);
+      // this.fileIDHash = "0x" + sha256(fileID);
+      this.fileIDHash = sha256(fileID);
+
       //  let aaa = this.toUint8Arr(fileID);
       //  this.fileIDHash = aaa
       console.log("fileIDHash", this.fileIDHash);

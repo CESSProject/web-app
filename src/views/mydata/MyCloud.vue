@@ -92,7 +92,7 @@
         <el-pagination
           @current-change="handleCurrentChange"
           background
-          :current-page.sync="listQuery.page"
+          :current-page.sync="listQuery.pageNum"
           :pager-count="5"
           :page-size="listQuery.pageSize"
           :layout="'prev,pager,next'"
@@ -100,7 +100,7 @@
         ></el-pagination>
         <div class="jumper-bar" v-if="maxlengthPage > 5">
           <el-input v-model="jumpPage" placeholder="Jump to page" type="number">
-            <span slot="append">{{ listQuery.page }}/{{ maxlengthPage }}</span>
+            <span slot="append">{{ listQuery.pageNum }}/{{ maxlengthPage }}</span>
           </el-input>
           <button
             type="button"
@@ -257,6 +257,7 @@ export default {
             });
             this.dialogVisible = false;
             this.listQuery.pageNum = 1;
+            this.jumpPage = 'Jump to page'
             this.getFileUploadList(this.listQuery);
           } else {
             this.$message({
@@ -281,29 +282,14 @@ export default {
               headers: {
                 token: this.$store.state.userInfo.data.token,
               },
-              responseType: "blob",
+              // responseType: "blob",
             })
             .then((result) => {
               console.log("===2222222222", result);
-              // if(result.data.code===0) {
-              // const link = document.createElement("a");
-              //   link.download = res.downloadInfomationDO.name;
-              //   link.href = result.data.data;
-              //   link.click();
-              //   link.remove();
-              // } else {
-              //   this.$message({
-              //     type: "error",
-              //     message: "",
-              //   });
-              // }
-              // debugger
-              if (result.status === 200) {
-                let blob = new Blob([result.data]);
-                let linkUrl = URL.createObjectURL(blob);
-                const link = document.createElement("a");
+              if(result.data.code===0) {
+              const link = document.createElement("a");
                 link.download = res.downloadInfomationDO.name;
-                link.href = linkUrl;
+                link.href = result.data.data;
                 link.click();
                 link.remove();
               } else {
@@ -312,6 +298,21 @@ export default {
                   message: "",
                 });
               }
+              // debugger
+              // if (result.status === 200) {
+              //   let blob = new Blob([result.data]);
+              //   let linkUrl = URL.createObjectURL(blob);
+              //   const link = document.createElement("a");
+              //   link.download = res.downloadInfomationDO.name;
+              //   link.href = linkUrl;
+              //   link.click();
+              //   link.remove();
+              // } else {
+              //   this.$message({
+              //     type: "error",
+              //     message: "",
+              //   });
+              // }
             })
             .catch((error) => {
               console.log("===", error);
@@ -325,7 +326,14 @@ export default {
       });
     },
     JumpTo() {
-      this.handleCurrentChange(Number(this.jumpPage));
+            let page = Number(this.jumpPage)
+      if(page<0){
+         page = 1
+      }else if(page > this.maxlengthPage){
+        page = this.maxlengthPage
+      }
+      this.handleCurrentChange(page);
+      this.jumpPage = 'Jump to page'
     },
     handleCurrentChange(val) {
       let asc = null;

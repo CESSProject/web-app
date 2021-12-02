@@ -23,7 +23,8 @@ const userInfo = {
     account:null,
     accountsVisible:false,
     userInfoVisible:false,
-    noExtension:false
+    noExtension:false,
+    searchKey:'',
   },
   getters: {
     userInfo: state => {
@@ -42,6 +43,9 @@ const userInfo = {
       state.accountOperator = []
       state.isLogined = false
       state.token = ''
+    },
+    setSearchKey(state, searchKey) {
+      state.searchKey = searchKey
     },
   },
   actions: {

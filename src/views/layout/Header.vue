@@ -128,8 +128,8 @@
 </template>
 
 <script>
-import Identicon from "@polkadot/vue-identicon";
-import { mapActions, mapGetters } from "vuex";
+// import Identicon from "@polkadot/vue-identicon";
+import { mapActions, mapGetters,mapMutations } from "vuex";
 import CustomDropDown from "../../components/customDropDown.vue";
 export default {
   data() {
@@ -186,16 +186,22 @@ export default {
       this.searchKey = "";
     },
     searchFiles() {
-         this.$router.push({
+      this.setSearchKey(this.searchKey)
+        this.$router.push({
           path: "/market",
           query: {
             keyword: this.searchKey,
           },
+        }).catch((err)=>{
+          console.log(err)
         });
+
     },
     handleDeleteClick() {},
     ...mapActions("userInfo", ["logout"]),
+    ...mapMutations("userInfo", ["setSearchKey"])
   },
+
 };
 </script>
 
@@ -208,7 +214,7 @@ export default {
   border-bottom: 2px solid #d7d7d7;
   padding: 0 20px;
   position: fixed;
-  z-index: 200;
+  z-index: 2002;
   width: 100%;
   box-sizing: border-box;
   background: white;

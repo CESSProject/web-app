@@ -11,6 +11,7 @@ import VueClipboard from 'vue-clipboard2'
 Vue.config.productionTip = false
 Vue.use(Element,{ locale })
 Vue.use(VueClipboard)
+
 new Vue({
   router,
   store,

@@ -57,7 +57,7 @@
                     </div>
                     <div class="price-info">
                       <div>Price:</div>
-                      <div>{{ text[0].estimateSpent }} tCESS</div>
+                      <div>{{ text[0].estimateSpent }} TCESS</div>
                     </div>
                   </div>
                 </div>
@@ -84,7 +84,7 @@
                     </div>
                     <div class="price-info">
                       <div>Price:</div>
-                      <div>{{ audio[0].estimateSpent }} tCESS</div>
+                      <div>{{ audio[0].estimateSpent }} TCESS</div>
                     </div>
                   </div>
                 </div>
@@ -107,7 +107,7 @@
                     </div>
                     <div class="price-info">
                       <div>Price:</div>
-                      <div>{{ video[0].estimateSpent }} tCESS</div>
+                      <div>{{ video[0].estimateSpent }} TCESS</div>
                     </div>
                   </div>
                 </div>
@@ -130,7 +130,7 @@
                     </div>
                     <div class="price-info">
                       <div>Price:</div>
-                      <div>{{ image[0].estimateSpent }} tCESS</div>
+                      <div>{{ image[0].estimateSpent }} TCESS</div>
                     </div>
                   </div>
                 </div>
@@ -174,6 +174,7 @@
 
 <script>
 import { popularFiles } from "@/api/api";
+import { mapMutations } from "vuex";
 
 export default {
   data() {
@@ -211,6 +212,7 @@ export default {
       });
     },
     searchData() {
+      this.setSearchKey(this.keyword)
       this.$router.push({
         path: "/market",
         query: {
@@ -226,6 +228,7 @@ export default {
         },
       });
     },
+    ...mapMutations("userInfo", ["setSearchKey"])
   },
 };
 </script>
@@ -375,7 +378,7 @@ export default {
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             word-break: break-all;
-            white-space: pre;
+            white-space:pre-wrap;
 
           }
           .price {

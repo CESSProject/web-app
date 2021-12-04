@@ -28,16 +28,16 @@ export function filesList(params) {
   });
 }
 
-export function getFileInfo(fileId) {
+export function getFileInfo(fileId, fid) {
   return network({
-    url: `/cess-hacknet/files/queryFile.Action?fileId=` + fileId,
+    url: `/cess-hacknet/files/queryFile.Action?fileId=` + fileId + '&fid=' + fid,
     method: "get"
   })
 }
 
-export function getSimilarFiles(fileId,fid) {
+export function getSimilarFiles(fileId) {
   return network({
-    url: `/cess-hacknet/files/similarFiles?fileId=` + fileId + '&fid=' + fid,
+    url: `/cess-hacknet/files/similarFiles?fileId=` + fileId ,
     method: "get"
   })
 }

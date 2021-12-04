@@ -198,6 +198,7 @@ export default {
     if (this.$route.query.fileId || this.$route.query.fid) {
       if(this.$route.query.fileId) this.fileId = this.$route.query.fileId
       if(this.$route.query.fid) this.fid = this.$route.query.fid
+      console.log("32423432423",this.fileId,this.fid )
       await this.queryFileInfo(this.fileId,this.fid);
       await this.querySimilarFiles();
       await this.checkNeedPay();
@@ -313,31 +314,6 @@ export default {
             })
             .then(async (result) => {
               console.log("===", result);
-              // if (result.status === 200) {
-              //   let blob = new Blob([result.data]);
-              //   let linkUrl = URL.createObjectURL(blob);
-              //   const link = document.createElement("a");
-              //   link.download = res.downloadInfomationDO.name;
-              //   link.href = linkUrl;
-              //   link.click();
-              //   link.remove();
-              //   _this.$message({
-              //     type: "success",
-              //     message: "Download succeed",
-              //   });
-              //   _this.buyFlag = false;
-              //  await _this.queryFileInfo(this.fileId,this.fid);
-              //  await _this.checkNeedPay();
-              //   _this.fullscreenLoading = false;
-              // } else {
-              //   this.fullscreenLoading = false;
-              //   this.$message({
-              //     type: "error",
-              //     message: "Download failed",
-              //   });
-              // }
-
-
               if (result.data.code===0) {
                 const link = document.createElement("a");
                 link.download = res.downloadInfomationDO.name;

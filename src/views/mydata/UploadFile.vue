@@ -134,9 +134,7 @@
             <span slot="label" class="not-required">
               Revenue per download：</span
             >
-            <span class="cost"
-              >{{ ruleFormFile.estimateSpent }} TCESS</span
-            >
+            <span class="cost">{{ ruleFormFile.estimateSpent }} TCESS</span>
           </el-form-item>
           <el-form-item>
             <span slot="label" class="not-required"> Storage cost：</span>
@@ -606,9 +604,9 @@ export default {
         .catch(() => {
           _this.loading.close();
           _this.$message({
-              type: "error",
-              message: "File upload failed",
-            });
+            type: "error",
+            message: "File upload failed",
+          });
         });
     },
     uploadtoDataBase() {
@@ -722,7 +720,7 @@ body {
       /deep/.el-form-item__label {
         font-size: 18px !important;
         line-height: 40px;
-        color: #606060;
+        color: #363636;
         padding-left: 8px;
         box-sizing: border-box;
       }
@@ -734,6 +732,7 @@ body {
         border-radius: 8px;
         font-size: 18px !important;
         font-family: "Open-Sans";
+        color: #383838 !important;
       }
       /deep/.el-textarea__inner {
         width: 444px !important;
@@ -743,6 +742,7 @@ body {
         border-radius: 8px;
         font-size: 18px !important;
         font-family: "Open-Sans";
+        color: #383838 !important;
       }
       /deep/.el-textarea__inner::-webkit-scrollbar {
         width: 5px;
@@ -775,7 +775,7 @@ body {
       }
 
       .cost {
-        color: #606060;
+        color: #363636;
         font-size: 18px;
       }
       .flex {
@@ -817,7 +817,7 @@ body {
         position: absolute;
         left: 450px;
         font-size: 18px;
-        color: #606060;
+        color: #363636;
       }
     }
     .bottom-btns {
@@ -837,7 +837,7 @@ body {
     .confirm-btn {
       width: 172px;
       height: 44px;
-      background: linear-gradient(180deg, #4a71fe 0%, #8fbfff 100%);
+      background: linear-gradient(180deg, #6aaeff 0%, #005eff 100%);
       border-radius: 22px;
       color: white;
       font-size: 18px;
@@ -887,7 +887,7 @@ body {
           color: #fd6b6d;
         }
         margin-left: 10px;
-        color: #5078fe;
+        color: #005eff;
         cursor: pointer;
       }
     }

@@ -38,7 +38,7 @@ module.exports = {
   },
   configureWebpack: config => {
     if (production) {
-      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true
+      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = false
       // config.devtool = 'source-map';
       return {
         plugins: [new FileManagerPlugin({

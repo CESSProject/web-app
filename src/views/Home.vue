@@ -261,13 +261,13 @@ export default {
     font-family: "AlegreyaSansSC-ExtraBold";
     font-weight: 800;
     line-height: 38px;
-    color: #5078fe;
+    color: #005EFF;
   }
   p {
     font-size: 18px;
     font-weight: 400;
     line-height: 32px;
-    color: #363636;
+
     margin: 34px 0;
   }
 }
@@ -370,7 +370,6 @@ export default {
             font-size: 18px;
             font-weight: 400;
             line-height: 26px;
-            color: #363636;
             height: 50px;
             overflow: hidden;
             text-overflow: ellipsis;
@@ -383,7 +382,6 @@ export default {
           }
           .price {
             padding: 10px 0px;
-            color: #606060;
             border-top: 1px solid #d7d7d7;
             margin-top: 15px;
             display: flex;
@@ -423,8 +421,9 @@ export default {
     font-size: 30px;
     font-weight: bold;
     line-height: 44px;
-    color: #5078fe;
-    margin-bottom: 55px;
+    color: #0E0E0E;
+    margin-bottom: 100px;
+    // text-align: left;
   }
   .block3-inner {
     display: flex;
@@ -440,14 +439,13 @@ export default {
       font-family: "Open-Sans-Bold";
       font-weight: 500;
       line-height: 44px;
-      color: #363636;
+      color: #0E0E0E;
       margin-top: 32px auto 13px;
     }
     .desc {
       font-size: 18px;
       width: 275px;
       line-height: 26px;
-      color: #606060;
       margin: 0 auto;
     }
   }

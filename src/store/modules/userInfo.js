@@ -35,7 +35,7 @@ const userInfo = {
     setUserInfo(state, userInfo) {
       state.data = userInfo
       state.isLogined = true
-      state.userInfoVisible = true;
+      // state.userInfoVisible = true;
     },
     clearUserInfo(state) {
       state.data = {}
@@ -65,8 +65,10 @@ const userInfo = {
       if(allAccounts.length ==0){
         Message.error('Please create cess-hacknet chain account.');
       }else {
+
         if(state.accountOperator.length==0){
           state.accountList.forEach((item) => {
+            console.log("item==========",item)
             let obj = {
               icon: require("../../assets/icons/default-avater.png"),
               meta: item.meta,
@@ -105,9 +107,9 @@ const userInfo = {
             state.accountOperator.push(obj);
           });
         }
-
-
         state.accountsVisible = true;
+        state.userInfoVisible = false;
+
       }
 
     },

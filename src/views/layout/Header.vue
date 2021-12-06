@@ -230,12 +230,12 @@ export default {
     font-family: "AlegreyaSansSC-ExtraBold";
     font-weight: 800;
     line-height: 67px;
-    color: #5078fe;
+    color: #005EFF;
     position: relative;
     margin-right: 20px;
   }
   .title-active {
-    border-bottom: 2px solid #5078fe;
+    border-bottom: 2px solid #005EFF;
   }
 
   .search-bar {
@@ -287,7 +287,8 @@ export default {
     .login-btn {
       width: 128px;
       height: 44px;
-      background: #f6f7fb;
+      background: #FFFFFF;
+      border: 1px solid #DBDBDB;
       border-radius: 24px;
       font-size: 18px;
       line-height: 44px;
@@ -358,13 +359,13 @@ export default {
   /deep/.el-dialog__header {
     font-size: 30px;
     line-height: 44px;
-    color: #606060;
+    color: #363636;
     padding: 0 0;
   }
   /deep/.el-dialog__body {
     font-size: 18px;
     line-height: 26px;
-    color: #606060;
+    color: #363636;
     text-align: left;
     padding: 0 0;
     word-break: break-word;
@@ -372,7 +373,7 @@ export default {
       margin: 30px 0;
     }
     a {
-      color: #5078fe;
+      color: #005EFF;
       text-decoration: underline;
       cursor: pointer;
     }

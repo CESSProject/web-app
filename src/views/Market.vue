@@ -3,7 +3,7 @@
     <div class="market-content">
       <div class="img-box">
         <img src="../assets/DTM-title.png" width="585px" class="img1" />
-        <img src="../assets/logo2.png" width="470px" class="img2" />
+        <img src="../assets/logo2.png" width="173px" class="img2" />
       </div>
       <div class="market-content-inner">
         <div class="content-left">
@@ -34,13 +34,13 @@
           <div class="sort-bar" v-show="!isSearchResult">
             <span
               @click="sortChange(0)"
-              :style="sortType === 0 ? 'color:#5078FE' : ''"
+              :style="sortType === 0 ? 'color:#005EFF' : ''"
               >Correlation<img
                 :src="sortType === 0 ? sortSrc1 : sortSrc2"
                 width="13px" /></span
             ><span
               @click="sortChange(1)"
-              :style="sortType === 1 ? 'color:#5078FE' : ''"
+              :style="sortType === 1 ? 'color:#005EFF' : ''"
               >Price<img
                 :src="sortType === 1 ? sortSrc1 : sortSrc2"
                 width="13px"
@@ -51,13 +51,13 @@
             <div>
               <span
                 @click="sortChange(0)"
-                :style="sortType === 0 ? 'color:#5078FE' : ''"
+                :style="sortType === 0 ? 'color:#005EFF' : ''"
                 >Correlation<img
                   :src="sortType === 0 ? sortSrc1 : sortSrc2"
                   width="13px" /></span
               ><span
                 @click="sortChange(1)"
-                :style="sortType === 1 ? 'color:#5078FE' : ''"
+                :style="sortType === 1 ? 'color:#005EFF' : ''"
                 >Price<img
                   :src="sortType === 1 ? sortSrc1 : sortSrc2"
                   width="13px"
@@ -335,13 +335,14 @@ export default {
     width: 100%;
     .img1 {
       position: absolute;
-      top: 17px;
+      top: 35px;
       right: 590px;
     }
     .img2 {
       position: absolute;
-      top: 0px;
+      top: 47px;
       right: 0px;
+      z-index: -1;
     }
   }
   .market-content {
@@ -382,7 +383,7 @@ export default {
         cursor: pointer;
         i {
           margin-left: 5px;
-          color: #606060;
+          color: #363636;
           font-size: 14px;
         }
       }
@@ -393,7 +394,7 @@ export default {
         border-radius: 4px;
         font-size: 14px;
         line-height: 40px;
-        color: #606060;
+        color: #363636;
         text-align: left;
         padding: 0 6px;
         margin-top: 15px;
@@ -426,8 +427,8 @@ export default {
       }
       /deep/.el-checkbox__inner::after {
         content: "";
-        border: 1px solid #5078fe;
-        border-color: #5078fe;
+        border: 1px solid #005EFF;
+        border-color: #005EFF;
         border-left: 0;
         border-top: 0;
         width: 5px;
@@ -440,7 +441,7 @@ export default {
         height: 18px;
       }
       /deep/.el-checkbox__input.is-checked + .el-checkbox__label {
-        color: #5078fe;
+        color: #005EFF;
         font-size: 18px !important;
       }
     }
@@ -562,7 +563,7 @@ export default {
       }
       .file-info-center {
         font-size: 14px;
-        color: #606060;
+        color: #363636;
         position: relative;
         padding: 17px 0px;
         border-bottom: 1px solid #d7d7d7;
@@ -586,7 +587,7 @@ export default {
             margin-right: 10px;
           }
           span {
-            color: #5078fe;
+            color: #005EFF;
             font-weight: bold;
             font-size: 18px;
             margin-right: 8px;
@@ -595,7 +596,7 @@ export default {
       }
       .file-review {
         line-height: 22px;
-        color: #606060;
+        color: #363636;
         overflow: hidden;
         text-overflow: ellipsis;
         display: -webkit-box;
@@ -640,7 +641,7 @@ export default {
       /deep/.el-pager li:not(.disabled):hover,
       /deep/ .btn-next:hover,
       /deep/.btn-prev:hover {
-        background-color: #5078fe !important;
+        background-color: #005EFF !important;
       }
       /deep/.btn-next,
       /deep/ .btn-prev,
@@ -663,7 +664,7 @@ export default {
       li:hover {
         width: 36px;
         height: 36px;
-        background-color: #5078fe !important;
+        background-color: #005EFF !important;
         border-radius: 50%;
         border: none !important;
         padding: 0;
@@ -739,7 +740,7 @@ export default {
 @media screen and (max-width: 1564px) {
   .market-container .img-box .img1 {
     position: absolute;
-    top: 17px;
+    top: 35px;
     left: 0px;
   }
 }

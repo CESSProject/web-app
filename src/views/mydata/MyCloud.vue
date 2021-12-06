@@ -475,7 +475,7 @@ export default {
   /deep/.el-dialog__body {
     font-size: 30px;
     line-height: 44px;
-    color: #606060;
+    color: #363636;
     text-align: center !important;
   }
   /deep/.el-dialog__footer {
@@ -555,7 +555,7 @@ export default {
     /deep/.el-pager li:not(.disabled):hover,
     /deep/.btn-next:hover,
     /deep/.el-pagination.is-background .btn-prev:hover {
-      background-color: #5078fe !important;
+      background-color: #005EFF !important;
     }
     /deep/.btn-next,
     /deep/.btn-prev,
@@ -574,7 +574,7 @@ export default {
     li:hover {
       width: 36px;
       height: 36px;
-      background-color: #5078fe !important;
+      background-color: #005EFF !important;
       border-radius: 50%;
       border: none !important;
       padding: 0;
@@ -674,7 +674,7 @@ export default {
     height: 100%;
     font-size: 18px;
     line-height: 40px;
-    color: #606060;
+    color: #363636;
     font-family: "Open-Sans";
   }
   .el-dialog__header {
@@ -682,7 +682,7 @@ export default {
     font-family: "Open Sans";
     font-weight: bold;
     line-height: 44px;
-    color: #5078fe;
+    color: #005EFF;
   }
 }
 .action-bar {
@@ -694,10 +694,10 @@ export default {
   .action-btn {
     width: 154px;
     height: 32px;
-    border: 1px solid #5078fe;
+    border: 1px solid #005EFF;
     border-radius: 16px;
     margin-right: 5px;
-    color: #5078fe;
+    color: #005EFF;
     line-height: 32px;
     text-align: center;
     display: flex;

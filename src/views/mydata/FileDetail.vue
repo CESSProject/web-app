@@ -134,7 +134,7 @@ export default {
       isLoading: false,
       loading: null,
       loading2: null,
-      fullscreenLoading:false,
+      fullscreenLoading: false,
       detailData: {
         name: "",
         type: "",
@@ -149,7 +149,7 @@ export default {
         creator: "",
         classification: "1",
         time: "",
-        fid:''
+        fid: "",
       },
       fileTypeImg: "",
       fileId: "",
@@ -173,14 +173,14 @@ export default {
     async isLogined() {
       let _this = this;
       console.log("isLogined =============");
-      this.fullscreenLoading = true
-      await _this.queryFileInfo(this.fileId,this.fid);
+      this.fullscreenLoading = true;
+      await _this.queryFileInfo(this.fileId, this.fid);
       if (_this.buyFlag) {
         if (_this.needPay) {
-         await _this.queryBanlance();
+          await _this.queryBanlance();
         } else {
-          this.fullscreenLoading = true
-         await _this.getFileDownload();
+          this.fullscreenLoading = true;
+          await _this.getFileDownload();
         }
       }
 
@@ -190,20 +190,19 @@ export default {
   computed: {
     ...mapGetters(["isLogined"]),
   },
- async mounted() {
+  async mounted() {
     if (this.$route.query.shareCode) {
       this.shareCode = this.$route.query.shareCode;
       this.queryByShareCode();
     }
     if (this.$route.query.fileId || this.$route.query.fid) {
-      if(this.$route.query.fileId) this.fileId = this.$route.query.fileId
-      if(this.$route.query.fid) this.fid = this.$route.query.fid
-      console.log("32423432423",this.fileId,this.fid )
-      await this.queryFileInfo(this.fileId,this.fid);
+      if (this.$route.query.fileId) this.fileId = this.$route.query.fileId;
+      if (this.$route.query.fid) this.fid = this.$route.query.fid;
+      console.log("32423432423", this.fileId, this.fid);
+      await this.queryFileInfo(this.fileId, this.fid);
       await this.querySimilarFiles();
       await this.checkNeedPay();
-      this.fullscreenLoading = false
-
+      this.fullscreenLoading = false;
     }
   },
   filters: {
@@ -258,20 +257,20 @@ export default {
     },
     queryByShareCode() {
       let _this = this;
-      this.fullscreenLoading = true
+      this.fullscreenLoading = true;
       decryptShareCode(this.shareCode).then((res) => {
         console.log("===", res);
         if (res.success) {
           this.fullscreenLoading = false;
           _this.detailData = res.fileInformation;
           _this.fileId = res.fileInformation.fileId;
+          _this.fid = res.fileInformation.fid;
           _this.fileTypeImg = fileType(res.fileInformation.suffix);
           _this.querySimilarFiles();
           _this.checkNeedPay();
         } else {
           _this.expiredFlag = true;
           this.fullscreenLoading = false;
-
         }
       });
     },
@@ -286,7 +285,6 @@ export default {
       if (_this.needPay) {
         this.queryBanlance();
       } else {
- 
         this.getFileDownload();
       }
     },
@@ -314,7 +312,7 @@ export default {
             })
             .then(async (result) => {
               console.log("===", result);
-              if (result.data.code===0) {
+              if (result.data.code === 0) {
                 const link = document.createElement("a");
                 link.download = res.downloadInfomationDO.name;
                 link.href = result.data.data;
@@ -325,8 +323,8 @@ export default {
                   message: "Download succeed",
                 });
                 _this.buyFlag = false;
-               await _this.queryFileInfo(this.fileId,this.fid);
-               await _this.checkNeedPay();
+                await _this.queryFileInfo(this.fileId, this.fid);
+                await _this.checkNeedPay();
                 _this.fullscreenLoading = false;
               } else {
                 this.fullscreenLoading = false;
@@ -353,10 +351,10 @@ export default {
         }
       });
     },
-    queryFileInfo(fileId,fid) {
+    queryFileInfo(fileId, fid) {
       let _this = this;
       this.fullscreenLoading = true;
-      getFileInfo(fileId,fid).then((res) => {
+      getFileInfo(fileId, fid).then((res) => {
         console.log(res);
         _this.detailData = res.fileInformation;
         _this.fid = res.fileInformation.fid;
@@ -406,9 +404,10 @@ export default {
     },
 
     async toBuy() {
-      console.log("tobuy", this.fid);
       let _this = this;
       let ADDR = this.$store.state.userInfo.data.myAddress;
+      console.log("tobuy", this.fid, ADDR);
+
       const transferExtrinsic = _this.api.tx.fileBank.buyfile(this.fid, ADDR);
       const injector = await web3FromSource(
         _this.$store.state.userInfo.data.account.meta.source
@@ -419,7 +418,7 @@ export default {
           ADDR,
           { signer: injector.signer },
           ({ events = [], status }) => {
-            console.log("status==========", status);
+            console.log("status==========", status,events);
             console.log("events", events);
             if (status.isInBlock) {
               console.log(
@@ -429,11 +428,11 @@ export default {
               _this.getFileDownload();
             } else {
               console.log(`Current status: ${status.type}`);
-              if(status.type ==='Invalid'){
-               _this.fullscreenLoading = false;
-               _this.$message({
+              if (status.type === "Invalid") {
+                _this.fullscreenLoading = false;
+                _this.$message({
                   type: "error",
-                  message: "Network connection failed. Please try again later",
+                  message: "The file resource is expired!",
                 });
               }
             }
@@ -505,7 +504,7 @@ export default {
       margin-bottom: 40px;
       .price {
         font-size: 24px;
-        color: #5078fe;
+        color: #005eff;
         padding-top: 28px;
         font-family: "Open-Sans-Bold";
         line-height: 1;
@@ -526,7 +525,7 @@ export default {
         .buy-btn {
           width: 235px;
           height: 48px;
-          background: #5078fe;
+          background: #005eff;
           color: white;
           border-radius: 42px;
           font-size: 18px;
@@ -548,8 +547,7 @@ export default {
         line-height: 40px;
         color: #363636;
         word-break: break-all;
-            white-space: pre;
-
+        white-space: pre;
       }
       .info-label {
         min-width: 150px;
@@ -559,12 +557,11 @@ export default {
         line-height: 39px;
         display: flex;
         justify-content: space-between;
-        .info-content{
+        .info-content {
           word-break: break-word;
-        
         }
-        .keywords{
-            line-height: 22px;
+        .keywords {
+          line-height: 22px;
         }
       }
       .overview {
@@ -596,7 +593,7 @@ export default {
       display: flex;
       justify-content: flex-start;
       font-size: 14px;
-      color: #606060;
+      color: #363636;
       line-height: 20px;
       padding: 24px 0px 33px 0px;
       border-bottom: 1px solid #d7d7d7;

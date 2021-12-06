@@ -11,7 +11,7 @@
       </div>
       <div class="footer-info">
         <div class="img">
-          <img src="../../assets/footer2.png" height="82px" />
+          <img src="../../assets/footer3.png" height="82px" />
         </div>
         <div>Data confirmation</div>
         <div>
@@ -21,7 +21,7 @@
       </div>
       <div class="footer-info">
         <div class="img">
-          <img src="../../assets/footer3.png" height="82px" />
+          <img src="../../assets/footer2.png" height="82px" />
         </div>
         <div>Distributed storage</div>
         <div>Data is stored in the miner's equipment</div>
@@ -45,12 +45,12 @@ export default {
 <style scoped lang="less">
 .footer-container {
   height: 273px;
-  background: white;
+  background: #005EFF;
 }
 .footer-top {
   display: flex;
   justify-content: space-around;
-  color: #363636;
+  color: #FFFFFF;
     max-width: 1564px;
   margin: 0 auto;
   .footer-info{
@@ -75,8 +75,8 @@ export default {
   height: 43px;
   font-size: 14px;
   line-height: 43px;
-  color: #363636;
-  border-top: 1px solid #d7d7d7;
-
+  color:#FFFFFF;
+  border-top: 1px solid #3888FF;
+background: #005EFF;
 }
 </style>

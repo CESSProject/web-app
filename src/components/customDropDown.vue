@@ -13,8 +13,7 @@
       <li
         v-for="(item, index) in items"
         :key="index"
-        @click="
-          item.callback(item);
+        @click="item.callback(item);
           closeMenu();
         "
       >

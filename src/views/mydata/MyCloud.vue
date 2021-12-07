@@ -447,7 +447,6 @@ export default {
         uploadId: uploadId,
       })
         .then((res) => {
-          console.log("获取分享码===", res, window.host);
           this.isCopyLoading = false;
           if (res.success) {
             this.ruleForm.linkUrl = 'http://' +

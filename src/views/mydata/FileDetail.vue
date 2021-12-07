@@ -35,7 +35,7 @@
             </div>
           </div>
           <div class="info-detail">
-            <div class="info-label">Download times:</div>
+            <div class="info-label">Sales:</div>
             <div class="info-content">{{ detailData.downloadTimes }}</div>
           </div>
           <div class="info-detail">
@@ -134,7 +134,7 @@ export default {
       isLoading: false,
       loading: null,
       loading2: null,
-      fullscreenLoading: false,
+      fullscreenLoading: true,
       detailData: {
         name: "",
         type: "",
@@ -191,6 +191,7 @@ export default {
     ...mapGetters(["isLogined"]),
   },
   async mounted() {
+
     if (this.$route.query.shareCode) {
       this.shareCode = this.$route.query.shareCode;
       this.queryByShareCode();
@@ -295,6 +296,64 @@ export default {
         }
       });
     },
+    // Old download way
+
+    // getFileDownload() {
+    //   let _this = this;
+    //   fileDownload({
+    //     fileId: _this.fileId,
+    //     txHash: _this.downloadBlockHash,
+    //   }).then((res) => {
+    //     console.log("===", res);
+    //     if (res.success) {
+    //       axios
+    //         .get(res.downloadUrl, {
+    //           headers: {
+    //             token: this.$store.state.userInfo.data.token,
+    //           },
+    //           // responseType: "blob",
+    //         })
+    //         .then(async (result) => {
+    //           console.log("===", result);
+    //           if (result.data.code === 0) {
+    //             const link = document.createElement("a");
+    //             link.download = res.downloadInfomationDO.name;
+    //             link.href = result.data.data;
+    //             link.click();
+    //             link.remove();
+    //             _this.$message({
+    //               type: "success",
+    //               message: "Download succeed",
+    //             });
+    //             _this.buyFlag = false;
+    //             await _this.queryFileInfo(this.fileId, this.fid);
+    //             await _this.checkNeedPay();
+    //             _this.fullscreenLoading = false;
+    //           } else {
+    //             this.fullscreenLoading = false;
+    //             this.$message({
+    //               type: "error",
+    //               message: "Download failed",
+    //             });
+    //           }
+    //         })
+    //         .catch((error) => {
+    //           this.fullscreenLoading = false;
+    //           console.log("===", error);
+    //           this.$message({
+    //             type: "error",
+    //             message: "Download failed",
+    //           });
+    //         });
+    //     } else {
+    //       this.fullscreenLoading = false;
+    //       this.$message({
+    //         type: "error",
+    //         message: "The file resource is expired!",
+    //       });
+    //     }
+    //   });
+    // },
     getFileDownload() {
       let _this = this;
       fileDownload({
@@ -303,13 +362,19 @@ export default {
       }).then((res) => {
         console.log("===", res);
         if (res.success) {
+          let url = 'http://139.224.19.104:80/download'
+          let index = res.downloadUrl.indexOf('token') +6;
+          let hash = res.downloadUrl.slice(res.downloadUrl.indexOf('download')+9,res.downloadUrl.indexOf('?'))
+          let token = res.downloadUrl.slice(index,res.downloadUrl.length);
+          console.log("url", url);
+          console.log("token",token,);
+          console.log("hash", hash);
+          let data = {
+            hash: hash,
+            token:token
+          };
           axios
-            .get(res.downloadUrl, {
-              headers: {
-                token: this.$store.state.userInfo.data.token,
-              },
-              // responseType: "blob",
-            })
+            .post(url,data)
             .then(async (result) => {
               console.log("===", result);
               if (result.data.code === 0) {
@@ -358,16 +423,20 @@ export default {
         console.log(res);
         _this.detailData = res.fileInformation;
         _this.fid = res.fileInformation.fid;
+        _this.fileId = res.fileInformation.fileId;
         _this.fileTypeImg = fileType(res.fileInformation.suffix);
       });
     },
     querySimilarFiles() {
       getSimilarFiles(this.fileId).then((res) => {
         console.log("querySimilarFiles", res);
+        if(res.success) {
         this.sililar = res.fileList;
         this.sililar.forEach((item) => {
           item.fileImg = fileType(item.suffix);
         });
+        }
+
       });
     },
     async queryBanlance() {
@@ -418,7 +487,7 @@ export default {
           ADDR,
           { signer: injector.signer },
           ({ events = [], status }) => {
-            console.log("status==========", status,events);
+            console.log("status==========", status, events);
             console.log("events", events);
             if (status.isInBlock) {
               console.log(

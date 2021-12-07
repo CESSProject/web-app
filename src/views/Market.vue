@@ -1,5 +1,5 @@
 <template>
-  <div class="market-container layout-content">
+  <div class="market-container layout-content" v-loading.fullscreen.lock="fullscreenLoading">
     <div class="market-content">
       <div class="img-box">
         <img src="../assets/DTM-title.png" width="585px" class="img1" />
@@ -30,7 +30,7 @@
             </el-checkbox-group>
           </div>
         </div>
-        <div class="content-right" v-if="list.length > 0">
+        <div class="content-right" v-if="list.length > 0" >
           <div class="sort-bar" v-show="!isSearchResult">
             <span
               @click="sortChange(0)"
@@ -149,6 +149,7 @@ import { mapMutations } from "vuex";
 export default {
   data() {
     return {
+      fullscreenLoading:true,
       isSearchResult: false,
       sortType: 0,
       sortSrc1: require("../assets/icons/sort1.png"),
@@ -190,38 +191,38 @@ export default {
   },
   computed: {
     keyword() {
-      console.log("-------------------",this.$store.state.userInfo.searchKey)
-         return this.$store.state.userInfo.searchKey;
-    }
+      console.log("-------------------", this.$store.state.userInfo.searchKey);
+      return this.$store.state.userInfo.searchKey;
+    },
   },
   watch: {
     keyword(val) {
-      console.log("keyword change", val)
-      if(val ==null) return
-     if (val !== "") {
-      this.isSearchResult = true;
-      this.queryParams.keyword = this.$store.state.userInfo.searchKey;
-      this.checkedCities = ["All"];
-      this.queryParams.formatList = [];
-      this.queryParams.pageNum = 1
-    } else {
-      this.isSearchResult = false;
-      this.checkedCities = ["All"];
-      this.queryParams.keyword = "";
-      this.queryParams.formatList = [];
-      this.queryParams.pageNum = 1
-
-    }
-    this.getData(this.queryParams);
+      console.log("keyword change", val);
+      if (val == null) return;
+      if (val !== "") {
+        this.isSearchResult = true;
+        this.queryParams.keyword = this.$store.state.userInfo.searchKey;
+        this.checkedCities = ["All"];
+        this.queryParams.formatList = [];
+        this.queryParams.pageNum = 1;
+      } else {
+        this.isSearchResult = false;
+        this.checkedCities = ["All"];
+        this.queryParams.keyword = "";
+        this.queryParams.formatList = [];
+        this.queryParams.pageNum = 1;
+      }
+      this.getData(this.queryParams);
     },
   },
   mounted() {
-      this.isSearchResult = true;
-      this.queryParams.keyword = this.$route.query.keyword || this.$store.state.userInfo.searchKey;
-      this.checkedCities = ["All"];
-      this.queryParams.formatList = [];
-      this.queryParams.pageNum = 1
-      this.getData(this.queryParams);
+    this.queryParams.keyword =
+      this.$route.query.keyword || this.$store.state.userInfo.searchKey;
+    this.checkedCities = ["All"];
+    this.queryParams.formatList = [];
+
+    this.queryParams.pageNum = 1;
+    this.getData(this.queryParams);
   },
   methods: {
     clearFilter() {
@@ -229,7 +230,7 @@ export default {
       this.checkedCities = ["All"];
       this.isSearchResult = false;
       this.queryParams.formatList = [];
-      this.queryParams.pageNum = 1
+      this.queryParams.pageNum = 1;
       this.getData(this.queryParams);
     },
     sortChange(val) {
@@ -251,8 +252,14 @@ export default {
             });
             this.total = res.totalPages;
             this.maxlengthPage = Math.ceil(this.total / this.pageSize);
-             this.setSearchKey(null)
+            if (this.list.length > 0 && this.queryParams.keyword!==null) {
+              this.isSearchResult = true;
+            }
+            this.setSearchKey(null);
+            this.fullscreenLoading = false
           } else {
+            this.fullscreenLoading = false
+
             _this.$message({
               type: "error",
               message: "",
@@ -276,7 +283,7 @@ export default {
       console.log(value, this.formatList);
       this.formatList = [];
       this.queryParams.formatList = this.formatList;
-      this.queryParams.pageNum = 1
+      this.queryParams.pageNum = 1;
       if (value.length === 0) {
         this.checkedCities.push("All");
         this.selectLabel = "Format: ";
@@ -311,17 +318,16 @@ export default {
       this.getData(this.queryParams);
     },
     JumpTo() {
-      let page = Number(this.jumpPage)
-      if(page<0){
-         page = 1
-      }else if(page > this.maxlengthPage){
-        page = this.maxlengthPage
+      let page = Number(this.jumpPage);
+      if (page < 0) {
+        page = 1;
+      } else if (page > this.maxlengthPage) {
+        page = this.maxlengthPage;
       }
       this.handleCurrentChange(page);
-      this.jumpPage = 'Jump to page'
+      this.jumpPage = "Jump to page";
     },
-    ...mapMutations("userInfo", ["setSearchKey"])
-
+    ...mapMutations("userInfo", ["setSearchKey"]),
   },
 };
 </script>
@@ -427,8 +433,8 @@ export default {
       }
       /deep/.el-checkbox__inner::after {
         content: "";
-        border: 1px solid #005EFF;
-        border-color: #005EFF;
+        border: 1px solid #005eff;
+        border-color: #005eff;
         border-left: 0;
         border-top: 0;
         width: 5px;
@@ -441,7 +447,7 @@ export default {
         height: 18px;
       }
       /deep/.el-checkbox__input.is-checked + .el-checkbox__label {
-        color: #005EFF;
+        color: #005eff;
         font-size: 18px !important;
       }
     }
@@ -587,7 +593,7 @@ export default {
             margin-right: 10px;
           }
           span {
-            color: #005EFF;
+            color: #005eff;
             font-weight: bold;
             font-size: 18px;
             margin-right: 8px;
@@ -641,7 +647,7 @@ export default {
       /deep/.el-pager li:not(.disabled):hover,
       /deep/ .btn-next:hover,
       /deep/.btn-prev:hover {
-        background-color: #005EFF !important;
+        background-color: #005eff !important;
       }
       /deep/.btn-next,
       /deep/ .btn-prev,
@@ -664,7 +670,7 @@ export default {
       li:hover {
         width: 36px;
         height: 36px;
-        background-color: #005EFF !important;
+        background-color: #005eff !important;
         border-radius: 50%;
         border: none !important;
         padding: 0;

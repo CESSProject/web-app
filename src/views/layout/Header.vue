@@ -211,7 +211,7 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  border-bottom: 2px solid #d7d7d7;
+  // border-bottom: 2px solid #d7d7d7;
   padding: 0 20px;
   position: fixed;
   z-index: 2002;

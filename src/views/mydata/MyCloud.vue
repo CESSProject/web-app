@@ -277,13 +277,21 @@ export default {
       }).then((res) => {
         console.log("===", res);
         if (res.success) {
+          let url = 'http://139.224.19.104:80/download'
+          let index = res.downloadUrl.indexOf('token') +6;
+          let hash = res.downloadUrl.slice(res.downloadUrl.indexOf('download')+9,res.downloadUrl.indexOf('?'))
+          let token = res.downloadUrl.slice(index,res.downloadUrl.length);
+          console.log("url", url);
+          console.log("token",token,);
+          console.log("hash", hash);
+          let data = {
+            hash: hash,
+            token:token
+          };
+
+
           axios
-            .get(res.downloadUrl, {
-              headers: {
-                token: this.$store.state.userInfo.data.token,
-              },
-              // responseType: "blob",
-            })
+            .post(url,data)
             .then((result) => {
               console.log("===2222222222", result);
               if(result.data.code===0) {

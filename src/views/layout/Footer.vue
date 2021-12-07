@@ -49,12 +49,12 @@ export default {
 }
 .footer-top {
   display: flex;
-  justify-content: space-around;
+  justify-content: space-between;
   color: #FFFFFF;
-    max-width: 1564px;
+    max-width: 1400px;
   margin: 0 auto;
   .footer-info{
-    width: 372px;
+
     font-weight: bold;
       padding: 48px 0px;
     
@@ -64,7 +64,8 @@ export default {
   }
   .footer-info div:last-child {
     font-size: 14px;
-
+    width: 372px;
+    margin-top: 5px;
   }
   .footer-info img {
     margin-bottom: 9px;

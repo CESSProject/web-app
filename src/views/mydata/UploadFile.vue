@@ -134,7 +134,7 @@
             <span slot="label" class="not-required">
               Revenue per download：</span
             >
-            <span class="cost">{{ ruleFormFile.estimateSpent }} TCESS</span>
+            <span class="cost">{{ (ruleFormFile.estimateSpent * 0.8).toFixed(4) }} TCESS</span>
           </el-form-item>
           <el-form-item>
             <span slot="label" class="not-required"> Storage cost：</span>
@@ -590,9 +590,15 @@ export default {
         .then((res) => {
           console.log("===", res);
           if (res.success) {
-            _this.uploadUrl = res.uploadUrl;
+            // _this.uploadUrl = res.uploadUrl.slice(0,res.uploadUrl.indexOf('upload')+6)
+            _this.uploadUrl = "http://139.224.19.104:80/upload";
+            let index = res.uploadUrl.indexOf("token") + 6;
+            let token = res.uploadUrl.slice(index, res.uploadUrl.length);
+            console.log("uploadUrl=======", _this.uploadUrl);
+
+            console.log("token=======", token);
             _this.loading.close();
-            _this.uploadtoDataBase();
+            _this.uploadtoDataBase(token);
           } else {
             _this.loading.close();
             _this.$message({
@@ -609,17 +615,19 @@ export default {
           });
         });
     },
-    uploadtoDataBase() {
+    uploadtoDataBase(token) {
       let _this = this;
       let formData = new FormData();
       _this.getFileInfo = _this.fileInfo;
       formData.append("file", _this.fileInfo);
+
       _this.isDrawer = true;
       _this.loading = _this.$loading({
         lock: true,
         text: "Loading",
         background: "rgba(0, 0, 0, 0.7)",
       });
+      formData.append("token", token);
       axios
         .post(_this.uploadUrl, formData, {
           cancelToken: _this.source.token,

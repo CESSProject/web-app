@@ -4,7 +4,8 @@
       <div class="block1">
         <div class="block1-left">
           <div class="block-title">
-            one stop data trading<br />service platform
+            <div class="title1"><span>O</span>ne stop</div>
+            <div>Data trading service platform.</div>
           </div>
           <p>
             Featuring data security, relying on blockchain, distributed cloud
@@ -19,25 +20,22 @@
         </div>
       </div>
       <div class="block2">
-        <div class="block2-bg">
-          <img src="../assets/home-bg.png" />
-        </div>
         <div class="block2-inner">
-          <div class="block2-title">
-            Popular data<br />
-            more user choices
+          <div class="circle">
+            <img src="../assets/icons/dot.png" class="dot" />
+          </div>
+          <div class="block-title">
+            <div class="title1"><span>P</span>opular data</div>
+            <div>more user choices.</div>
           </div>
           <div class="search-bar">
             <el-input
               v-model="keyword"
               placeholder="Enter data name"
             ></el-input>
-            <img
-              class="search-icon"
-              src="../assets/icons/search.png"
-              width="22px"
-              @click="searchData"
-            />
+            <div class="search-icon" @click="searchData">
+              <img src="../assets/icons/search2.png" width="22px" />
+            </div>
           </div>
           <div class="popular-data">
             <div
@@ -144,6 +142,7 @@
           CESS data trading market is an official application<br />
           built on CESS public chain and distributed storage system
         </p>
+        <div class="circle2"></div>
         <div class="block3-inner">
           <div class="block3-inner-item">
             <img src="../assets/home6.png" width="275px" />
@@ -212,7 +211,7 @@ export default {
       });
     },
     searchData() {
-      this.setSearchKey(this.keyword)
+      this.setSearchKey(this.keyword);
       this.$router.push({
         path: "/market",
         query: {
@@ -228,7 +227,7 @@ export default {
         },
       });
     },
-    ...mapMutations("userInfo", ["setSearchKey"])
+    ...mapMutations("userInfo", ["setSearchKey"]),
   },
 };
 </script>
@@ -243,120 +242,143 @@ export default {
   z-index: 1;
   margin-top: 65px;
   overflow: hidden;
+  // max-width: 1400px;
+      padding: 0 253px;
+    box-sizing: border-box;
+  min-width: 980px;
+  margin: 0 auto;
+}
+.block-title {
+  font-size: 45px;
+  font-weight: 800;
+  line-height: 45px;
+  color: #0e0e0e;
+  .title1 {
+    font-size: 60px;
+    margin-bottom: 35px;
+    span {
+      color: #005eff;
+    }
+  }
+  .title2 {
+    font-size: 36px;
+  }
 }
 .block1 {
-  height: 358px;
+  height: 800px;
   display: flex;
   max-width: 1564px;
-  padding: 0 50px;
   margin: 0 auto;
-  justify-content: center;
+  justify-content: space-between;
   .block1-left {
     width: 625px;
     text-align: left;
     margin-right: 123px;
+    margin-top: 183px;
   }
-  .block-title {
-    font-size: 45px;
-    font-family: "AlegreyaSansSC-ExtraBold";
-    font-weight: 800;
-    line-height: 38px;
-    color: #005EFF;
-  }
+
   p {
-    font-size: 18px;
+    font-size: 14px;
     font-weight: 400;
     line-height: 32px;
-
-    margin: 34px 0;
+    margin: 37px 0;
+    color: #383838;
+  }
+  .block1-right {
+    background-image: url("../assets/home1-bg.png");
+    background-repeat: no-repeat;
+    background-size: 100%;
+    background-position: 15px 25px;
   }
 }
 .block2 {
-  height: 1016px;
-  // background-image: url("../assets/home-bg.png");
-  // background-repeat: no-repeat;
-  // background-size: cover;
-  // background-position: top;
-  margin-top: -75px;
+  height: 800px;
+  margin-top: 20px;
   text-align: left;
   position: relative;
   z-index: -1;
-  .block2-bg {
+  .circle {
+    background-image: url("../assets/circle1.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top;
+    width: 922px;
+    height: 922px;
+    z-index: -1;
+    left: -250px;
+    top: -350px;
     position: absolute;
-    height: 1017px;
-    z-index: 1;
-    img {
-      left: -300px;
-      top: -15px;
-      height: 1017px;
+    .dot {
       position: absolute;
+      width: 20px;
+      height: 20px;
+      top: 134px;
+      left: 176px;
     }
   }
   .block2-inner {
     max-width: 1564px;
     margin: 0 auto;
     position: relative;
-    height: 1016px;
+    height: 800px;
     z-index: 10;
-    .block2-title {
-      font-size: 30px;
-      font-weight: bold;
-      line-height: 32px;
-      color: #ffffff;
-      top: 143px;
-      position: absolute;
-      left: 135px;
-    }
     .search-bar {
-      width: 607px;
-      height: 55px;
+      width: 943px;
+      height: 74px;
       background: #ffffff;
       border-radius: 28px;
-      top: 266px;
-      left: 135px;
-      position: absolute;
       margin-bottom: 80px;
+      margin-top: 58px;
+      position: relative;
       /deep/.el-input__inner {
         font-size: 16px;
         font-family: "Roboto";
         font-weight: 500;
-        line-height: 55px;
-        border: 1px solid #dbdbdb;
-        width: 607px;
-        height: 55px;
-        background: #ffffff;
-        border-radius: 28px;
+        line-height: 74px;
+        width: 943px;
+        height: 74px;
+        background: #f6f7fb;
+        border: 1px solid #005eff;
+        border-radius: 11px;
         color: #9f9f9f;
         width: 100%;
         padding: 0 32px;
       }
       .search-icon {
         position: absolute;
-        right: 20px;
-        top: 28%;
+        right: -85px;
+        top: 0;
+        width: 74px;
+        height: 74px;
+        background: #f6f7fb;
+        border: 1px solid #005eff;
+        border-radius: 11px;
+        text-align: center;
+        line-height: 85px;
         cursor: pointer;
       }
     }
     .popular-data {
-      top: 402px;
-      position: absolute;
       display: flex;
       width: 100%;
       justify-content: flex-start;
       margin-bottom: 30px;
-      padding: 0px 110px;
       .popular-data-item {
         width: 265px;
         height: 336px;
-        background: #f6f7fb;
         border-radius: 8px;
         padding-top: 39px;
         box-sizing: border-box;
         text-align: center;
         margin: 0 23px;
-
+        background: white;
+        border: 1px solid #b9c7ff;
+        box-shadow: 0px 8px 17px #b9c7ff;
         overflow: hidden;
         cursor: pointer;
+        transform: translateY(0);
+        transition: transform 0.4s;
+
         .popular-img {
           height: 95px;
         }
@@ -377,8 +399,7 @@ export default {
             -webkit-line-clamp: 2;
             -webkit-box-orient: vertical;
             word-break: break-all;
-            white-space:pre-wrap;
-
+            white-space: pre-wrap;
           }
           .price {
             padding: 10px 0px;
@@ -406,6 +427,11 @@ export default {
           }
         }
       }
+      .popular-data-item:hover {
+        transform: translateY(-20px);
+        box-shadow: 0px 8px 17px rgba(42, 84, 253, 0.6);
+        transition: transform 0.4s;
+      }
     }
   }
   .block2-inner::after {
@@ -415,31 +441,46 @@ export default {
   }
 }
 .block3 {
-  margin-top: -90px;
   margin-bottom: 74px;
+  position: relative;
+  .circle2 {
+    background-image: url("../assets/circle2.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: top;
+    width: 298px;
+    height: 298px;
+    right: -149px;
+    top: -50px;
+    z-index: -1;
+    position: absolute;
+  }
   .block3-title {
-    font-size: 30px;
+    font-size: 32px;
     font-weight: bold;
     line-height: 44px;
-    color: #0E0E0E;
+    color: #0e0e0e;
     margin-bottom: 100px;
-    // text-align: left;
+    text-align: left;
   }
   .block3-inner {
     display: flex;
-    justify-content: space-around;
+    justify-content: space-between;
     max-width: 1564px;
     margin: 0 auto;
     margin-top: 35px;
   }
   .block3-inner-item {
-    flex: 1;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
+    align-items: center;
     p {
       font-size: 30px;
       font-family: "Open-Sans-Bold";
       font-weight: 500;
       line-height: 44px;
-      color: #0E0E0E;
+      color: #0e0e0e;
       margin-top: 32px auto 13px;
     }
     .desc {
@@ -448,6 +489,13 @@ export default {
       line-height: 26px;
       margin: 0 auto;
     }
+  }
+}
+@media screen and (max-width: 1366px) {
+  .home-content {
+    width: 100%;
+    padding: 0 100px;
+    box-sizing: border-box;
   }
 }
 </style>

@@ -16,6 +16,12 @@ module.exports = {
         //     '^/api': '/'
         // }
       },
+      '/file': {
+        target: 'http://139.224.19.104:8081/',
+        changeOrigin: true,
+        ws: false
+
+      },
     }
   },
   chainWebpack: config => {

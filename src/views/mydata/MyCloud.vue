@@ -277,7 +277,7 @@ export default {
       }).then((res) => {
         console.log("===", res);
         if (res.success) {
-          let url = 'http://139.224.19.104:80/download'
+          let url = 'http://139.224.19.104:8081/file/download'
           let index = res.downloadUrl.indexOf('token') +6;
           let hash = res.downloadUrl.slice(res.downloadUrl.indexOf('download')+9,res.downloadUrl.indexOf('?'))
           let token = res.downloadUrl.slice(index,res.downloadUrl.length);
@@ -753,7 +753,7 @@ export default {
   line-height: 40px;
   color: #363636;
   margin-left: 30px;
-            white-space: pre;
+            white-space: pre-wrap;
   
 }
 .custom-cell {

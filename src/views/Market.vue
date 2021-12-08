@@ -1,5 +1,8 @@
 <template>
-  <div class="market-container layout-content" v-loading.fullscreen.lock="fullscreenLoading">
+  <div
+    class="market-container layout-content"
+    v-loading.fullscreen.lock="fullscreenLoading"
+  >
     <div class="market-content">
       <div class="img-box">
         <img src="../assets/DTM-title.png" width="585px" class="img1" />
@@ -30,7 +33,7 @@
             </el-checkbox-group>
           </div>
         </div>
-        <div class="content-right" v-if="list.length > 0" >
+        <div class="content-right" v-if="list.length > 0">
           <div class="sort-bar" v-show="!isSearchResult">
             <span
               @click="sortChange(0)"
@@ -85,7 +88,7 @@
                   <span
                     >File validity period:
                     {{ item.expireTime | dealWithDate }}</span
-                  ><span>Download times: {{ item.downloadTimes }}</span>
+                  ><span>Sales: {{ item.downloadTimes }}</span>
                   <span>Data size: {{ item.size | sizeFilter }}</span>
                   <div class="price-info">
                     <img src="../assets/icons/download-icon.png" width="24px" />
@@ -149,7 +152,7 @@ import { mapMutations } from "vuex";
 export default {
   data() {
     return {
-      fullscreenLoading:true,
+      fullscreenLoading: true,
       isSearchResult: false,
       sortType: 0,
       sortSrc1: require("../assets/icons/sort1.png"),
@@ -252,13 +255,13 @@ export default {
             });
             this.total = res.totalPages;
             this.maxlengthPage = Math.ceil(this.total / this.pageSize);
-            if (this.list.length > 0 && this.queryParams.keyword!==null) {
+            if (this.list.length > 0 && this.queryParams.keyword !== null) {
               this.isSearchResult = true;
             }
             this.setSearchKey(null);
-            this.fullscreenLoading = false
+            this.fullscreenLoading = false;
           } else {
-            this.fullscreenLoading = false
+            this.fullscreenLoading = false;
 
             _this.$message({
               type: "error",
@@ -467,7 +470,7 @@ export default {
   }
   .content-right {
     flex: 1;
-
+    background: #f6f7fb;
     .sort-bar {
       width: 100%;
       height: 47px;

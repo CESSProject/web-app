@@ -591,7 +591,7 @@ export default {
           console.log("===", res);
           if (res.success) {
             // _this.uploadUrl = res.uploadUrl.slice(0,res.uploadUrl.indexOf('upload')+6)
-            _this.uploadUrl = "http://139.224.19.104:80/upload";
+            _this.uploadUrl = "http://139.224.19.104:8081/file/upload";
             let index = res.uploadUrl.indexOf("token") + 6;
             let token = res.uploadUrl.slice(index, res.uploadUrl.length);
             console.log("uploadUrl=======", _this.uploadUrl);

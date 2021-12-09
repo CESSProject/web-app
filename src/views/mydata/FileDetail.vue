@@ -172,9 +172,10 @@ export default {
   watch: {
     async isLogined() {
       let _this = this;
-      console.log("isLogined =============");
       this.fullscreenLoading = true;
       await _this.queryFileInfo(this.fileId, this.fid);
+      await _this.checkNeedPay();
+      console.log("isLogined =============", _this.buyFlag, _this.needPay);
       if (_this.buyFlag) {
         if (_this.needPay) {
           await _this.queryBanlance();
@@ -183,15 +184,12 @@ export default {
           await _this.getFileDownload();
         }
       }
-
-      await _this.checkNeedPay();
     },
   },
   computed: {
     ...mapGetters(["isLogined"]),
   },
   async mounted() {
-
     if (this.$route.query.shareCode) {
       this.shareCode = this.$route.query.shareCode;
       this.queryByShareCode();
@@ -362,22 +360,29 @@ export default {
       }).then((res) => {
         console.log("===", res);
         if (res.success) {
-          let url = 'http://139.224.19.104:8081/file/download'
-          let index = res.downloadUrl.indexOf('token') +6;
-          let hash = res.downloadUrl.slice(res.downloadUrl.indexOf('download')+9,res.downloadUrl.indexOf('?'))
-          let token = res.downloadUrl.slice(index,res.downloadUrl.length);
+          _this.queryFileInfo(this.fileId, this.fid);
+          _this.checkNeedPay();
+          let url = "http://139.224.19.104:8081/file/download";
+          let index = res.downloadUrl.indexOf("token") + 6;
+          let hash = res.downloadUrl.slice(
+            res.downloadUrl.indexOf("download") + 9,
+            res.downloadUrl.indexOf("?")
+          );
+          let token = res.downloadUrl.slice(index, res.downloadUrl.length);
           console.log("url", url);
-          console.log("token",token,);
+          console.log("token", token);
           console.log("hash", hash);
           let data = {
             hash: hash,
-            token:token
+            token: token,
           };
           axios
-            .post(url,data)
+            .post(url, data)
             .then(async (result) => {
               console.log("===", result);
               if (result.data.code === 0) {
+                _this.buyFlag = false;
+                _this.fullscreenLoading = false;
                 const link = document.createElement("a");
                 link.download = res.downloadInfomationDO.name;
                 link.href = result.data.data;
@@ -387,10 +392,6 @@ export default {
                   type: "success",
                   message: "Download succeed",
                 });
-                _this.buyFlag = false;
-                await _this.queryFileInfo(this.fileId, this.fid);
-                await _this.checkNeedPay();
-                _this.fullscreenLoading = false;
               } else {
                 this.fullscreenLoading = false;
                 this.$message({
@@ -430,13 +431,12 @@ export default {
     querySimilarFiles() {
       getSimilarFiles(this.fileId).then((res) => {
         console.log("querySimilarFiles", res);
-        if(res.success) {
-        this.sililar = res.fileList;
-        this.sililar.forEach((item) => {
-          item.fileImg = fileType(item.suffix);
-        });
+        if (res.success) {
+          this.sililar = res.fileList;
+          this.sililar.forEach((item) => {
+            item.fileImg = fileType(item.suffix);
+          });
         }
-
       });
     },
     async queryBanlance() {

@@ -321,8 +321,9 @@ export default {
       this.getData(this.queryParams);
     },
     JumpTo() {
+      if (this.jumpPage === "Jump to page") return;
       let page = Number(this.jumpPage);
-      if (page < 0) {
+      if (page < 0 || page === 0) {
         page = 1;
       } else if (page > this.maxlengthPage) {
         page = this.maxlengthPage;
@@ -631,7 +632,7 @@ export default {
       /deep/.btn-prev,
       /deep/.btn-next,
       /deep/.el-pager,
-      /deep/.number {
+      /deep/.number,.btn-quicknext {
         height: 36px !important;
         border: none !important;
         padding: 0;
@@ -639,6 +640,10 @@ export default {
           width: 36px !important;
           margin-right: 0px;
         }
+      }
+      /deep/.el-pager .more  {
+        height: 36px !important;
+
       }
       /deep/.el-pager li {
         line-height: 36px;
@@ -741,6 +746,9 @@ export default {
           cursor: pointer;
           font-weight: bold;
           background: white;
+        }
+        .jump-btn:hover {
+          color: white;
         }
       }
     }

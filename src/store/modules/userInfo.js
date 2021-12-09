@@ -126,7 +126,7 @@ const userInfo = {
       commit('clearUserInfo')
       localStorage.removeItem('userInfo')
       localStorage.removeItem('publicUsersInfo')
-      location.href = '/'
+      location.href = '/data'
     }
   }
 }

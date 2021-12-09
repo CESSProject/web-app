@@ -117,7 +117,7 @@
 import axios from "axios";
 import moment from "moment";
 import { types } from "@/utils/config";
-import { parseTime, renderSize, fileType, similarValue } from "@/utils/valid";
+import { renderSize, fileType, similarValue } from "@/utils/valid";
 import { mapGetters } from "vuex";
 import {
   queryFileNeedPay,
@@ -162,34 +162,39 @@ export default {
       api: null,
       fid: "",
       needPay: true,
+      buyFlag: null,
       fromPath: "",
       timer: null,
       downloading: false,
-      buyFlag: null,
       expiredFlag: false,
     };
   },
   watch: {
     async isLogined() {
       let _this = this;
-      this.fullscreenLoading = true;
-      await _this.queryFileInfo(this.fileId, this.fid);
-      await _this.checkNeedPay();
-      console.log("isLogined =============", _this.buyFlag, _this.needPay);
-      if (_this.buyFlag) {
-        if (_this.needPay) {
-          await _this.queryBanlance();
-        } else {
-          this.fullscreenLoading = true;
-          await _this.getFileDownload();
+      _this.fullscreenLoading = true;
+      console.log("isLogined =============", _this.needPay);
+      await _this.queryFileInfo(this.fileId, this.fid).then((resFileId) => {
+        if (resFileId) {
+          _this.checkNeedPay(resFileId).then((res) => {
+            console.log("oooooooooooooo", res);
+            if (_this.buyFlag) {
+              if (res) {
+                _this.queryBanlance();
+              } else {
+                _this.getFileDownload();
+              }
+            }
+          });
         }
-      }
+      });
     },
   },
   computed: {
     ...mapGetters(["isLogined"]),
   },
   async mounted() {
+    let _this = this;
     if (this.$route.query.shareCode) {
       this.shareCode = this.$route.query.shareCode;
       this.queryByShareCode();
@@ -198,10 +203,15 @@ export default {
       if (this.$route.query.fileId) this.fileId = this.$route.query.fileId;
       if (this.$route.query.fid) this.fid = this.$route.query.fid;
       console.log("32423432423", this.fileId, this.fid);
-      await this.queryFileInfo(this.fileId, this.fid);
-      await this.querySimilarFiles();
-      await this.checkNeedPay();
-      this.fullscreenLoading = false;
+      await this.queryFileInfo(this.fileId, this.fid).then((resFileId) => {
+        console.log("resFileId", resFileId);
+        if (_this.isLogined) {
+          _this.checkNeedPay(resFileId).then((res) => {
+            console.log("checkNeedPay", res);
+          });
+        }
+        this.fullscreenLoading = false;
+      });
     }
   },
   filters: {
@@ -266,7 +276,11 @@ export default {
           _this.fid = res.fileInformation.fid;
           _this.fileTypeImg = fileType(res.fileInformation.suffix);
           _this.querySimilarFiles();
-          _this.checkNeedPay();
+          if (this.isLogined) {
+            _this.checkNeedPay(this.fileId).then((res) => {
+              console.log("ooooooooooooo", res);
+            });
+          }
         } else {
           _this.expiredFlag = true;
           this.fullscreenLoading = false;
@@ -275,8 +289,8 @@ export default {
     },
     handleClick() {
       let _this = this;
-      this.buyFlag = true;
       this.fullscreenLoading = true;
+      this.buyFlag = true;
       if (!this.isLogined) {
         this.authorization();
         return;
@@ -287,13 +301,21 @@ export default {
         this.getFileDownload();
       }
     },
-    checkNeedPay() {
-      queryFileNeedPay(this.fileId).then((res) => {
-        if (res.success) {
-          this.needPay = res.needPay;
-        }
+    checkNeedPay(fileId) {
+      let _this = this;
+      return new Promise(function (resolve, reject) {
+        queryFileNeedPay(fileId).then((res) => {
+          console.log("res========", res);
+          if (res.success) {
+            _this.needPay = res.needPay;
+            resolve(_this.needPay);
+          } else {
+            reject(console.log("checkNeedPay Error"));
+          }
+        });
       });
     },
+
     // Old download way
 
     // getFileDownload() {
@@ -360,8 +382,6 @@ export default {
       }).then((res) => {
         console.log("===", res);
         if (res.success) {
-          _this.queryFileInfo(this.fileId, this.fid);
-          _this.checkNeedPay();
           let url = "http://139.224.19.104:8081/file/download";
           let index = res.downloadUrl.indexOf("token") + 6;
           let hash = res.downloadUrl.slice(
@@ -381,7 +401,20 @@ export default {
             .then(async (result) => {
               console.log("===", result);
               if (result.data.code === 0) {
-                _this.buyFlag = false;
+                _this
+                  .queryFileInfo(_this.fileId, _this.fid)
+                  .then((resFileId) => {
+                    if (resFileId) {
+                      _this.checkNeedPay(resFileId).then((res) => {
+                        console.log("下载文件后重新调接口", res);
+                      });
+                    }
+                  });
+                  let isFirefox = navigator.userAgent.indexOf("Firefox")
+                if (isFirefox > 0) {
+                  console.log("----------------------------",'isFirefox')
+                }
+                _this.buyFlag = null;
                 _this.fullscreenLoading = false;
                 const link = document.createElement("a");
                 link.download = res.downloadInfomationDO.name;
@@ -420,12 +453,23 @@ export default {
     queryFileInfo(fileId, fid) {
       let _this = this;
       this.fullscreenLoading = true;
-      getFileInfo(fileId, fid).then((res) => {
-        console.log(res);
-        _this.detailData = res.fileInformation;
-        _this.fid = res.fileInformation.fid;
-        _this.fileId = res.fileInformation.fileId;
-        _this.fileTypeImg = fileType(res.fileInformation.suffix);
+      return new Promise(function (resolve, reject) {
+        getFileInfo(fileId, fid).then((res) => {
+          if (res.success) {
+            console.log(res);
+            _this.detailData = res.fileInformation;
+            _this.fid = res.fileInformation.fid;
+            _this.fileId = res.fileInformation.fileId;
+            _this.fileTypeImg = fileType(res.fileInformation.suffix);
+            _this.querySimilarFiles();
+            resolve(res.fileInformation.fileId);
+            if (_this.$route.query.fid && _this.buyFlag == null) {
+              _this.fullscreenLoading = false;
+            }
+          } else {
+            reject(null);
+          }
+        });
       });
     },
     querySimilarFiles() {

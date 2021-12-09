@@ -5,23 +5,22 @@ const path = require('path');
 
 module.exports = {
   lintOnSave: true,
-  // publicPath: '/app',
+  publicPath: '/data',
   devServer: {
     proxy: {
       '/api': {
-        target: 'http://192.168.14.4:8103/',
+        target: 'http://data.cesslab.co.uk/',
         changeOrigin: true,
         ws: false
         // pathRewrite: {
         //     '^/api': '/'
         // }
       },
-      '/file': {
-        target: 'http://139.224.19.104:8081/',
-        changeOrigin: true,
-        ws: false
-
-      },
+      // '/file': {
+      //   target: 'http://139.224.19.104:8081/',
+      //   changeOrigin: true,
+      //   ws: false
+      // },
     }
   },
   chainWebpack: config => {

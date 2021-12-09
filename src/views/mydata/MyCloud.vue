@@ -334,8 +334,9 @@ export default {
       });
     },
     JumpTo() {
-            let page = Number(this.jumpPage)
-      if(page<0){
+      if(this.jumpPage === 'Jump to page') return
+      let page = Number(this.jumpPage)
+      if(page < 0 ||page === 0){
          page = 1
       }else if(page > this.maxlengthPage){
         page = this.maxlengthPage
@@ -450,9 +451,9 @@ export default {
           this.isCopyLoading = false;
           if (res.success) {
             this.ruleForm.linkUrl = 'http://' +
-              window.location.host + "/fileDetail?shareCode=" + res.shareCode;
+              window.location.host + "/data/fileDetail?shareCode=" + res.shareCode;
             this.shareCode = 'http://' +
-              window.location.host + "/fileDetail?shareCode=" + res.shareCode;
+              window.location.host + "/data/fileDetail?shareCode=" + res.shareCode;
           } else {
             this.$message({
               type: "error",
@@ -574,6 +575,10 @@ export default {
     /deep/.el-pagination .is-background {
       display: none;
     }
+          /deep/.el-pager .more  {
+        height: 36px !important;
+
+      }
     /deep/.el-pager li:hover {
       color: white !important;
     }
@@ -651,6 +656,9 @@ export default {
         font-weight: bold;
         background: #f6f7fb;
       }
+              .jump-btn:hover {
+          color: white;
+        }
     }
   }
 }

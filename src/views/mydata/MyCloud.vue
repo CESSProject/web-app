@@ -281,9 +281,6 @@ export default {
           let index = res.downloadUrl.indexOf('token') +6;
           let hash = res.downloadUrl.slice(res.downloadUrl.indexOf('download')+9,res.downloadUrl.indexOf('?'))
           let token = res.downloadUrl.slice(index,res.downloadUrl.length);
-          console.log("url", url);
-          console.log("token",token,);
-          console.log("hash", hash);
           let data = {
             hash: hash,
             token:token
@@ -291,7 +288,6 @@ export default {
           axios
             .post(url,data)
             .then((result) => {
-              console.log("===2222222222", result);
               if(result.data.code===0) {
               const link = document.createElement("a");
                 link.download = res.downloadInfomationDO.name;
@@ -304,21 +300,6 @@ export default {
                   message: "",
                 });
               }
-              // debugger
-              // if (result.status === 200) {
-              //   let blob = new Blob([result.data]);
-              //   let linkUrl = URL.createObjectURL(blob);
-              //   const link = document.createElement("a");
-              //   link.download = res.downloadInfomationDO.name;
-              //   link.href = linkUrl;
-              //   link.click();
-              //   link.remove();
-              // } else {
-              //   this.$message({
-              //     type: "error",
-              //     message: "",
-              //   });
-              // }
             })
             .catch((error) => {
               console.log("===", error);
@@ -362,7 +343,7 @@ export default {
       filesList(params)
         .then((res) => {
           this.loading = false;
-          console.log("===", res.fileInfomationDOList);
+          // console.log("===", res.fileInfomationDOList);
           if (res.success) {
             let arr = res.fileInfomationDOList;
             arr.forEach((v) => {
@@ -370,7 +351,6 @@ export default {
               console.log(v.imageUrl);
             });
             this.tableData = arr;
-            console.log(this.tableData);
             this.total = res.totalPages;
             this.maxlengthPage = Math.ceil(
               this.total / this.listQuery.pageSize
@@ -401,13 +381,11 @@ export default {
     sortByTime() {
       this.orderType = "time";
       this.timeDesc = !this.timeDesc;
-
       let params = {
         order: this.orderType,
         asc: this.timeDesc,
       };
       this.listQuery.pageNum = 1;
-      console.log(params);
       params = Object.assign(params, this.listQuery);
       this.getFileUploadList(params);
     },

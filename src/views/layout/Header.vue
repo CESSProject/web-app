@@ -57,7 +57,6 @@
           "
         >
           <img :src="imgUrl" alt="" class="user-avatar" :onerror="errorImg" />
-          <!-- <Identicon :size="128" :theme="'polkadot'" :value="account" />Z -->
           <span class="username">{{
             $store.state.userInfo.account.address
           }}</span>
@@ -128,7 +127,6 @@
 </template>
 
 <script>
-// import Identicon from "@polkadot/vue-identicon";
 import { mapActions, mapGetters,mapMutations } from "vuex";
 import CustomDropDown from "../../components/customDropDown.vue";
 export default {
@@ -168,7 +166,6 @@ export default {
   watch: {},
   components: {
     CustomDropDown,
-    // Identicon,
   },
   mounted() {
     this.currentPath = this.$route.path;
@@ -211,7 +208,6 @@ export default {
   display: flex;
   align-items: center;
   justify-content: flex-start;
-  // border-bottom: 2px solid #d7d7d7;
   padding: 0 20px;
   position: fixed;
   z-index: 2002;

@@ -173,20 +173,14 @@ export default {
   watch: {
     async isLogined() {
       let _this = this;
-      // if (_this.buyFlag) {
-      //   _this.fullscreenLoading = true;
-      // }
       console.log("isLogined =============", _this.needPay);
       await _this.queryFileInfo(this.fileId, this.fid).then((resFileId) => {
         if (resFileId) {
           _this.checkNeedPay(resFileId).then((res) => {
-            console.log("oooooooooooooo", res);
-        _this.fullscreenLoading = false;
-
+            _this.fullscreenLoading = false;
             if (_this.buyFlag) {
               if (res) {
-        _this.fullscreenLoading = true;
-
+                _this.fullscreenLoading = true;
                 _this.queryBanlance();
               } else {
                 _this.getFileDownload();
@@ -209,9 +203,7 @@ export default {
     if (this.$route.query.fileId || this.$route.query.fid) {
       if (this.$route.query.fileId) this.fileId = this.$route.query.fileId;
       if (this.$route.query.fid) this.fid = this.$route.query.fid;
-      console.log("32423432423", this.fileId, this.fid);
       await this.queryFileInfo(this.fileId, this.fid).then((resFileId) => {
-        console.log("resFileId", resFileId);
         if (_this.isLogined) {
           _this.checkNeedPay(resFileId).then((res) => {
             console.log("checkNeedPay", res);
@@ -236,22 +228,20 @@ export default {
     similarityFilter(value) {
       return similarValue(value);
     },
-    ToHex(str) {
-      if (str) {
-        if (str === "") return "";
-        if (str === "0") return "Checking";
-        let hexCharCode = [];
-        hexCharCode.push("0x");
-        for (let i = 0; i < str.length; i++) {
-          hexCharCode.push(str.charCodeAt(i).toString(16));
-        }
-        return hexCharCode.join("");
-      }
-    },
+    // ToHex(str) {
+    //   if (str) {
+    //     if (str === "") return "";
+    //     if (str === "0") return "Checking";
+    //     let hexCharCode = [];
+    //     hexCharCode.push("0x");
+    //     for (let i = 0; i < str.length; i++) {
+    //       hexCharCode.push(str.charCodeAt(i).toString(16));
+    //     }
+    //     return hexCharCode.join("");
+    //   }
+    // },
   },
   beforeRouteEnter: (to, from, next) => {
-    console.log(from.path);
-
     next((vm) => {
       vm.fromPath = from.path;
     });
@@ -275,7 +265,7 @@ export default {
       let _this = this;
       this.fullscreenLoading = true;
       decryptShareCode(this.shareCode).then((res) => {
-        console.log("===", res);
+        // console.log("===", res);
         if (res.success) {
           this.fullscreenLoading = false;
           _this.detailData = res.fileInformation;
@@ -286,7 +276,6 @@ export default {
           _this.querySimilarFiles();
           if (this.isLogined) {
             _this.checkNeedPay(this.fileId).then((res) => {
-              console.log("ooooooooooooo", res);
             });
           }
         } else {
@@ -316,9 +305,8 @@ export default {
           console.log("res========", res);
           if (res.success) {
             _this.needPay = res.needPay;
-            if(res.needPay){
-                _this.salesTemp = _this.salesTemp + 1
-                debugger
+            if (res.needPay) {
+              _this.salesTemp = _this.salesTemp + 1;
             }
             resolve(_this.needPay);
           } else {
@@ -328,71 +316,12 @@ export default {
       });
     },
 
-    // Old download way
-
-    // getFileDownload() {
-    //   let _this = this;
-    //   fileDownload({
-    //     fileId: _this.fileId,
-    //     txHash: _this.downloadBlockHash,
-    //   }).then((res) => {
-    //     console.log("===", res);
-    //     if (res.success) {
-    //       axios
-    //         .get(res.downloadUrl, {
-    //           headers: {
-    //             token: this.$store.state.userInfo.data.token,
-    //           },
-    //           // responseType: "blob",
-    //         })
-    //         .then(async (result) => {
-    //           console.log("===", result);
-    //           if (result.data.code === 0) {
-    //             const link = document.createElement("a");
-    //             link.download = res.downloadInfomationDO.name;
-    //             link.href = result.data.data;
-    //             link.click();
-    //             link.remove();
-    //             _this.$message({
-    //               type: "success",
-    //               message: "Download succeed",
-    //             });
-    //             _this.buyFlag = false;
-    //             await _this.queryFileInfo(this.fileId, this.fid);
-    //             await _this.checkNeedPay();
-    //             _this.fullscreenLoading = false;
-    //           } else {
-    //             this.fullscreenLoading = false;
-    //             this.$message({
-    //               type: "error",
-    //               message: "Download failed",
-    //             });
-    //           }
-    //         })
-    //         .catch((error) => {
-    //           this.fullscreenLoading = false;
-    //           console.log("===", error);
-    //           this.$message({
-    //             type: "error",
-    //             message: "Download failed",
-    //           });
-    //         });
-    //     } else {
-    //       this.fullscreenLoading = false;
-    //       this.$message({
-    //         type: "error",
-    //         message: "The file resource is expired!",
-    //       });
-    //     }
-    //   });
-    // },
-    getFileDownload() {
+  getFileDownload() {
       let _this = this;
       fileDownload({
         fileId: _this.fileId,
         txHash: _this.downloadBlockHash,
       }).then((res) => {
-        console.log("===", res);
         if (res.success) {
           let url = "http://139.224.19.104:8081/file/download";
           let index = res.downloadUrl.indexOf("token") + 6;
@@ -401,9 +330,6 @@ export default {
             res.downloadUrl.indexOf("?")
           );
           let token = res.downloadUrl.slice(index, res.downloadUrl.length);
-          console.log("url", url);
-          console.log("token", token);
-          console.log("hash", hash);
           let data = {
             hash: hash,
             token: token,
@@ -424,7 +350,7 @@ export default {
                   type: "success",
                   message: "Download succeed",
                 });
-                  _this.detailData.downloadTimes = _this.salesTemp;
+                _this.detailData.downloadTimes = _this.salesTemp;
                 _this.needPay = false;
                 _this.buyFlag = false;
               } else {
@@ -458,7 +384,6 @@ export default {
       return new Promise(function (resolve, reject) {
         getFileInfo(fileId, fid).then((res) => {
           if (res.success) {
-            console.log(res);
             _this.detailData = res.fileInformation;
             _this.salesTemp = _this.detailData.downloadTimes;
             _this.fid = res.fileInformation.fid;
@@ -503,11 +428,9 @@ export default {
 
       // The actual address that we use
       const ADDR = this.$store.state.userInfo.data.myAddress;
-      console.log("ADDR============", ADDR);
       const acct = await this.api.query.system.account(ADDR);
       let free = acct.data.free.toString(10);
       let freeBalance = (Number(free) / 1000000000000).toFixed(4);
-      console.log("freeBalance", freeBalance);
       if (freeBalance > _this.detailData.estimateSpent) {
         _this.toBuy();
       } else {
@@ -522,8 +445,6 @@ export default {
     async toBuy() {
       let _this = this;
       let ADDR = this.$store.state.userInfo.data.myAddress;
-      console.log("tobuy", this.fid, ADDR);
-
       const transferExtrinsic = _this.api.tx.fileBank.buyfile(this.fid, ADDR);
       const injector = await web3FromSource(
         _this.$store.state.userInfo.data.account.meta.source
@@ -534,16 +455,15 @@ export default {
           ADDR,
           { signer: injector.signer },
           ({ events = [], status }) => {
-            console.log("status==========", status, events);
-            console.log("events", events);
+            // console.log("status==========", status, events);
             if (status.isInBlock) {
-              console.log(
-                `Completed at block hash #${status.asInBlock.toString()}`
-              );
+              // console.log(
+              //   `Completed at block hash #${status.asInBlock.toString()}`
+              // );
               _this.downloadBlockHash = status.asInBlock.toString();
               _this.getFileDownload();
             } else {
-              console.log(`Current status: ${status.type}`);
+              // console.log(`Current status: ${status.type}`);
               if (status.type === "Invalid") {
                 _this.fullscreenLoading = false;
                 _this.$message({

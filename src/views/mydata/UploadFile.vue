@@ -447,11 +447,8 @@ export default {
       let _this = this;
       // Create the instance
       const wsProvider = new WsProvider("ws://106.15.44.155:9947/");
-
       this.api = await ApiPromise.create({ provider: wsProvider });
-      //        let getHeader =  await this.api.rpc.chain.getBlock('0xe38ff4e60b7b352ffd8daa3c12544b2e3fcf93b9bef904f92b689337b6480cd4')
-      // console.log("getHeader",getHeader)
-      console.log(_this.$store.state.userInfo.data.account);
+      // console.log(_this.$store.state.userInfo.data.account);
       // this call fires up the authorization popup
       const extensions = await web3Enable("Data trading market");
       if (extensions.length === 0) {
@@ -459,14 +456,14 @@ export default {
         // in this case we should inform the use and give a link to the extension
         return;
       }
-      console.log("", extensions);
+      // console.log("", extensions);
       // The actual address that we use
       const ADDR = this.$store.state.userInfo.data.myAddress;
-      console.log("ADDR============", ADDR);
+      // console.log("ADDR============", ADDR);
       const acct = await this.api.query.system.account(ADDR);
       let free = acct.data.free.toString(10);
       let freeBalance = (Number(free) / 1000000000000).toFixed(4);
-      console.log("freeBalance", freeBalance, typeof freeBalance);
+      // console.log("freeBalance", freeBalance, typeof freeBalance);
       if (freeBalance > 0) {
         this.uploadPay();
       } else {
@@ -481,32 +478,25 @@ export default {
       let _this = this;
       let ADDR = this.$store.state.userInfo.data.myAddress;
       let timestamp = Date.parse(new Date()) / 1000;
-      // console.log("timestamp", timestamp);
       let fileID = _this.fileHash + ADDR + timestamp;
       let sha256 = require("js-sha256").sha256;
-      // this.fileIDHash = "0x" + sha256(fileID);
       this.fileIDHash = sha256(fileID);
-
-      //  let aaa = this.toUint8Arr(fileID);
-      //  this.fileIDHash = aaa
-      console.log("fileIDHash", this.fileIDHash);
-      // let test = this.fileIDHash.toU8a();
-
-      console.log("_this.fileHash===========", _this.fileHash);
+      // console.log("fileIDHash", this.fileIDHash);
+      // console.log("_this.fileHash===========", _this.fileHash);
       let isPublic = _this.ruleFormFile.visibility;
-      console.log("_isPublic ", isPublic);
+      // console.log("_isPublic ", isPublic);
       let uploadCost = Number(_this.storageCost);
       let downloadFee =
         Number(_this.ruleFormFile.estimateSpent) * 1000000000000;
       console.log("fileSize", _this.size);
       let fileSize = Number(_this.size);
-      console.log("uploadCost", uploadCost);
-      console.log("downloadFee", downloadFee);
-      console.log("fileSize", fileSize);
+      // console.log("uploadCost", uploadCost);
+      // console.log("downloadFee", downloadFee);
+      // console.log("fileSize", fileSize);
       let date = this.ruleFormFile.expireTime;
       let expireTime = new Date(date).getTime() / 1000;
       expireTime = Number(expireTime);
-      console.log("deadline", expireTime);
+      // console.log("deadline", expireTime);
       const transferExtrinsic = _this.api.tx.fileBank.upload(
         _this.ruleFormFile.name,
         ADDR,
@@ -532,28 +522,26 @@ export default {
           ADDR,
           { signer: injector.signer },
           async ({ events = [], status }) => {
-            console.log("status==========", status);
-            console.log("events", events);
+            // console.log("status==========", status);
+            // console.log("events", events);
             if (status.isInBlock) {
-              console.log(
-                `Completed at block hash #${status.asInBlock.toString()}`
-              );
+              // console.log(
+              //   `Completed at block hash #${status.asInBlock.toString()}`
+              // );
               _this.fileBlockHash = status.asInBlock.toString();
               _this.loading.close();
               _this.uploadFile();
             } else if (status.isFinalized) {
-              console.log(
-                `status.isFinalized #${status.asFinalized.toString()}`
-              );
+              // console.log(
+              //   `status.isFinalized #${status.asFinalized.toString()}`
+              // );
               //   let getBlock  = await _this.api.rpc.chain.getBlock('0xe38ff4e60b7b352ffd8daa3c12544b2e3fcf93b9bef904f92b689337b6480cd4')
               //   console.log("getBlock", getBlock,getBlock.toHuman())
-            } else {
-              console.log(`Current status: ${status.type}`);
             }
           }
         )
         .catch((error) => {
-          console.log(":( transaction failed", error);
+          // console.log(":( transaction failed", error);
           _this.loading.close();
         });
     },
@@ -564,7 +552,7 @@ export default {
           24 * 60 * 60 * 1000 -
           1000
       );
-      console.log("expireTime=======", expireTime);
+      // console.log("expireTime=======", expireTime);
       let _this = this;
       let data = {
         estimateSpent: Number(_this.ruleFormFile.estimateSpent),
@@ -590,13 +578,11 @@ export default {
         .then((res) => {
           console.log("===", res);
           if (res.success) {
-            // _this.uploadUrl = res.uploadUrl.slice(0,res.uploadUrl.indexOf('upload')+6)
             _this.uploadUrl = "http://139.224.19.104:8081/file/upload";
             let index = res.uploadUrl.indexOf("token") + 6;
             let token = res.uploadUrl.slice(index, res.uploadUrl.length);
-            console.log("uploadUrl=======", _this.uploadUrl);
-
-            console.log("token=======", token);
+            // console.log("uploadUrl=======", _this.uploadUrl);
+            // console.log("token=======", token);
             _this.loading.close();
             _this.uploadtoDataBase(token);
           } else {
@@ -641,7 +627,7 @@ export default {
           },
         })
         .then((result) => {
-          console.log("uploadresult===", result);
+          // console.log("uploadresult===", result);
           _this.showProcess = false;
           if (result.data.code === 0) {
             _this.$router.push({

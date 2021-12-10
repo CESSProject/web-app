@@ -52,13 +52,23 @@ Generally speaking, you may also need to install [*The Polkadot-JS Extension*](h
 
 ### Upload
 
-![Image](https://raw.githubusercontent.com/CESSProject/W3F-illustration/main/hackathon/upload1.png)
+![Image](https://raw.githubusercontent.com/CESSProject/W3F-illustration/main/hackathon/upload-file.png)
 
 - We will check every file upload. If the file has been uploaded by someone or is more than 50% similar (At present, only the similarity comparison between txt and image format is supported) to the existing file in the system, we will convert the file status to private if you originally wanted to make it public.
 
-## Project setup
+
+
+## Getting started
 ```
+# clone the project
+git clone https://github.com/CESSProject/web-app.git
+
+# enter the project directory
+cd web-app
+
+# install dependency
 npm install
+
 ```
 
 ### Compiles and hot-reloads for development

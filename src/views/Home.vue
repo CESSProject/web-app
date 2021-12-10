@@ -16,7 +16,7 @@
           </p>
         </div>
         <div class="block1-right">
-          <img src="../assets/home1.png" width="889px" />
+          <img src="../assets/home1.png" />
         </div>
       </div>
       <div class="block2">
@@ -281,7 +281,7 @@ export default {
   margin: 0 auto;
 }
 .block-title {
-  font-size: 45px;
+  font-size: 36px;
   font-weight: 800;
   line-height: 45px;
   color: #0e0e0e;
@@ -304,7 +304,7 @@ export default {
   justify-content: space-between;
   position: relative;
   .block1-left {
-    width: 625px;
+    width: 530px;
     text-align: left;
     margin-right: 123px;
     margin-top: 183px;
@@ -329,6 +329,9 @@ export default {
     right: -65px;
     z-index: 1;
     padding-bottom: 80px;
+    img {
+      width: 889px;
+    }
   }
 }
 .block2 {
@@ -542,6 +545,9 @@ export default {
     width: 100%;
     padding: 0 100px;
     box-sizing: border-box;
+    .block1-right img {
+      width: 790px;
+    }
   }
 }
 </style>

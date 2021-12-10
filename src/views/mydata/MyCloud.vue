@@ -288,8 +288,6 @@ export default {
             hash: hash,
             token:token
           };
-
-
           axios
             .post(url,data)
             .then((result) => {

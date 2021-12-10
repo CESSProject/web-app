@@ -41,5 +41,6 @@ body{
 }
 .el-loading-mask{
   background-color: rgba(0, 0, 0, 0.8) !important;
+  z-index: 2001 !important;
 }
 </style>

@@ -163,6 +163,7 @@ export default {
       fid: "",
       needPay: true,
       buyFlag: null,
+      salesTemp: 0,
       fromPath: "",
       timer: null,
       downloading: false,
@@ -172,14 +173,20 @@ export default {
   watch: {
     async isLogined() {
       let _this = this;
-      _this.fullscreenLoading = true;
+      // if (_this.buyFlag) {
+      //   _this.fullscreenLoading = true;
+      // }
       console.log("isLogined =============", _this.needPay);
       await _this.queryFileInfo(this.fileId, this.fid).then((resFileId) => {
         if (resFileId) {
           _this.checkNeedPay(resFileId).then((res) => {
             console.log("oooooooooooooo", res);
+        _this.fullscreenLoading = false;
+
             if (_this.buyFlag) {
               if (res) {
+        _this.fullscreenLoading = true;
+
                 _this.queryBanlance();
               } else {
                 _this.getFileDownload();
@@ -272,6 +279,7 @@ export default {
         if (res.success) {
           this.fullscreenLoading = false;
           _this.detailData = res.fileInformation;
+          _this.salesTemp = _this.detailData.downloadTimes;
           _this.fileId = res.fileInformation.fileId;
           _this.fid = res.fileInformation.fid;
           _this.fileTypeImg = fileType(res.fileInformation.suffix);
@@ -308,6 +316,10 @@ export default {
           console.log("res========", res);
           if (res.success) {
             _this.needPay = res.needPay;
+            if(res.needPay){
+                _this.salesTemp = _this.salesTemp + 1
+                debugger
+            }
             resolve(_this.needPay);
           } else {
             reject(console.log("checkNeedPay Error"));
@@ -401,19 +413,6 @@ export default {
             .then(async (result) => {
               console.log("===", result);
               if (result.data.code === 0) {
-                _this
-                  .queryFileInfo(_this.fileId, _this.fid)
-                  .then((resFileId) => {
-                    if (resFileId) {
-                      _this.checkNeedPay(resFileId).then((res) => {
-                        console.log("下载文件后重新调接口", res);
-                      });
-                    }
-                  });
-                  let isFirefox = navigator.userAgent.indexOf("Firefox")
-                if (isFirefox > 0) {
-                  console.log("----------------------------",'isFirefox')
-                }
                 _this.buyFlag = null;
                 _this.fullscreenLoading = false;
                 const link = document.createElement("a");
@@ -425,6 +424,9 @@ export default {
                   type: "success",
                   message: "Download succeed",
                 });
+                  _this.detailData.downloadTimes = _this.salesTemp;
+                _this.needPay = false;
+                _this.buyFlag = false;
               } else {
                 this.fullscreenLoading = false;
                 this.$message({
@@ -458,6 +460,7 @@ export default {
           if (res.success) {
             console.log(res);
             _this.detailData = res.fileInformation;
+            _this.salesTemp = _this.detailData.downloadTimes;
             _this.fid = res.fileInformation.fid;
             _this.fileId = res.fileInformation.fileId;
             _this.fileTypeImg = fileType(res.fileInformation.suffix);

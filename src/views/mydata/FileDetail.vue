@@ -118,7 +118,7 @@ import axios from "axios";
 import moment from "moment";
 import { types } from "@/utils/config";
 import { renderSize, fileType, similarValue } from "@/utils/valid";
-import { mapGetters } from "vuex";
+import { mapGetters,mapMutations } from "vuex";
 import {
   queryFileNeedPay,
   getFileInfo,
@@ -127,7 +127,8 @@ import {
   getSimilarFiles,
 } from "@/api/api";
 import { ApiPromise, WsProvider } from "@polkadot/api";
-import { web3Enable, web3FromSource } from "@polkadot/extension-dapp";
+import { stringToHex } from "@polkadot/util";
+import { web3Enable, web3FromSource ,web3Accounts} from "@polkadot/extension-dapp";
 export default {
   data() {
     return {
@@ -228,18 +229,6 @@ export default {
     similarityFilter(value) {
       return similarValue(value);
     },
-    // ToHex(str) {
-    //   if (str) {
-    //     if (str === "") return "";
-    //     if (str === "0") return "Checking";
-    //     let hexCharCode = [];
-    //     hexCharCode.push("0x");
-    //     for (let i = 0; i < str.length; i++) {
-    //       hexCharCode.push(str.charCodeAt(i).toString(16));
-    //     }
-    //     return hexCharCode.join("");
-    //   }
-    // },
   },
   beforeRouteEnter: (to, from, next) => {
     next((vm) => {
@@ -250,6 +239,7 @@ export default {
     clearInterval(this.timer);
   },
   methods: {
+    ...mapMutations("userInfo",["setUserInfo"]),
     viewFileDetail(value) {
       this.$router.push({
         path: "/fileDetail",
@@ -258,8 +248,70 @@ export default {
         },
       });
     },
-    authorization() {
-      this.$store.dispatch("userInfo/authorization");
+  async authorization() {
+
+      let extensions = await web3Enable("Data tranding market");
+        if (extensions.length === 0) {
+          this.$store.state.userInfo.noExtension = true
+          return;
+        }
+        let allAccounts = await web3Accounts();
+        console.log("allAccounts========", allAccounts);
+        this.$store.state.userInfo.accountList = allAccounts;
+        if(allAccounts.length ==0){
+              _this.$message({
+                  type: "error",
+                  message: 'Please create cess-hacknet chain account.',
+                });
+          // Message.error('Please create cess-hacknet chain account.');
+        }else {
+
+          if(this.$store.state.userInfo.accountOperator.length==0){
+            this.$store.state.userInfo.accountList.forEach((item) => {
+              console.log("item==========",item)
+              let obj = {
+                icon: require("../../assets/icons/default-avater.png"),
+                meta: item.meta,
+                address: item.address,
+                callback: async (item) => {
+                  console.log(item);
+                  this.$store.state.userInfo.account = item;
+                  const injector = await web3FromSource(item.meta.source);
+                  console.log(
+                    "we can use web3FromSource which will return an InjectedExtension type",
+                    injector
+                  );
+                  const signRaw = injector?.signer?.signRaw;
+                  console.log("signRaw=============", signRaw);
+                  if (signRaw) {
+                    await signRaw({
+                      address: item.address,
+                      data: stringToHex(item.address),
+                      type: "bytes",
+                    })
+                      .then((res) => {
+                        console.log(res, res.signature.slice(2));
+                        let data = {
+                          myAddress: item.address,
+                          signature: res.signature.slice(2),
+                          account: item,
+                        };
+                        this.setUserInfo(data)
+                      })
+                      .catch((err) => {
+                        console.log(err);
+                        this.fullscreenLoading = false;
+                      
+                      });
+                  }
+                },
+              };
+              this.$store.state.userInfo.accountOperator.push(obj);
+            });
+          }
+          this.$store.state.userInfo.accountsVisible = true;
+          this.$store.state.userInfo.userInfoVisible = false;
+        }
     },
     queryByShareCode() {
       let _this = this;
@@ -275,8 +327,7 @@ export default {
           _this.fileTypeImg = fileType(res.fileInformation.suffix);
           _this.querySimilarFiles();
           if (this.isLogined) {
-            _this.checkNeedPay(this.fileId).then((res) => {
-            });
+            _this.checkNeedPay(this.fileId).then((res) => {});
           }
         } else {
           _this.expiredFlag = true;
@@ -316,7 +367,7 @@ export default {
       });
     },
 
-  getFileDownload() {
+    getFileDownload() {
       let _this = this;
       fileDownload({
         fileId: _this.fileId,

@@ -16,11 +16,6 @@ module.exports = {
         //     '^/api': '/'
         // }
       },
-      // '/file': {
-      //   target: 'http://139.224.19.104:8081/',
-      //   changeOrigin: true,
-      //   ws: false
-      // },
     }
   },
   chainWebpack: config => {
@@ -43,7 +38,7 @@ module.exports = {
   },
   configureWebpack: config => {
     if (production) {
-      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = false
+      config.optimization.minimizer[0].options.terserOptions.compress.drop_console = true
       // config.devtool = 'source-map';
       return {
         plugins: [new FileManagerPlugin({

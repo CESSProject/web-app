@@ -281,8 +281,9 @@ export default {
         email: [
           {
             required: false,
+            
             pattern:
-              /^(([^<>()\[\]\\.,;:\s@"]+(\.[^<>()\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
+              /^(([^<>()\\[\]\\.,;:\s@"]+(\.[^<>()\\[\]\\.,;:\s@"]+)*)|(".+"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/,
             message: "Please enter the correct e-mail address",
             trigger: "change",
           },
@@ -517,13 +518,13 @@ export default {
         _this.$store.state.userInfo.data.account.meta.source
       );
 
-      let txhash = transferExtrinsic
+      transferExtrinsic
         .signAndSend(
           ADDR,
           { signer: injector.signer },
           async ({ events = [], status }) => {
             // console.log("status==========", status);
-            // console.log("events", events);
+            console.log("events", events);
             if (status.isInBlock) {
               // console.log(
               //   `Completed at block hash #${status.asInBlock.toString()}`
@@ -541,7 +542,7 @@ export default {
           }
         )
         .catch((error) => {
-          // console.log(":( transaction failed", error);
+          console.log(":( transaction failed", error);
           _this.loading.close();
         });
     },

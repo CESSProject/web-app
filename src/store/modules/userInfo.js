@@ -120,8 +120,7 @@ const userInfo = {
       commit('setUserInfo', result)
     },
     logout({
-      commit,
-      state
+      commit
     }) {
       commit('clearUserInfo')
       localStorage.removeItem('userInfo')

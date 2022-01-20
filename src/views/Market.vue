@@ -223,7 +223,6 @@ export default {
       this.$route.query.keyword || this.$store.state.userInfo.searchKey;
     this.checkedCities = ["All"];
     this.queryParams.formatList = [];
-
     this.queryParams.pageNum = 1;
     this.getData(this.queryParams);
   },

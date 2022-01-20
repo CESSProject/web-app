@@ -19,6 +19,7 @@
           </template>
         </el-table-column>
         <el-table-column label="" width="250" class="action-column">
+          <!-- eslint-disable-next-line -->
           <template slot-scope="scope">
             <div class="action-btns">
               <span
@@ -40,6 +41,7 @@
           </template>
         </el-table-column>
         <el-table-column prop="state" label="state" width="150">
+          <!-- eslint-disable-next-line -->
           <template slot-scope="scope">
             <div
               class="state-tag"
@@ -56,6 +58,7 @@
           </template>
         </el-table-column>
         <el-table-column label="size" width="150">
+          <!-- eslint-disable-next-line -->
           <template slot="header" slot-scope="slot">
             <div class="custom-sort">
               <span>size</span>
@@ -71,6 +74,7 @@
           </template>
         </el-table-column>
         <el-table-column label="time" width="150">
+          <!-- eslint-disable-next-line -->
           <template slot="header" slot-scope="slot">
             <div class="custom-sort">
               <span>time</span>
@@ -400,7 +404,7 @@ export default {
       }
     },
 
-    onCopy(e) {
+    onCopy() {
       // console.log(e.text);
       this.dialogShareVisible = false;
       this.$message({
@@ -409,7 +413,7 @@ export default {
         duration: 1000,
       });
     },
-    onError(e) {
+    onError() {
       this.$message({
         type: "error",
         message: "Copy fail",

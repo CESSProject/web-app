@@ -206,7 +206,6 @@
 <script>
 import { popularFiles } from "@/api/api";
 import { mapMutations } from "vuex";
-
 export default {
   data() {
     return {
@@ -218,10 +217,11 @@ export default {
       image: [],
     };
   },
-  created() {
+ async created() {
     this.queryPopular();
   },
-  mounted() {},
+ mounted() {
+  },
   methods: {
     queryPopular() {
       let _this = this;

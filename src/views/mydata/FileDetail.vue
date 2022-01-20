@@ -118,7 +118,7 @@ import axios from "axios";
 import moment from "moment";
 import { types } from "@/utils/config";
 import { renderSize, fileType, similarValue } from "@/utils/valid";
-import { mapGetters,mapMutations } from "vuex";
+import { mapGetters, mapMutations } from "vuex";
 import {
   queryFileNeedPay,
   getFileInfo,
@@ -128,7 +128,11 @@ import {
 } from "@/api/api";
 import { ApiPromise, WsProvider } from "@polkadot/api";
 import { stringToHex } from "@polkadot/util";
-import { web3Enable, web3FromSource ,web3Accounts} from "@polkadot/extension-dapp";
+import {
+  web3Enable,
+  web3FromSource,
+  web3Accounts,
+} from "@polkadot/extension-dapp";
 export default {
   data() {
     return {
@@ -239,7 +243,7 @@ export default {
     clearInterval(this.timer);
   },
   methods: {
-    ...mapMutations("userInfo",["setUserInfo"]),
+    ...mapMutations("userInfo", ["setUserInfo"]),
     viewFileDetail(value) {
       this.$router.push({
         path: "/fileDetail",
@@ -248,70 +252,68 @@ export default {
         },
       });
     },
-  async authorization() {
-
+    async authorization() {
       let extensions = await web3Enable("Data tranding market");
-        if (extensions.length === 0) {
-          this.$store.state.userInfo.noExtension = true
-          return;
-        }
-        let allAccounts = await web3Accounts();
-        console.log("allAccounts========", allAccounts);
-        this.$store.state.userInfo.accountList = allAccounts;
-        if(allAccounts.length ==0){
-              _this.$message({
-                  type: "error",
-                  message: 'Please create cess-hacknet chain account.',
-                });
-          // Message.error('Please create cess-hacknet chain account.');
-        }else {
-
-          if(this.$store.state.userInfo.accountOperator.length==0){
-            this.$store.state.userInfo.accountList.forEach((item) => {
-              console.log("item==========",item)
-              let obj = {
-                icon: require("../../assets/icons/default-avater.png"),
-                meta: item.meta,
-                address: item.address,
-                callback: async (item) => {
-                  console.log(item);
-                  this.$store.state.userInfo.account = item;
-                  const injector = await web3FromSource(item.meta.source);
-                  console.log(
-                    "we can use web3FromSource which will return an InjectedExtension type",
-                    injector
-                  );
-                  const signRaw = injector?.signer?.signRaw;
-                  console.log("signRaw=============", signRaw);
-                  if (signRaw) {
-                    await signRaw({
-                      address: item.address,
-                      data: stringToHex(item.address),
-                      type: "bytes",
+      if (extensions.length === 0) {
+        this.$store.state.userInfo.noExtension = true;
+        this.fullscreenLoading = false;
+        return;
+      }
+      let allAccounts = await web3Accounts();
+      console.log("allAccounts========", allAccounts);
+      this.$store.state.userInfo.accountList = allAccounts;
+      if (allAccounts.length == 0) {
+        this.$message({
+          type: "error",
+          message: "Please create cess-hacknet chain account.",
+        });
+        // Message.error('Please create cess-hacknet chain account.');
+      } else {
+        if (this.$store.state.userInfo.accountOperator.length == 0) {
+          this.$store.state.userInfo.accountList.forEach((item) => {
+            console.log("item==========", item);
+            let obj = {
+              icon: require("../../assets/icons/default-avater.png"),
+              meta: item.meta,
+              address: item.address,
+              callback: async (item) => {
+                console.log(item);
+                this.$store.state.userInfo.account = item;
+                const injector = await web3FromSource(item.meta.source);
+                console.log(
+                  "we can use web3FromSource which will return an InjectedExtension type",
+                  injector
+                );
+                const signRaw = injector?.signer?.signRaw;
+                console.log("signRaw=============", signRaw);
+                if (signRaw) {
+                  await signRaw({
+                    address: item.address,
+                    data: stringToHex(item.address),
+                    type: "bytes",
+                  })
+                    .then((res) => {
+                      console.log(res, res.signature.slice(2));
+                      let data = {
+                        myAddress: item.address,
+                        signature: res.signature.slice(2),
+                        account: item,
+                      };
+                      this.setUserInfo(data);
                     })
-                      .then((res) => {
-                        console.log(res, res.signature.slice(2));
-                        let data = {
-                          myAddress: item.address,
-                          signature: res.signature.slice(2),
-                          account: item,
-                        };
-                        this.setUserInfo(data)
-                      })
-                      .catch((err) => {
-                        console.log(err);
-                        this.fullscreenLoading = false;
-                      
-                      });
-                  }
-                },
-              };
-              this.$store.state.userInfo.accountOperator.push(obj);
-            });
-          }
-          this.$store.state.userInfo.accountsVisible = true;
-          this.$store.state.userInfo.userInfoVisible = false;
+                    .catch((err) => {
+                      console.log(err);
+                      this.fullscreenLoading = false;
+                    });
+                }
+              },
+            };
+            this.$store.state.userInfo.accountOperator.push(obj);
+          });
         }
+        this.$store.state.userInfo.accountsVisible = true;
+        this.$store.state.userInfo.userInfoVisible = false;
+      }
     },
     queryByShareCode() {
       let _this = this;
@@ -327,7 +329,7 @@ export default {
           _this.fileTypeImg = fileType(res.fileInformation.suffix);
           _this.querySimilarFiles();
           if (this.isLogined) {
-            _this.checkNeedPay(this.fileId).then((res) => {});
+            _this.checkNeedPay(this.fileId).then();
           }
         } else {
           _this.expiredFlag = true;
@@ -501,12 +503,12 @@ export default {
         _this.$store.state.userInfo.data.account.meta.source
       );
 
-      let txhash = transferExtrinsic
+    transferExtrinsic
         .signAndSend(
           ADDR,
           { signer: injector.signer },
           ({ events = [], status }) => {
-            // console.log("status==========", status, events);
+            console.log("status==========", status, events);
             if (status.isInBlock) {
               // console.log(
               //   `Completed at block hash #${status.asInBlock.toString()}`

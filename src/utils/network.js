@@ -3,9 +3,7 @@ import {
   apiUrl
 } from './url'
 import store from '../store'
-import {
-  Message
-} from 'element-ui'
+
 
 const service = axios.create({
   baseURL: apiUrl,

@@ -79,7 +79,9 @@ export default {
         complete: () => {
           try {
             this.$refs.menu.classList.remove("visible");
-          } catch (e) {}
+          } catch (e) {
+            console.log(e)
+          }
           if (this.visible) {
             this.$emit("update:visible", false);
           }
